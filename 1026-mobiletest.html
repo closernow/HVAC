@@ -1,0 +1,2364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>G2 Quiz System</title>
+<style>
+/* ===== VARIABLES ===== */
+:root {
+  --bg: #f5f3ee; --surface: #ffffff; --surface2: #fafaf8; --border: #e0ddd6;
+  --text: #1a1a1a; --text-muted: #666; --text-faint: #999; --opt-bg: #fafaf8;
+  --opt-hover: #f0ede6; --exp-bg: #f7f6f1; --sidebar-bg: #ffffff;
+  --dot-bg: #ece9e2; --dot-text: #888; --tag-bg: #ece9e2;
+  --correct-bg: #eaf5ec; --correct-border: #4caf72; --correct-text: #2a7a45;
+  --wrong-bg: #fdecea; --wrong-border: #e05a5a; --wrong-text: #b33;
+  --accent: #3a6ea5; --accent-bg: #e8f0f8; --warn-bg: #fffbeb;
+  --warn-border: #f59e0b; --warn-text: #92400e; --progress-track: #ddd;
+}
+html.dark {
+  --bg: #18181a; --surface: #242428; --surface2: #2a2a2f; --border: #3a3a3f;
+  --text: #f0ede6; --text-muted: #999; --text-faint: #555; --opt-bg: #2a2a2f;
+  --opt-hover: #32323a; --exp-bg: #1f1f24; --sidebar-bg: #1e1e22;
+  --dot-bg: #2e2e34; --dot-text: #888; --tag-bg: #2e2e34;
+  --correct-bg: #1a3326; --correct-border: #4caf72; --correct-text: #6dcc90;
+  --wrong-bg: #3d1e1e; --wrong-border: #e05a5a; --wrong-text: #e08080;
+  --accent: #5b9ad5; --accent-bg: #1e2e42; --warn-bg: #2d2000;
+  --warn-border: #d97706; --warn-text: #fcd34d; --progress-track: #3a3a3f;
+}
+
+/* ===== RESET & LAYOUT ===== */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Georgia, "Times New Roman", serif; background: var(--bg); color: var(--text); height: 100vh; height: 100dvh; overflow: hidden; display: flex; transition: background 0.3s, color 0.3s; }
+.app { display: flex; width: 100%; height: 100%; }
+
+/* ===== SIDEBAR ===== */
+.sidebar { width: 260px; flex-shrink: 0; background: var(--sidebar-bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; transition: background 0.3s, border-color 0.3s; }
+.sidebar-head { padding: 14px; border-bottom: 1px solid var(--border); background: var(--surface2); transition: background 0.3s; }
+.app-title { font-size: 1rem; font-weight: normal; color: var(--accent); margin-bottom: 10px; letter-spacing: 0.01em; }
+.search-box { width: 100%; padding: 7px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem; font-family: Georgia, serif; background: var(--surface); color: var(--text); margin-bottom: 10px; outline: none; transition: border-color 0.2s, background 0.3s; }
+.search-box:focus { border-color: var(--accent); }
+.filter-tabs { display: flex; gap: 5px; margin-bottom: 10px; }
+.filter-tab { flex: 1; text-align: center; padding: 5px 4px; font-size: 0.78rem; font-family: Georgia, serif; cursor: pointer; border-radius: 5px; background: var(--tag-bg); color: var(--text-muted); transition: all 0.2s; border: 1px solid transparent; }
+.filter-tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.source-label { font-size: 0.75rem; color: var(--text-faint); margin-bottom: 5px; }
+.source-scroll { display: flex; flex-wrap: wrap; gap: 5px; max-height: 100px; overflow-y: auto; }
+.source-tag { font-size: 0.72rem; padding: 3px 8px; border-radius: 10px; background: var(--tag-bg); color: var(--text-muted); cursor: pointer; border: 1px solid transparent; white-space: nowrap; }
+.source-tag.active { background: var(--accent-bg); color: var(--accent); border-color: var(--accent); font-weight: bold; }
+.q-list { flex: 1; overflow-y: auto; padding: 10px; }
+.q-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
+.q-dot { aspect-ratio: 1; border-radius: 5px; background: var(--dot-bg); color: var(--dot-text); font-size: 0.78rem; font-family: Georgia, serif; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid transparent; transition: all 0.12s; position: relative; }
+.q-dot.active { border-color: var(--accent); color: var(--accent); background: var(--surface); box-shadow: 0 0 0 2px var(--accent); }
+.q-dot.correct { background: var(--correct-border); color: #fff; border-color: var(--correct-border); }
+.q-dot.wrong { background: var(--wrong-border); color: #fff; border-color: var(--wrong-border); }
+.q-dot.answered { background: var(--accent); color: #fff; border-color: var(--accent); }
+.q-dot.star::after { content: "★"; position: absolute; top: -4px; right: -4px; color: #f59e0b; font-size: 9px; }
+.sidebar-foot { padding: 12px 14px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; font-size: 0.82rem; color: var(--text-muted); background: var(--surface2); }
+.foot-row { display: flex; justify-content: space-between; align-items: center; }
+.reset-link { color: var(--accent); cursor: pointer; font-size: 0.78rem; }
+.foot-btn { width: 100%; padding: 7px; font-size: 0.8rem; font-family: Georgia, serif; border-radius: 6px; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--text); }
+.foot-btn.green { background: #059669; color: #fff; border-color: #059669; }
+
+/* ===== MAIN AREA ===== */
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.toolbar { height: 54px; padding: 0 24px; border-bottom: 1px solid var(--border); background: var(--surface); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.toolbar-left { display: flex; align-items: center; gap: 14px; }
+.q-counter { font-size: 1rem; color: var(--text); }
+.q-counter span { color: var(--accent); }
+.progress-mini { width: 120px; height: 4px; background: var(--progress-track); border-radius: 99px; overflow: hidden; }
+.progress-mini-fill { height: 100%; background: var(--accent); border-radius: 99px; transition: width 0.4s; }
+.toolbar-right { display: flex; align-items: center; gap: 14px; }
+.timer-badge { display: none; background: var(--warn-bg); color: var(--warn-text); padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; border: 1px solid var(--warn-border); }
+.exam-toggle-wrap { display: flex; align-items: center; gap: 7px; font-size: 0.82rem; color: var(--text-muted); cursor: pointer; }
+.toggle-track { position: relative; width: 36px; height: 20px; background: var(--progress-track); border-radius: 99px; transition: background 0.3s; }
+.toggle-track::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; background: #fff; border-radius: 50%; transition: transform 0.3s; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+.toggle-input { display: none; }
+.toggle-input:checked + .toggle-track { background: var(--accent); }
+.toggle-input:checked + .toggle-track::after { transform: translateX(16px); }
+.theme-btn { background: none; border: none; font-size: 1.1rem; cursor: pointer; padding: 0 4px; display: flex; align-items: center; }
+.nav-btn.submit { background: #d97706; color: #fff; border-color: #d97706; display: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-family: Georgia, serif; font-size: 0.82rem; border-width: 1px; border-style: solid;}
+
+/* ===== CONTENT ===== */
+.content-scroll { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 24px; display: flex; justify-content: center; align-items: flex-start; padding-bottom: 40px; }
+.card-wrapper { position: relative; width: 100%; max-width: 820px; }
+.card { width: 100%; padding-bottom: 20px; will-change: transform, opacity; }
+#phantomCard { position: absolute; top: 0; left: 0; z-index: 1; display: none; pointer-events: none; }
+#questionCard { position: relative; z-index: 2; }
+
+.unit-badge { display: inline-block; font-size: 0.75rem; font-weight: bold; font-family: -apple-system, sans-serif; text-transform: uppercase; color: var(--accent); background: var(--accent-bg); padding: 3px 10px; border-radius: 4px; margin-bottom: 14px; border: 1px solid var(--accent); }
+.q-text { font-size: 1.1rem; font-weight: bold; line-height: 1.6; margin-bottom: 4px; color: var(--text); }
+.q-trans { display: none; font-size: 0.88rem; color: var(--text-muted); margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--border); line-height: 1.5; }
+
+.hint-wrap { display: none !important; }
+
+.opt-list { display: flex; flex-direction: column; gap: 10px; margin-top: 18px; }
+.opt-btn { display: flex; align-items: flex-start; gap: 12px; padding: 13px 16px; border: 1px solid var(--border); border-radius: 8px; background: var(--opt-bg); cursor: pointer; font-size: 0.95rem; font-family: Georgia, serif; color: var(--text); text-align: left; transition: background 0.12s, border-color 0.12s; line-height: 1.5; }
+.opt-btn:hover { border-color: var(--accent); background: var(--opt-hover); }
+.opt-key { font-weight: bold; color: var(--text-faint); min-width: 20px; font-size: 0.85rem; padding-top: 1px; }
+.opt-trans { display: none; font-size: 0.82rem; color: var(--text-muted); margin-top: 3px; }
+.opt-btn.highlight-correct { background: var(--correct-bg); border-color: var(--correct-border); }
+.opt-btn.highlight-correct .opt-key { color: var(--correct-text); }
+.opt-btn.highlight-wrong { background: var(--wrong-bg); border-color: var(--wrong-border); }
+.opt-btn.highlight-wrong .opt-key { color: var(--wrong-text); }
+.opt-btn.exam-selected { border-color: var(--accent); background: var(--accent-bg); }
+
+/* ===== FEEDBACK ===== */
+.feedback { display: none; margin-top: 22px; padding: 18px 20px; border-radius: 8px; font-size: 0.9rem; line-height: 1.6; }
+.feedback.ok { background: var(--correct-bg); border: 1px solid var(--correct-border); color: var(--correct-text); }
+.feedback.bad { background: var(--wrong-bg); border: 1px solid var(--wrong-border); color: var(--wrong-text); }
+.fb-title { font-weight: bold; display: block; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px dashed rgba(0,0,0,0.15); }
+.fb-exp { white-space: pre-wrap; line-height: 1.65; margin-top: 5px; color: var(--text); font-size: 0.88rem; }
+.feedback.ok .fb-msg, .feedback.ok .fb-exp, .feedback.ok .fb-section-label { color: var(--correct-text); }
+.feedback.bad .fb-msg, .feedback.bad .fb-exp, .feedback.bad .fb-section-label { color: var(--wrong-text); }
+.feedback.ok .fb-src, .feedback.bad .fb-src { color: var(--text-muted); }
+.fb-msg { margin-bottom: 10px; color: var(--text); font-size: 0.9rem; line-height: 1.5; }
+.fb-section-label { font-weight: bold; font-size: 0.88rem; color: var(--text); margin-bottom: 4px; display: inline-block; }
+.fb-src { white-space: pre-wrap; line-height: 1.8; font-style: italic; font-size: 0.82rem; color: var(--text-muted); padding: 8px 0; margin-top: 5px; }
+.fb-divider { border: none; border-top: 1px dashed var(--border); margin: 10px 0; }
+.fb-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+.edit-btn { font-size: 0.78rem; padding: 2px 8px; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); color: var(--text); cursor: pointer; font-family: Georgia, serif; }
+.edit-btn:hover { background: var(--opt-hover); }
+.src-textarea { width: 100%; height: 120px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; font-family: Georgia, serif; font-size: 0.85rem; line-height: 1.5; background: var(--surface); color: var(--text); resize: vertical; margin-top: 8px; transition: background 0.3s, color 0.3s; }
+.save-row { display: flex; gap: 8px; margin-top: 6px; }
+.save-row button { padding: 4px 14px; border-radius: 5px; cursor: pointer; font-family: Georgia, serif; font-size: 0.82rem; border: 1px solid var(--border); background: var(--surface); color: var(--text); }
+.save-row button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.edit-warn { font-size: 0.75rem; color: var(--warn-text); margin-top: 5px; }
+
+/* ===== BOTTOM NAV ===== */
+.bottom-nav { width: 100%; height: 62px; flex-shrink: 0; background: var(--surface); border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: center; gap: 12px; padding: 0 24px; transition: background 0.3s, border-color 0.3s; }
+.nav-btn { padding: 9px 20px; border-radius: 7px; font-family: Georgia, serif; font-size: 0.88rem; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--text); }
+.nav-btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.toast { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.8); color: white; padding: 12px 24px; border-radius: 8px; z-index: 9999; font-size: 1rem; pointer-events: none; opacity: 0; transition: opacity 0.3s ease; text-align: center; }
+.toast.show { opacity: 1; }
+.empty-state { display: none; text-align: center; padding: 60px 20px; }
+
+/* ===== OVERLAY ===== */
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 200; display: none; align-items: center; justify-content: center; }
+.result-card { background: var(--surface); border-radius: 14px; padding: 32px 28px; text-align: center; width: 90%; max-width: 380px; box-shadow: 0 16px 40px rgba(0,0,0,0.2); }
+.result-score { font-size: 4rem; font-weight: bold; color: var(--accent); margin: 4px 0 16px; line-height: 1; }
+.result-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+.result-stat { background: var(--surface2); border-radius: 8px; padding: 10px; }
+.result-stat-val { font-size: 1.3rem; font-weight: bold; display: block; }
+.result-stat-lbl { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+.result-btns { display: flex; gap: 12px; justify-content: center; }
+.result-btn { padding: 8px 18px; border-radius: 7px; cursor: pointer; font-family: Georgia, serif; font-size: 0.88rem; border: 1px solid var(--border); background: var(--surface); color: var(--text); }
+.result-btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+.hl { background: #fef08a; color: #854d0e; border-bottom: 2px solid #eab308; padding: 0 2px; border-radius: 2px; font-weight: bold; }
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+/* ===== SIDEBAR OVERLAY ===== */
+.hamburger { display: none; background: none; border: none; font-size: 1.3rem; cursor: pointer; padding: 0 4px; color: var(--text); line-height: 1; }
+.sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 50; }
+.sidebar-overlay.show { display: block; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 900px) { .sidebar { width: 220px; } }
+@media (max-width: 650px) {
+  .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 80vw; max-width: 300px; z-index: 60; transform: translateX(-100%); transition: transform 0.28s ease; box-shadow: 4px 0 20px rgba(0,0,0,0.15); }
+  .sidebar.open { transform: translateX(0); }
+  .hamburger { display: block; }
+  .bottom-nav { display: none !important; }
+  .content-scroll { padding: 16px 12px 140px 12px; }
+  .toolbar { padding: 0 10px; height: 50px; }
+  .toolbar-left { gap: 8px; } .toolbar-right { gap: 6px; }
+  .progress-mini { width: 60px; } .q-text { font-size: 1rem; } .opt-btn { font-size: 0.9rem; padding: 11px 13px; }
+  .result-card { width: 92%; padding: 24px 18px; } .result-score { font-size: 3rem; }
+}
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<div class="app">
+
+  <div class="sidebar">
+    <div class="sidebar-head">
+      <div class="app-title">G2 Quiz System</div>
+      <input type="text" class="search-box" id="searchBox" placeholder="Search questions..." oninput="handleSearch()">
+      <div class="filter-tabs">
+        <div class="filter-tab active" id="tab-all" onclick="setFilter('all')">All</div>
+        <div class="filter-tab" id="tab-wrong" onclick="setFilter('wrong')">Wrong</div>
+        <div class="filter-tab" id="tab-star" onclick="setFilter('star')">Starred</div>
+      </div>
+      <div class="source-label">Chapter filter:</div>
+      <div class="source-scroll" id="sourceList"></div>
+    </div>
+    <div class="q-list"><div class="q-grid" id="qGrid"></div></div>
+    <div class="sidebar-foot">
+      <div class="foot-row"><span id="totalStats">Done: 0 / 0</span><span class="reset-link" onclick="resetProgress()">Clear progress</span></div>
+      <button class="foot-btn" onclick="shuffleQuestions()">Shuffle questions &amp; options</button>
+      <button class="foot-btn green" onclick="exportHtml()">Save updated file</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <button class="hamburger" id="hamburger" onclick="toggleSidebar()">&#9776;</button>
+        <div class="q-counter">Q <span id="currNum">1</span> / <span id="totalNum">1</span></div>
+        <div class="progress-mini"><div class="progress-mini-fill" id="miniBar" style="width:0%"></div></div>
+      </div>
+      <div class="toolbar-right">
+        <div class="timer-badge" id="timerBadge">03:30:00</div>
+        <button id="topSubmitBtn" class="nav-btn submit" onclick="submitExam()">Submit</button>
+        <label class="exam-toggle-wrap">
+          <input type="checkbox" class="toggle-input" id="cnToggle" onchange="toggleChinese()">
+          <div class="toggle-track"></div><span id="cnLabel">EN</span>
+        </label>
+        <label class="exam-toggle-wrap">
+          <input type="checkbox" class="toggle-input" id="examToggle" onchange="toggleExam()">
+          <div class="toggle-track"></div><span>Exam</span>
+        </label>
+        <button class="theme-btn" id="favBtn" onclick="toggleStar()" style="font-size:1.3rem;">☆</button>
+        <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">🌙</button>
+      </div>
+    </div>
+
+    <div class="content-scroll">
+      <div class="card-wrapper">
+        <div class="card" id="phantomCard"></div>
+        <div class="card" id="questionCard">
+          <div id="unitBadge" class="unit-badge"></div>
+          <div class="q-text" id="qText"></div>
+          <div class="q-trans" id="qTrans"></div>
+          <div class="hint-wrap" id="hintWrap"></div>
+          <div class="opt-list" id="optList"></div>
+          <div class="feedback" id="feedbackBox"></div>
+          <div class="empty-state" id="emptyState">
+            <h3>No questions in this view</h3><p>Try changing the filter or search term.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-nav" id="bottomNav">
+      <button class="nav-btn" onclick="prevQ()">Prev</button>
+      <button class="nav-btn primary" onclick="nextQ()">Next</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="result-card">
+    <div class="result-title">Exam result</div>
+    <div class="result-score" id="resScore">0</div>
+    <div class="result-grid">
+      <div class="result-stat"><span class="result-stat-val" id="resTotal">0</span><span class="result-stat-lbl">Total</span></div>
+      <div class="result-stat"><span class="result-stat-val" style="color:var(--correct-text)" id="resRight">0</span><span class="result-stat-lbl">Correct</span></div>
+      <div class="result-stat"><span class="result-stat-val" style="color:var(--wrong-text)" id="resWrong">0</span><span class="result-stat-lbl">Wrong</span></div>
+    </div>
+    <div class="result-btns">
+      <button class="result-btn" onclick="closeResult()">Review answers</button>
+      <button class="result-btn primary" onclick="resetProgress()">Restart</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ==========================================================
+   QUIZ DATA (在这里贴上你的所有题目代码)
+========================================================== */
+var quizData = [
+  {
+        "u": "6. Combustion & Flue Gas Analysis",
+        "q": "What is the 'Ultimate $CO_{2}$' (theoretical maximum) for propane?@@(丙烷的“极限 $CO_{2}$”（理论最大值）是多少？)",
+        "hint": "Ultimate CO2 Propane",
+        "opts": [
+            {
+                "t": "~10%@@(~10%)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "~12%@@(~12%)",
+                "f": "❌ 错误。这是天然气的极限。"
+            },
+            {
+                "t": "~13.9%@@(~13.9%)",
+                "f": "✅ 正确。丙烷含有更多的碳原子，完美燃烧产生的二氧化碳浓度比天然气更高。"
+            },
+            {
+                "t": "~15.5%@@(~15.5%)",
+                "f": "❌ 错误。这是 2号燃油（Heating Oil）的极限。"
+            }
+        ],
+        "a": 2,
+        "exp": "解析: 死记数字考点。丙烷（Propane，C3H8）比天然气（主要成分甲烷 CH4）分子结构更大，含碳量更高。因此，在零过剩空气完美燃烧的情况下，丙烷能产生的极限 $CO_{2}$ 浓度也更高，约为 13.9%。",
+        "src": "• 课文出处: 6. Combustion & Flue Gas Analysis\n• 原文语句: \"Ultimate CO2 Propane: ~13.9%\""
+    },
+    {
+        "u": "6. Combustion & Flue Gas Analysis",
+        "q": "If a flue gas analysis on a natural gas appliance shows 10% $CO_{2}$, what does this indicate regarding the ultimate 12% maximum?@@(如果天然气设备的烟气分析显示 10% $CO_{2}$，相对于 12% 的极限最大值，这表明了什么？)",
+        "hint": "10% CO2 for NG",
+        "opts": [
+            {
+                "t": "It indicates perfect theoretical combustion@@(表明达到了完美的理论燃烧)",
+                "f": "❌ 错误。理论极限是 12%。"
+            },
+            {
+                "t": "It indicates excess air is still present (it is below the 12% max)@@(表明仍存在过剩空气 —— 因为它低于 12% 的最大值)",
+                "f": "✅ 正确。虽然 10% 已经高于正常的 8.5%，但只要没到 12% 的天花板，说明燃烧反应中依然有多余的空气在稀释浓度。"
+            },
+            {
+                "t": "It indicates incomplete combustion and carbon monoxide production@@(表明燃烧不完全且产生了一氧化碳)",
+                "f": "❌ 错误。不能仅凭 10% CO2 就断定产生了一氧化碳。"
+            },
+            {
+                "t": "It indicates the gas pressure is too low@@(表明燃气压力太低)",
+                "f": "❌ 错误。读数偏高往往意味着气给得太多，空气相对变少。"
+            }
+        ],
+        "a": 1,
+        "exp": "解析: 这是一个理解测试题。只要分析仪测出的 $CO_{2}$ 百分比低于该燃料的理论最高极限（天然气为 12%），就意味着废气中一定掺入了其他气体（如未燃烧完的氧气和氮气），这就证明系统中存在“过剩空气 (excess air)”。",
+        "src": "• 课文出处: 6. Combustion & Flue Gas Analysis\n• 原文语句: \"10% CO2 for NG: Indicates excess air present (below the 12% max)\""
+    },
+    {
+        "u": "6. Combustion & Flue Gas Analysis",
+        "q": "During a flue gas analysis on a natural gas furnace, you read 9% $O_{2}$ and 6% $CO_{2}$. What does this combination indicate?@@(在对天然气火炉进行烟气分析时，你读到 9% $O_{2}$ 和 6% $CO_{2}$。这个组合说明了什么故障？)",
+        "hint": "9% O2 + 6% CO2",
+        "opts": [
+            {
+                "t": "Perfect stoichiometric combustion@@(完美的化学计量燃烧)",
+                "f": "❌ 错误。完美燃烧 O2 应该是 0%。"
+            },
+            {
+                "t": "Too much excess air@@(过剩空气太多)",
+                "f": "✅ 正确。正常 $O_{2}$ 是 5-8%，9% 偏高；正常 $CO_{2}$ 是 7-8.5%，6% 偏低。这说明大量的冷空气涌入，稀释了二氧化碳浓度。"
+            },
+            {
+                "t": "Not enough primary air (rich mixture)@@(一次空气不足 / 混合物过浓)",
+                "f": "❌ 错误。如果是空气不足，$O_{2}$ 会非常低，甚至接近零。"
+            },
+            {
+                "t": "Severe flame impingement@@(严重的火焰撞击)",
+                "f": "❌ 错误。火焰撞击主要产生 CO 和黑烟，与氧气过高的直接关系不大。"
+            }
+        ],
+        "a": 1,
+        "exp": "解析: 记住一个跷跷板效应：排气里的 $O_{2}$（氧气）和 $CO_{2}$（二氧化碳）永远是反向变动的。当你给的空气太多（Too much excess air）时，多余的氧气没被烧掉就排了出来（导致 $O_{2}$ 升高到 9%），同时大量空气像兑水一样稀释了烟气，导致 $CO_{2}$ 浓度下降到了 6%。",
+        "src": "• 课文出处: 6. Combustion & Flue Gas Analysis\n• 原文语句: \"9% O2 + 6% CO2: Too much excess air\""
+    },
+    {
+        "u": "6. Combustion & Flue Gas Analysis",
+        "q": "How is 'Excess Air' defined in combustion theory?@@(在燃烧理论中，“过剩空气 (Excess Air)”是如何定义的？)",
+        "hint": "Excess Air Definition",
+        "opts": [
+            {
+                "t": "The minimum exact air required to burn the fuel completely@@(燃料完全燃烧所需的最小精确空气量)",
+                "f": "❌ 错误。这叫化学计量空气（Stoichiometric air）。"
+            },
+            {
+                "t": "Air that leaks into the heat exchanger from the blower fan@@(从鼓风机泄漏进热交换器的空气)",
+                "f": "❌ 错误。那是设备破裂导致的漏风。"
+            },
+            {
+                "t": "Air in the combustion zone beyond what's needed for complete theoretical combustion@@(燃烧区内超过理论上完全燃烧所需的那部分多余空气)",
+                "f": "✅ 正确。为了保险起见故意多给的“冗余空气”，就叫过剩空气。"
+            },
+            {
+                "t": "Draft air entering the relief opening of the draft hood@@(进入排烟罩泄压口的抽力空气)",
+                "f": "❌ 错误。这叫稀释空气（Dilution air）。"
+            }
+        ],
+        "a": 2,
+        "exp": "解析: 因为燃气和空气混合不可能做到分子级别的完美均匀，如果只给刚刚好（10:1）的空气，总会有燃气分子找不到氧气，从而产生致命的一氧化碳。所以现实中必须多给一些多余的氧气保底，这部分超额提供的空气就定义为“过剩空气（Excess Air）”。",
+        "src": "• 课文出处: 6. Combustion & Flue Gas Analysis\n• 原文语句: \"Excess Air: Air in combustion zone beyond what's needed for complete combustion\""
+    },
+	{
+        "u": "6. Combustion & Flue Gas Analysis",
+        "q": "What are the primary byproducts of INCOMPLETE combustion of natural gas or propane?@@(天然气或丙烷不完全燃烧的主要副产物是什么？)",
+        "hint": "Incomplete Combustion Products",
+        "opts": [
+            {
+                "t": "Carbon dioxide ($CO_{2}$) and Water ($H_{2}O$)@@(二氧化碳和水)",
+                "f": "❌ 错误。这是完全燃烧（Perfect combustion）的安全产物。"
+            },
+            {
+                "t": "Carbon monoxide (CO) and Aldehydes@@(一氧化碳和醛类)",
+                "f": "✅ 正确。由于缺氧或火焰撞击被冷却，碳无法完全氧化，就会产生致命的一氧化碳和刺鼻的醛类物质。"
+            },
+            {
+                "t": "Nitrogen dioxide ($NO_{2}$) and Sulfur@@(二氧化氮和硫)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "Ozone ($O_{3}$) and Methane ($CH_{4}$)@@(臭氧和甲烷)",
+                "f": "❌ 错误。"
+            }
+        ],
+        "a": 1,
+        "exp": "解析: 基础化学考点。完全燃烧只产生无毒的 $CO_{2}$、水蒸气和热量。一旦燃烧条件变差（不完全燃烧 Incomplete combustion），就会立刻产生一氧化碳（CO），并往往伴随着醛类（Aldehydes，一种闻起来有刺鼻酸味的气体，是 CO 存在的强烈警示信号）。",
+        "src": "• 课文出处: 6. Combustion & Flue Gas Analysis\n• 原文语句: \"Incomplete Combustion Products: Carbon monoxide (CO) and Aldehydes\""
+    },
+    {
+        "u": "6. Combustion & Flue Gas Analysis",
+        "q": "What is the primary source of Carbon Monoxide (CO) generation in a gas appliance?@@(燃气设备中产生一氧化碳 (CO) 的主要根源是什么？)",
+        "hint": "CO Source",
+        "opts": [
+            {
+                "t": "Excessive ventilation in the mechanical room@@(机械室通风过度)",
+                "f": "❌ 错误。通风好只会带来更多的氧气，有助于完全燃烧。"
+            },
+            {
+                "t": "Too much primary air@@(一次空气过多)",
+                "f": "❌ 错误。一次空气过多会导致火焰飞离（Lifting），极少直接产生大量 CO。"
+            },
+            {
+                "t": "Incomplete combustion due to lack of oxygen or flame impingement@@(由于缺氧或火焰撞击导致的不完全燃烧)",
+                "f": "✅ 正确。当碳原子找不到足够的氧原子配对，或者火焰烧到冷表面被强行降温时，就会生成 CO。"
+            },
+            {
+                "t": "Natural gas supply pressure is slightly low@@(天然气供气压力略低)",
+                "f": "❌ 错误。压力低只会导致火小、输入功率不足。"
+            }
+        ],
+        "a": 2,
+        "exp": "解析: CO 是燃料中碳（C）元素未被完全氧化为 $CO_{2}$ 的半成品。导致不完全燃烧（Incomplete combustion）的两个最大罪魁祸首是：1. 没给够空气（缺氧）；2. 燃烧还没结束，火焰就撞击（impingement）到了冷的热交换器壁上，导致反应被强行冷却冻结。",
+        "src": "• 课文出处: 6. Combustion & Flue Gas Analysis\n• 原文语句: \"CO Source: Incomplete combustion (lack of oxygen or flame quenching/impingement)\""
+    },
+    {
+        "u": "6. Combustion & Flue Gas Analysis",
+        "q": "What parameters does a standard electronic combustion analyzer ACTUALLY measure directly?@@(标准的电子燃烧分析仪实际上直接测量哪些参数？)",
+        "hint": "Combustion Analyzer Measures",
+        "opts": [
+            {
+                "t": "Efficiency and $CO_{2}$@@(效率和二氧化碳)",
+                "f": "❌ 错误。这是经典陷阱。效率和 $CO_{2}$ 通常是由仪器“计算 (calculated)”出来的，而不是直接测量的。"
+            },
+            {
+                "t": "Oxygen ($O_{2}$), Carbon Monoxide (CO), Flue Temp, and Room Temp@@(氧气、一氧化碳、烟气温度和室温)",
+                "f": "✅ 正确。这四个是分析仪的传感器直接感知物理世界得出的真实读数。"
+            },
+            {
+                "t": "Excess air and Gross Stack Temp@@(过剩空气和总排烟温度)",
+                "f": "❌ 错误。过剩空气也是通过公式算出来的。"
+            },
+            {
+                "t": "Gas pressure and Draft@@(燃气压力和抽力)",
+                "f": "❌ 错误。这是压力表（Manometer）测量的。"
+            }
+        ],
+        "a": 1,
+        "exp": "解析: 仪器原理必考题。市面上绝大多数的燃烧分析仪（Analyzer）内部只有 $O_{2}$ 传感器、CO 传感器和温度探头。它通过直接测量（Measure）烟气中的氧气含量和排烟温度，然后套用内部算法，“推算/计算（Calculate）”出 $CO_{2}$ 含量、过剩空气比例以及设备的燃烧效率（Efficiency）。",
+        "src": "• 课文出处: 6. Combustion & Flue Gas Analysis\n• 原文语句: \"Combustion Analyzer Measures: O2, CO, Flue Temp, Room Temp (CO2 and Efficiency are CALCULATED)\""
+    },
+    {
+        "u": "6. Combustion & Flue Gas Analysis",
+        "q": "How should a technician verify the accuracy of an electronic combustion analyzer before testing an appliance?@@(在测试设备之前，技工应如何验证电子燃烧分析仪的准确性？)",
+        "hint": "Verify Analyzer Accuracy",
+        "opts": [
+            {
+                "t": "By testing the exhaust of a running vehicle@@(通过测试正在运行的汽车尾气)",
+                "f": "❌ 错误。这会损坏高灵敏度的传感器。"
+            },
+            {
+                "t": "By blowing into the probe and checking for $CO_{2}$@@(向探头吹气并检查二氧化碳)",
+                "f": "❌ 错误。不专业且会引入水分。"
+            },
+            {
+                "t": "By turning it on in fresh outdoor air to ensure it reads ~20.9% $O_{2}$ and 0 ppm CO@@(在新鲜的室外空气中开机，确保其读数约为 20.9% 氧气和 0 ppm CO)",
+                "f": "✅ 正确。新鲜空气是最好的免费校准基准。"
+            },
+            {
+                "t": "By placing the probe in the draft hood before the burner fires@@(在燃烧器点火之前将探头放在排烟罩中)",
+                "f": "❌ 错误。室内或排烟罩内的空气可能已经被污染。"
+            }
+        ],
+        "a": 2,
+        "exp": "解析: 每次使用燃烧分析仪前，必须在清洁的环境中让仪器归零校准（Zeroing）。最标准的做法是拿着仪器走到室外新鲜空气中开机，观察 $O_{2}$ 读数是否在 20.9%（大气的天然含氧量），且 CO 为 0。如果读数偏差大，说明传感器老化需要返厂标定了。",
+        "src": "• 课文出处: 6. Combustion & Flue Gas Analysis\n• 原文语句: \"Verify Analyzer Accuracy: Test in fresh outdoor air (should read ~20.9% O2, 0 ppm CO)\""
+    },
+    {
+        "u": "6. Combustion & Flue Gas Analysis",
+        "q": "What are the two primary purposes for performing a flue gas analysis on a heating appliance?@@(对供暖设备进行烟气分析的两个主要目的是什么？)",
+        "hint": "Flue Gas Analysis",
+        "opts": [
+            {
+                "t": "To measure gas pressure and verify electrical draw@@(测量燃气压力并验证电流消耗)",
+                "f": "❌ 错误。这两项不属于烟气分析的范畴。"
+            },
+            {
+                "t": "To ensure safe operation (CO levels) and maximize combustion efficiency@@(确保安全运行（CO 水平）并使燃烧效率最大化)",
+                "f": "✅ 正确。一个是保命（安全），一个是省钱（效率）。"
+            },
+            {
+                "t": "To check for gas leaks and determine the heat exchanger size@@(检查燃气泄漏并确定热交换器尺寸)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "To calculate the building's heat loss and adjust the thermostat@@(计算建筑物的热损失并调节恒温器)",
+                "f": "❌ 错误。"
+            }
+        ],
+        "a": 1,
+        "exp": "解析: 燃烧分析（Flue Gas Analysis）是高端技工吃饭的本事。它的两大终极目标是：1. 调整空气与燃气的比例，使得排放出的有毒 CO 尽量低（保证人身安全 Safety）；2. 在安全的前提下减少过剩空气，降低排烟温度，使得燃烧效率（Efficiency）达到最高。",
+        "src": "• 课文出处: 6. Combustion & Flue Gas Analysis\n• 原文语句: \"Flue Gas Analysis: Two main purposes - verify safety (CO limits) and maximize efficiency\""
+    },
+    {
+        "u": "6. Combustion & Flue Gas Analysis",
+        "q": "When using chemical detection tubes (like Drager or Gastec tubes) to measure CO, what is a critical limitation to check before use?@@(在使用化学检测管（如 Drager 或 Gastec 管）测量 CO 时，使用前必须检查的关键限制是什么？)",
+        "hint": "Drager/Gastec Tubes",
+        "opts": [
+            {
+                "t": "They require a 120V power supply@@(它们需要 120V 电源)",
+                "f": "❌ 错误。显色管是纯物理/化学的，不需要电。"
+            },
+            {
+                "t": "They must be kept frozen until use@@(使用前必须冷冻保存)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "They have a strict expiration date and expire over time@@(它们有严格的有效期限，会随时间过期)",
+                "f": "✅ 正确。管内的化学显色剂时间长了会失效，导致读数不准。"
+            },
+            {
+                "t": "They only work on propane, not natural gas@@(它们仅适用于丙烷，不适用于天然气)",
+                "f": "❌ 错误。只要测的是 CO，什么燃料产生的都可以。"
+            }
+        ],
+        "a": 2,
+        "exp": "解析: Drager/Gastec 管是一种老式的便携测毒气工具。像针筒一样抽一口气进去，里面的化学晶体遇到 CO 就会变色（变黑或变褐），根据变色长度读出 ppm 浓度。它的致命弱点是管子里的化学药剂有保质期（Expiration date），过期的管子测出的数据是完全不可靠的。",
+        "src": "• 课文出处: 6. Combustion & Flue Gas Analysis\n• 原文语句: \"Drager/Gastec Tubes: Have strict expiration dates\""
+    },
+    {
+        "u": "6. Combustion & Flue Gas Analysis",
+        "q": "What two temperature measurements are required when using a sling psychrometer to determine relative humidity?@@(当使用手摇干湿表确定相对湿度时，需要哪两个温度测量值？)",
+        "hint": "Humidity Measurement",
+        "opts": [
+            {
+                "t": "Supply air temp and Return air temp@@(送风温度和回风温度)",
+                "f": "❌ 错误。这是用来算温升（Temp Rise）的。"
+            },
+            {
+                "t": "Wet-bulb temperature and Dry-bulb temperature@@(湿球温度和干球温度)",
+                "f": "✅ 正确。通过对比干球（环境温度）和湿球（水分蒸发带走热量后的温度）的差值，可以查表得出相对湿度。"
+            },
+            {
+                "t": "Flue gas temp and Ambient room temp@@(烟气温度和室温)",
+                "f": "❌ 错误。这是用来算净排烟温度的。"
+            },
+            {
+                "t": "Dew point and Frost point@@(露点和霜点)",
+                "f": "❌ 错误。这是通过干湿球温度算出来的结果，不是直接测量的。"
+            }
+        ],
+        "a": 1,
+        "exp": "解析: 湿度测量原理考点。干湿球温度计（Psychrometer）由两支温度计组成，一支暴露在空气中（干球 Dry-bulb），另一支用湿布包着（湿球 Wet-bulb）。空气越干燥，湿布上的水蒸发得越快，带走的热量越多，湿球读数就越低。通过计算两者的温差，就能准确测定空气的相对湿度。",
+        "src": "• 课文出处: 6. Combustion & Flue Gas Analysis\n• 原文语句: \"Humidity Measurement: Requires wet-bulb and dry-bulb temperatures\""
+    },
+    {
+        "u": "6. Combustion & Flue Gas Analysis",
+        "q": "What three main characteristics of a gas flame should a technician observe to quickly judge combustion quality?@@(技工应观察燃气火焰的哪三个主要特征，以快速判断燃烧质量？)",
+        "hint": "Flame Characteristics",
+        "opts": [
+            {
+                "t": "Height, width, and sound@@(高度、宽度和声音)",
+                "f": "❌ 错误。不够全面。"
+            },
+            {
+                "t": "Color, shape, and stability@@(颜色、形状和稳定性)",
+                "f": "✅ 正确。这是经验老道的师傅判断燃烧工况的“望闻问切”。"
+            },
+            {
+                "t": "Temperature, odor, and radiation@@(温度、气味和辐射)",
+                "f": "❌ 错误。这些不是光靠眼睛能准确观察的火焰特征。"
+            },
+            {
+                "t": "Velocity, pressure, and density@@(速度、压力和密度)",
+                "f": "❌ 错误。"
+            }
+        ],
+        "a": 1,
+        "exp": "解析: 优秀的燃气技工只需看一眼火焰就能知道八九不离十。评估火焰质量一看【颜色 Color】（正常是蓝色带亮蓝内锥，发黄代表缺氧）；二看【形状 Shape】（是否清晰分明，不应软绵绵的）；三看【稳定性 Stability】（火焰应稳稳扎在喷嘴上，不能飘离/Lifting 或闪回）。",
+        "src": "• 课文出处: 6. Combustion & Flue Gas Analysis\n• 原文语句: \"Flame Characteristics: Observe color, shape, and stability\""
+    },
+    {
+        "u": "6. Combustion & Flue Gas Analysis",
+        "q": "What is the most common cause of carbonizing or soot build-up on the heat exchanger?@@(导致热交换器上积碳或积灰的最常见原因是什么？)",
+        "hint": "Carbonizing/Sooting Cause",
+        "opts": [
+            {
+                "t": "Too much primary air@@(一次空气过多)",
+                "f": "❌ 错误。这会导致火焰飞离，不会产生黑烟。"
+            },
+            {
+                "t": "High gas pressure@@(燃气压力高)",
+                "f": "❌ 错误。单纯压力高不一定会积碳，除非导致了其他问题。"
+            },
+            {
+                "t": "Flame impingement on a cool surface or insufficient combustion air@@(火焰撞击在冷表面上或燃烧空气不足)",
+                "f": "✅ 正确。这就是造成不完全燃烧的两个元凶，生成的游离碳颗粒附着在表面就成了黑色的积灰。"
+            },
+            {
+                "t": "Using natural gas instead of propane@@(使用天然气代替丙烷)",
+                "f": "❌ 错误。燃料种类不会引起积灰，混合不当才会。"
+            }
+        ],
+        "a": 2,
+        "exp": "解析: 积碳（Soot / Carbonizing）其实就是没有燃烧干净的纯碳颗粒。原因有两个：1. 空气（氧气）给少了，导致燃气烧不透；2. 燃烧器对位不准或火太大，导致火焰直接烧到了金属内壁上（Flame impingement），冰冷的金属壁把火焰的温度抽走，燃烧反应被迫中止，直接析出黑色的碳灰。",
+        "src": "• 课文出处: 6. Combustion & Flue Gas Analysis\n• 原文语句: \"Carbonizing/Sooting Cause: Flame impingement on cool surface or insufficient air\""
+    },
+    {
+        "u": "6. Combustion & Flue Gas Analysis",
+        "q": "When converting an older oil furnace to natural gas, what is the consequence of leaving an oversized fire pot (combustion chamber)?@@(在将较旧的燃油火炉改装为天然气时，如果保留过大的炉膛（燃烧室），后果是什么？)",
+        "hint": "Oversized Fire Pot (conversion)",
+        "opts": [
+            {
+                "t": "It increases the efficiency of the natural gas burner@@(它提高了天然气燃烧器的效率)",
+                "f": "❌ 错误。恰恰相反。"
+            },
+            {
+                "t": "It causes reduced heat transfer and lowers the overall efficiency@@(它会导致热传导减少并降低整体效率)",
+                "f": "✅ 正确。炉膛太空旷，天然气的柔和火焰够不到炉壁，热量都顺着烟囱跑了。"
+            },
+            {
+                "t": "It results in excessive carbon monoxide production@@(它会导致过量的一氧化碳产生)",
+                "f": "❌ 错误。空间大空气足，通常不会产生 CO。"
+            },
+            {
+                "t": "It creates a higher risk of flame impingement@@(它造成更高的火焰撞击风险)",
+                "f": "❌ 错误。炉膛过大反而不容易发生撞击。"
+            }
+        ],
+        "a": 1,
+        "exp": "解析: 燃油火炉（Oil furnace）的火焰非常凶猛且辐射热极高，所以原来的炉膛通常造得很大。天然气燃烧器的火焰相对柔和（主要靠对流和传导）。如果“油改气（Conversion）”时不缩小炉膛，天然气的小火苗在空荡荡的大炉膛里就像在广场上烧篝火，热量根本贴不到金属壁上传递出去（reduced heat transfer），导致热效率惨不忍睹。",
+        "src": "• 课文出处: 6. Combustion & Flue Gas Analysis\n• 原文语句: \"Oversized Fire Pot (conversion): Reduces efficiency / poor heat transfer\""
+    },
+    {
+        "u": "6. Combustion & Flue Gas Analysis",
+        "q": "In flue gas analysis, how is the 'Net Stack Temperature' calculated using the 'Gross Stack Temperature'?@@(在烟气分析中，如何利用“总排烟温度 (Gross Stack Temperature)”来计算“净排烟温度 (Net Stack Temperature)”？)",
+        "hint": "Gross Stack Temp",
+        "opts": [
+            {
+                "t": "Net Temp = Gross Stack Temp + Supply Air Temp@@(净温度 = 总排烟温度 + 送风温度)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "Net Temp = Gross Stack Temp MINUS Ambient Room Temp@@(净温度 = 总排烟温度 减去 环境室温)",
+                "f": "✅ 正确。必须扣除燃烧室吸入室温空气本身自带的基底温度。"
+            },
+            {
+                "t": "Net Temp = Gross Stack Temp divided by $CO_{2}$%@@(净温度 = 总排烟温度 除以 二氧化碳百分比)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "They are exactly the same thing@@(它们完全是一回事)",
+                "f": "❌ 错误。"
+            }
+        ],
+        "a": 1,
+        "exp": "解析: 总排烟温度（Gross Stack Temp）是你把温度探头插进烟囱里读出来的实际度数（例如 400°F）。但燃烧器吸入用来燃烧的室内冷空气本身就已经有 70°F 了。这 70°F 的热量不是火炉烧出来的。所以用来计算设备真实效率的指标是“净温度（Net Stack Temp）”，计算方法是：烟囱总温度 - 机械室的室温（400 - 70 = 330°F）。",
+        "src": "• 课文出处: 6. Combustion & Flue Gas Analysis\n• 原文语句: \"Gross Stack Temp: Net stack temp = Gross stack temp MINUS ambient room temp\""
+    },
+    {
+        "u": "6. Combustion & Flue Gas Analysis",
+        "q": "Where must the test probe be placed to accurately measure the 'Over-Fire Draft' of a heating appliance?@@(必须将测试探头放置在何处才能准确测量供暖设备的“炉膛上方抽力 (Over-Fire Draft)”？)",
+        "hint": "Over-Fire Draft",
+        "opts": [
+            {
+                "t": "At the outdoor vent termination@@(在室外排气终端处)",
+                "f": "❌ 错误。那是测烟囱总抽力的。"
+            },
+            {
+                "t": "Directly inside the draft hood relief opening@@(直接放在排烟罩泄压口内部)",
+                "f": "❌ 错误。那是测回流或通风抽力的。"
+            },
+            {
+                "t": "Inside the combustion chamber, directly over the flame/fire@@(在燃烧室内部，直接在火焰/火势的上方)",
+                "f": "✅ 正确。“Over-Fire（火的上方）”字面意思，也就是测量燃烧室最核心区域的压力。"
+            },
+            {
+                "t": "Inside the return air duct@@(在回风管道内部)",
+                "f": "❌ 错误。与排烟无关。"
+            }
+        ],
+        "a": 2,
+        "exp": "解析: Draft（抽力/负压）在系统不同位置读数是不同的。顾名思义，“Over-fire Draft”指的就是跨过火焰区域的压力。技工通常需要通过炉膛观察孔，把长长的差压计探针伸入到燃烧室（Combustion chamber）的内部、正好在燃烧器的上方，去测量这里是否有足够的负压将废气拉向热交换器。",
+        "src": "• 课文出处: 6. Combustion & Flue Gas Analysis\n• 原文语句: \"Over-Fire Draft: Measured inside the combustion chamber (above the fire)\""
+    },
+	{
+        "u": "7. Burners, Pilots, Draft & Units",
+        "q": "What resistances does a Fan-Assist burner overcome?@@(风机辅助燃烧器克服哪些阻力？)",
+        "hint": "Fan-Assist Burner",
+        "opts": [
+            {
+                "t": "Overcomes resistance of burner + appliance + vent system@@(克服燃烧器 + 设备 + 排气系统的阻力)",
+                "f": "❌ 错误。这是强制排风燃烧器（Forced-Draft Burner）的能力。"
+            },
+            {
+                "t": "Overcomes resistance of burner + appliance (not vent)@@(仅克服燃烧器 + 设备的阻力，不包括排气系统)",
+                "f": "✅ 正确。风机辅助（Fan-Assist）的风力相对较小，只能把废气推过热交换器，进入烟囱后依然需要依靠自然负压抽力来排烟。"
+            },
+            {
+                "t": "Overcomes resistance of the vent system only@@(仅克服排气系统的阻力)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "Relies entirely on natural draft@@(完全依靠自然抽力)",
+                "f": "❌ 错误。那是常压燃烧器（Atmospheric Burner）。"
+            }
+        ],
+        "a": 1,
+        "exp": "解析: 这是区分风机类别的核心考点。Fan-Assist（风机辅助）火炉内部有一个小引风机，它的力量刚好够克服燃烧器和曲折的热交换器产生的内部阻力，但它的力量推不到室外。因此，它的排气管（Vent）内部依然是负压（Negative pressure）。",
+        "src": "• 课文出处: 7. Burners, Pilots, Draft & Units\n• 原文语句: \"Fan-Assist Burner: Overcomes resistance of burner + appliance (not vent)\""
+    },
+    {
+        "u": "7. Burners, Pilots, Draft & Units",
+        "q": "What resistances does a Forced-Draft burner overcome, and what is the pressure inside its venting system?@@(强制排风燃烧器克服哪些阻力？其排气系统内部的压力状态如何？)",
+        "hint": "Forced-Draft Burner",
+        "opts": [
+            {
+                "t": "Overcomes burner + appliance only; negative pressure@@(仅克服燃烧器 + 设备；负压)",
+                "f": "❌ 错误。那是 Fan-Assist 的特征。"
+            },
+            {
+                "t": "Overcomes vent system only; negative pressure@@(仅克服排气系统；负压)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "Overcomes burner + appliance + vent system; positive pressure throughout@@(克服燃烧器 + 设备 + 排气系统；全线处于正压状态)",
+                "f": "✅ 正确。强制排风系统力量非常大，能把废气一路“吹”出室外，因此整个烟囱管内部都是正压（Positive pressure）。"
+            },
+            {
+                "t": "Overcomes burner + vent system; zero pressure@@(克服燃烧器 + 排气系统；零压)",
+                "f": "❌ 错误。"
+            }
+        ],
+        "a": 2,
+        "exp": "解析: 强制排风燃烧器（Forced-Draft Burner）通常配有强力的鼓风马达。它不仅能克服设备内部阻力，还能强行把废气一直吹出排气管末端。因此，它使用的排气管（如 Category III 或 IV 级管）必须是密封防漏的，因为里面充满了推出去的正压废气。",
+        "src": "• 课文出处: 7. Burners, Pilots, Draft & Units\n• 原文语句: \"Forced-Draft Burner: Overcomes burner + appliance + vent system (positive pressure throughout)\""
+    },
+    {
+        "u": "7. Burners, Pilots, Draft & Units",
+        "q": "What is the primary cause of a noisy, lifting, or blowing pilot flame?@@(常明火产生噪音、飞离或被吹熄的主要原因是什么？)",
+        "hint": "Noisy/Lifting/Blowing Pilot",
+        "opts": [
+            {
+                "t": "Low gas pressure@@(燃气压力低)",
+                "f": "❌ 错误。压力低会导致火苗缩成一团，无力甚至熄灭，不会产生飞离或噪音。"
+            },
+            {
+                "t": "Orifice too LARGE@@(喷嘴过大)",
+                "f": "❌ 错误。喷嘴过大会导致火苗大而黄（Lazy Yellow）。"
+            },
+            {
+                "t": "HIGH gas pressure (blows the flame off)@@(燃气压力高 —— 把火焰吹离了)",
+                "f": "✅ 正确。喷气速度过快，超出了火焰燃烧传播的速度，导致火焰根部离开喷嘴甚至被吹灭。"
+            },
+            {
+                "t": "Lack of primary air@@(缺乏一次空气)",
+                "f": "❌ 错误。缺空气会导致火焰发黄积碳。"
+            }
+        ],
+        "a": 2,
+        "exp": "解析: 经典的火焰 Troubleshooting。如果你听到常明火（Pilot）发出类似喷气机的“嘶嘶”噪音（Noisy），或者看到火苗的根部没有贴在金属喷嘴上（Lifting/飞离），这就是典型的“燃气压力过高（High gas pressure）”。过高的喷射速度会直接把火苗吹离原位。",
+        "src": "• 课文出处: 7. Burners, Pilots, Draft & Units\n• 原文语句: \"Noisy/Lifting/Blowing Pilot: HIGH gas pressure (blows the flame off)\""
+    },
+    {
+        "u": "7. Burners, Pilots, Draft & Units",
+        "q": "What causes a pilot flame to be lazy and yellow?@@(什么原因导致常明火变得无力且发黄？)",
+        "hint": "Lazy Yellow Pilot",
+        "opts": [
+            {
+                "t": "Orifice too LARGE (too much gas, not enough primary air)@@(喷嘴过大 —— 燃气太多，一次空气相对不足)",
+                "f": "✅ 正确。进气孔径过大，喷出的燃气量超过了空气混合的能力，导致缺氧发黄。"
+            },
+            {
+                "t": "High gas pressure@@(燃气压力高)",
+                "f": "❌ 错误。会导致飞离或发声。"
+            },
+            {
+                "t": "Too much primary air@@(一次空气过多)",
+                "f": "❌ 错误。空气过多火焰会发蓝发白、偏短且跳动。"
+            },
+            {
+                "t": "Orifice too small@@(喷嘴过小)",
+                "f": "❌ 错误。会导致火苗像针尖一样微弱。"
+            }
+        ],
+        "a": 0,
+        "exp": "解析: 如果常明火（Pilot）看起来软绵绵的（Lazy）、像蜡烛一样发黄（Yellow），这说明严重缺氧（燃烧不完全）。对于常明火来说，最常见的原因是装错了喷嘴，导致 Orifice too LARGE，出来的气太多了，按比例混进来的空气就不够了。",
+        "src": "• 课文出处: 7. Burners, Pilots, Draft & Units\n• 原文语句: \"Lazy Yellow Pilot: Orifice too LARGE (too much gas, not enough primary air)\""
+    },
+    {
+        "u": "7. Burners, Pilots, Draft & Units",
+        "q": "What is the physical effect of increasing 'Dilution Air' at the draft hood?@@(在排烟罩处增加“稀释空气 (Dilution Air)”的物理影响是什么？)",
+        "hint": "Increasing Dilution Air",
+        "opts": [
+            {
+                "t": "Increases the efficiency of the heat exchanger@@(提高热交换器的效率)",
+                "f": "❌ 错误。稀释空气是在废气离开设备后混入的，不影响热交换。"
+            },
+            {
+                "t": "Increases the risk of carbon monoxide production@@(增加产生一氧化碳的风险)",
+                "f": "❌ 错误。它甚至能稀释 CO，不会产生 CO。"
+            },
+            {
+                "t": "Lowers combustion/stack temperature (cool ambient mixes in)@@(降低燃烧/排烟温度 —— 冷的室内环境空气混入了废气)",
+                "f": "✅ 正确。这是稀释空气的核心作用之一，防止过热的废气烧坏砖石烟囱。"
+            },
+            {
+                "t": "Raises the gross stack temperature@@(提高总排烟温度)",
+                "f": "❌ 错误。冷空气混入只会降温。"
+            }
+        ],
+        "a": 2,
+        "exp": "解析: 稀释空气（Dilution Air）是从 Draft hood（排烟罩）开口处吸入的室内冷空气。它的作用是像兑凉水一样，与从热交换器出来的高温废气混合，从而显着降低进入烟囱前的最终排烟温度（Lowers combustion/stack temp），保护烟囱结构。",
+        "src": "• 课文出处: 7. Burners, Pilots, Draft & Units\n• 原文语句: \"Increasing Dilution Air: Lowers combustion temperature (cool ambient mixes in)\""
+    },
+    {
+        "u": "7. Burners, Pilots, Draft & Units",
+        "q": "How do you correctly resolve duct condensation issues when running warm-air ducts through an unheated space like a crawlspace?@@(当暖风管道穿过像爬行空间这样没有暖气的区域时，如何正确解决管道结露问题？)",
+        "hint": "Duct Condensation (crawlspace)",
+        "opts": [
+            {
+                "t": "Install a larger blower motor@@(安装更大的鼓风机马达)",
+                "f": "❌ 错误。不能解决温差导致的结露。"
+            },
+            {
+                "t": "Internally insulate the ductwork@@(在管道内部进行隔热)",
+                "f": "❌ 错误。内保温容易积灰、滋生霉菌且阻碍气流。"
+            },
+            {
+                "t": "Externally insulate the ductwork@@(在管道外部进行隔热/保温)",
+                "f": "✅ 正确。用带防潮层的保温棉将铁皮管道从外面包裹起来，隔绝冷热交替。"
+            },
+            {
+                "t": "Increase the furnace gas pressure@@(增加火炉的燃气压力)",
+                "f": "❌ 错误。瞎调压力非常危险。"
+            }
+        ],
+        "a": 2,
+        "exp": "解析: 爬行空间（Crawlspace）冬天极冷。如果不做处理，铁皮管道里的热空气遇到冰冷的铁皮，会在内部凝结成水（Condensation），导致滴水生锈。唯一正确的做法是：用玻璃纤维保温棉从**外部（Externally）**将管道严严实实地包裹起来（insulate）。",
+        "src": "• 课文出处: 7. Burners, Pilots, Draft & Units\n• 原文语句: \"Duct Condensation (crawlspace): Externally insulate the ductwork\""
+    },
+    {
+        "u": "7. Burners, Pilots, Draft & Units",
+        "q": "If a technician reads a gauge pressure of 50 PSIG, what is the Absolute Pressure (PSIA) assuming sea level?@@(如果技工读到的表压为 50 PSIG，假设在海平面，绝对压力 (PSIA) 是多少？)",
+        "hint": "PSIA Calculation",
+        "opts": [
+            {
+                "t": "35.3 PSIA@@(35.3 PSIA)",
+                "f": "❌ 错误。你用的是减法。"
+            },
+            {
+                "t": "50.0 PSIA@@(50.0 PSIA)",
+                "f": "❌ 错误。没有加上大气压。"
+            },
+            {
+                "t": "64.7 PSIA@@(64.7 PSIA)",
+                "f": "✅ 正确。计算公式：50 (表压) + 14.7 (标准大气压) = 64.7 PSIA。"
+            },
+            {
+                "t": "14.7 PSIA@@(14.7 PSIA)",
+                "f": "❌ 错误。这只是大气压本身。"
+            }
+        ],
+        "a": 2,
+        "exp": "解析: 必考的基础物理计算题。压力表在没接入系统时读数是零（0 PSIG），但当时地球上其实有 14.7 psi 的大气压压着它。所以，计算绝对真实压力（Absolute Pressure, PSIA）的公式永远是：表压读数 (PSIG) + 14.7 = 绝对压力 (PSIA)。",
+        "src": "• 课文出处: 7. Burners, Pilots, Draft & Units\n• 原文语句: \"PSIA = PSIG + 14.7: 50 psi gauge -> 64.7 PSIA\""
+    },
+    {
+        "u": "7. Burners, Pilots, Draft & Units",
+        "q": "How is Absolute Pressure (PSIA) technically defined?@@(绝对压力 (PSIA) 在技术上是如何定义的？)",
+        "hint": "PSIA Definition",
+        "opts": [
+            {
+                "t": "Gauge pressure MINUS atmospheric pressure@@(表压 减去 大气压)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "Gauge pressure PLUS atmospheric pressure (14.7 psi at sea level)@@(表压 加上 大气压 —— 海平面为 14.7 psi)",
+                "f": "✅ 正确。PSIA 考虑了地球环境本身施加的固有压力。"
+            },
+            {
+                "t": "Atmospheric pressure alone@@(仅指大气压)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "The pressure measured inside a perfect vacuum@@(在完美真空中测量到的压力)",
+                "f": "❌ 错误。"
+            }
+        ],
+        "a": 1,
+        "exp": "解析: PSIA 里的 'A' 代表 Absolute（绝对）。它的定义就是将仪器表盘显示的压力（Gauge pressure）与当地实际的大气压（Atmospheric pressure，海平面通常取 14.7 psi）相加。天然气大表的计费修正（EVC）用的就是绝对压力。",
+        "src": "• 课文出处: 7. Burners, Pilots, Draft & Units\n• 原文语句: \"PSIA Definition: Absolute pressure = gauge + atmospheric (14.7 psi at sea level)\""
+    },
+	{
+        "u": "Quick Reference",
+        "q": "What is the maximum permitted propane pressure inside a single-family dwelling?@@(单户住宅内允许的最大丙烷压力是多少？)",
+        "hint": "Max propane pressure, single-family",
+        "opts": [
+            {
+                "t": "2 psig@@(2 psig)",
+                "f": "❌ 错误。这不是上限。"
+            },
+            {
+                "t": "5 psig@@(5 psig)",
+                "f": "✅ 正确。根据规范 (Cl. 5.1)，单户住宅内的丙烷管线最大压力限制为 5 psig。"
+            },
+            {
+                "t": "10 psig@@(10 psig)",
+                "f": "❌ 错误。这是室外一二级调压器之间的限制。"
+            },
+            {
+                "t": "11 inches w.c.@@(11 英寸水柱)",
+                "f": "❌ 错误。这是进入设备的最终燃烧压力。"
+            }
+        ],
+        "a": 1,
+        "exp": "解析: 这是 Quick Reference（快速参考）表格中要求死记硬背的核心数据。为了安全，进入独立屋（单户住宅）室内的丙烷管线，其承受的压力绝对不能超过 5 psig。",
+        "src": "• 课文出处: Quick Reference Table (Page 23 bottom)\n• 原文语句: \"Max propane pressure, single-family dwelling: 5 psig (Residential supply limit Cl. 5.1)\""
+    },
+    {
+        "u": "Quick Reference",
+        "q": "What is the maximum permitted vapour pressure between the 1st stage and 2nd stage regulators in a residential propane system?@@(在住宅丙烷系统中，一级和二级调压器之间的最大允许蒸汽压力是多少？)",
+        "hint": "Max vapour pressure, 1st-2nd stage",
+        "opts": [
+            {
+                "t": "5 psig@@(5 psig)",
+                "f": "❌ 错误。这是单户住宅室内的上限。"
+            },
+            {
+                "t": "10 psig (70 kPa)@@(10 psig / 70 kPa)",
+                "f": "✅ 正确。室外连接一级和二级减压阀的中间管线，最大允许压力为 10 psig。"
+            },
+            {
+                "t": "20 psig@@(20 psig)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "250 psi@@(250 psi)",
+                "f": "❌ 错误。这是储罐安全泄压阀的触发设定值。"
+            }
+        ],
+        "a": 1,
+        "exp": "解析: Quick Reference（快速参考）表格核心数据。在丙烷两级调压系统中，安装在储罐上的一级调压器会将极高的初始压力降至约 10 psig。这个 10 psig 就是一二级之间室外连接管线（Intermediate line）的最高允许压力极限。",
+        "src": "• 课文出处: Quick Reference Table (Page 23 bottom)\n• 原文语句: \"Max vapour pressure, 1st-2nd stage propane: 10 psig (70 kPa) (Residential Cl. 5.1.5)\""
+    },
+	{
+        "u": "Quick Reference",
+        "q": "What is the standard relief valve setting for an ASME propane tank?@@(ASME 丙烷储罐的标准泄压阀设定值是多少？)",
+        "hint": "Propane tank relief valve setting",
+        "opts": [
+            {
+                "t": "125 psi (861 kPa)@@(125 psi / 861 kPa)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "250 psi (1724 kPa)@@(250 psi / 1724 kPa)",
+                "f": "✅ 正确。储罐的泄压阀通常设定在其设计压力的 80% 左右，即 250 psi。"
+            },
+            {
+                "t": "350 psi (2413 kPa)@@(350 psi / 2413 kPa)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "10 psig (70 kPa)@@(10 psig / 70 kPa)",
+                "f": "❌ 错误。这是室外一二级调压器之间的允许压力。"
+            }
+        ],
+        "a": 1,
+        "exp": "解析: 死记硬背的红线数据。为了防止丙烷储罐在高温下发生爆炸，其内置泄压阀（Relief valve）会在内部压力飙升到 250 psi (1724 kPa) 时强制开启排气。",
+        "src": "• 课文出处: Quick Reference Table\n• 原文语句: \"Propane tank relief valve setting: 250 psi (1724 kPa) | ASME tanks, ~80% of design\""
+    },
+    {
+        "u": "Quick Reference",
+        "q": "What is the typical outlet pressure of a propane service regulator?@@(丙烷服务调压器的典型出口压力是多少？)",
+        "hint": "Propane service regulator outlet",
+        "opts": [
+            {
+                "t": "5 psig@@(5 psig)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "7\" w.c.@@(7\" w.c.)",
+                "f": "❌ 错误。这是天然气的压力。"
+            },
+            {
+                "t": "10 psig@@(10 psig)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "11\" w.c.@@(11\" w.c.)",
+                "f": "✅ 正确。丙烷终端设备需要的运行压力标准就是 11 英寸水柱。"
+            }
+        ],
+        "a": 3,
+        "exp": "解析: 无论上游网络传来的是几盎司（ounces）的微压，丙烷服务调压器的唯一任务就是将其稳定在 11\" w.c.，供家里的设备使用。",
+        "src": "• 课文出处: Quick Reference Table\n• 原文语句: \"Propane service regulator outlet: 11\" w.c. | Ounces inlet to 11\" w.c. outlet\""
+    },
+    {
+        "u": "Quick Reference",
+        "q": "What is the typical manifold pressure for a natural gas appliance?@@(天然气设备的典型歧管压力是多少？)",
+        "hint": "Natural gas typical manifold",
+        "opts": [
+            {
+                "t": "3.5\" w.c.@@(3.5\" w.c.)",
+                "f": "❌ 错误。这是经过组合燃气阀再次降压后的喷嘴处压力，但总的歧管入户标压通常是 7\" w.c.。"
+            },
+            {
+                "t": "7\" w.c.@@(7\" w.c.)",
+                "f": "✅ 正确。这是天然气设备调压器下游的标准压力。"
+            },
+            {
+                "t": "11\" w.c.@@(11\" w.c.)",
+                "f": "❌ 错误。这是丙烷的标压。"
+            },
+            {
+                "t": "14\" w.c.@@(14\" w.c.)",
+                "f": "❌ 错误。这是 0.5 psi，通常是天然气的最高限值。"
+            }
+        ],
+        "a": 1,
+        "exp": "解析: 天然气的标志性压力数字。房屋内部天然气主管线（Manifold / downstream of appliance reg）的标准压力是 7\" w.c.。",
+        "src": "• 课文出处: Quick Reference Table\n• 原文语句: \"Natural gas typical manifold: 7\" w.c. | Downstream of appliance reg\""
+    },
+    {
+        "u": "Quick Reference",
+        "q": "At what pressure does a direct-acting relief valve typically begin to sense and open?@@(直动式泄压阀通常在什么压力下开始感应并开启？)",
+        "hint": "Relief valve sensing threshold",
+        "opts": [
+            {
+                "t": "At exactly the regulator setpoint@@(正好在调压器的设定值)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "At 2x the regulator setpoint@@(调压器设定值的 2 倍)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "At 4x the regulator setpoint@@(调压器设定值的 4 倍)",
+                "f": "✅ 正确。这是行业内泄压阀触发设定的常见经验值。"
+            },
+            {
+                "t": "At 10x the regulator setpoint@@(调压器设定值的 10 倍)",
+                "f": "❌ 错误。"
+            }
+        ],
+        "a": 2,
+        "exp": "解析: 为了避免在正常压力波动时发生误排气，泄压阀的感知阈值（Sensing threshold）被设计得较高，通常是正常工作压力设定值（setpoint）的 4 倍。",
+        "src": "• 课文出处: Quick Reference Table\n• 原文语句: \"Relief valve sensing threshold: 4x setpoint | Direct-acting relief trigger\""
+    },
+    {
+        "u": "Quick Reference",
+        "q": "At what pressure threshold is a regulator exempt from venting to the outdoors, provided it has a leak limiter?@@(前提是配有泄漏限制器，调压器在什么压力阈值下可以豁免外接排气管？)",
+        "hint": "Vent piping exemption threshold",
+        "opts": [
+            {
+                "t": "≤ 0.5 psig@@(≤ 0.5 psig)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "≤ 2 psig@@(≤ 2 psig)",
+                "f": "✅ 正确。满足此压力条件且配有漏气限制器的调压器无需外接排气。"
+            },
+            {
+                "t": "≤ 5 psig@@(≤ 5 psig)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "≤ 10 psig@@(≤ 10 psig)",
+                "f": "❌ 错误。"
+            }
+        ],
+        "a": 1,
+        "exp": "解析: 室内安装调压器的一大规范。如果管线压力不超过 2 psig（≤ 2 psig），只要加装了防漏气的 Leak Limiter，就可以免去连接长长的排气管到室外（Exempt）。",
+        "src": "• 课文出处: Quick Reference Table\n• 原文语句: \"Vent piping exemption threshold: ≤ 2 psig | Needs vent leak-limiting (Cl. 5.5.1)\""
+    },
+    {
+        "u": "Quick Reference",
+        "q": "What is the maximum allowable escape rate for a propane leak limiter in the event of a diaphragm rupture?@@(如果膜片破裂，丙烷泄漏限制器的最大允许逃逸率是多少？)",
+        "hint": "Leak limiter - propane",
+        "opts": [
+            {
+                "t": "1.0 ft³/h max@@(最大 1.0 ft³/h)",
+                "f": "✅ 正确。丙烷重且危险，限制极其严格。"
+            },
+            {
+                "t": "2.5 ft³/h max@@(最大 2.5 ft³/h)",
+                "f": "❌ 错误。这是天然气的限制。"
+            },
+            {
+                "t": "5.0 ft³/h max@@(最大 5.0 ft³/h)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "0.5 ft³/h max@@(最大 0.5 ft³/h)",
+                "f": "❌ 错误。"
+            }
+        ],
+        "a": 0,
+        "exp": "解析: 当室内调压器膜片破裂时，泄漏限制器能把漏到屋子里的丙烷气体严格控制在每小时不超过 1.0 立方英尺（1.0 ft³/h max）。",
+        "src": "• 课文出处: Quick Reference Table\n• 原文语句: \"Leak limiter - propane: 1.0 ft³/h max | On diaphragm rupture\""
+    },
+    {
+        "u": "Quick Reference",
+        "q": "What is the maximum allowable escape rate for a natural gas leak limiter in the event of a diaphragm rupture?@@(如果膜片破裂，天然气泄漏限制器的最大允许逃逸率是多少？)",
+        "hint": "Leak limiter - natural gas",
+        "opts": [
+            {
+                "t": "1.0 ft³/h max@@(最大 1.0 ft³/h)",
+                "f": "❌ 错误。这是丙烷的限制。"
+            },
+            {
+                "t": "2.5 ft³/h max@@(最大 2.5 ft³/h)",
+                "f": "✅ 正确。天然气较轻易散，允许值略大。"
+            },
+            {
+                "t": "5.0 ft³/h max@@(最大 5.0 ft³/h)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "14.0 ft³/h max@@(最大 14.0 ft³/h)",
+                "f": "❌ 错误。"
+            }
+        ],
+        "a": 1,
+        "exp": "解析: 天然气的泄漏限制器（Leak limiter）标准被设定为 2.5 ft³/h max。记住这两组数据：丙烷 1.0，天然气 2.5。",
+        "src": "• 课文出处: Quick Reference Table\n• 原文语句: \"Leak limiter - natural gas: 2.5 ft³/h max | On diaphragm rupture\""
+    },
+    {
+        "u": "Quick Reference",
+        "q": "Above what pressure threshold must a pressure correction factor be applied when clocking a meter?@@(在打表测试时，超过哪个压力阈值必须应用压力修正系数？)",
+        "hint": "Pressure correction factor threshold",
+        "opts": [
+            {
+                "t": "> 0.5 psig (14\" w.c.)@@(> 0.5 psig / 14\" w.c.)",
+                "f": "✅ 正确。低于这个压力不用管，高于它就得乘系数补偿。"
+            },
+            {
+                "t": "> 2.0 psig@@(> 2.0 psig)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "> 5.0 psig@@(> 5.0 psig)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "> 7\" w.c.@@(> 7\" w.c.)",
+                "f": "❌ 错误。7寸水柱是正常的打表压力，不需要修正。"
+            }
+        ],
+        "a": 0,
+        "exp": "解析: 这是高级打表计算的门槛。燃气表压力一旦超过 0.5 psig（即 14寸水柱），燃气体积就被显著压缩了，不乘修正系数算出的功率（Input）就会低于真实值。",
+        "src": "• 课文出处: Quick Reference Table\n• 原文语句: \"Pressure correction factor threshold: > 0.5 psig | Clocking - below this, ignore\""
+    },
+    {
+        "u": "Quick Reference",
+        "q": "What is the standard reference temperature used for gas heat value calculations?@@(用于燃气热值计算的标准参考温度是多少？)",
+        "hint": "Standard gas reference temperature",
+        "opts": [
+            {
+                "t": "0°C (32°F)@@(0°C / 32°F)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "15°C (60°F)@@(15°C / 60°F)",
+                "f": "✅ 正确。所有热值标定均以此环境温度为基准。"
+            },
+            {
+                "t": "20°C (68°F)@@(20°C / 68°F)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "25°C (77°F)@@(25°C / 77°F)",
+                "f": "❌ 错误。"
+            }
+        ],
+        "a": 1,
+        "exp": "解析: 气体的体积随温度变化。为了统一度量衡，北美 HVAC 规定 15°C (60°F) 为燃气热值（Heat value）的标准参考基准线。",
+        "src": "• 课文出处: Quick Reference Table\n• 原文语句: \"Standard gas reference temperature: 15°C (60°F) | Heat value calculations\""
+    },
+    {
+        "u": "Quick Reference",
+        "q": "What is the standard atmospheric pressure at sea level used for PSIA calculations?@@(用于绝对压力 PSIA 计算的海平面标准大气压是多少？)",
+        "hint": "Atmospheric pressure (sea level)",
+        "opts": [
+            {
+                "t": "10.0 psi@@(10.0 psi)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "14.7 psi@@(14.7 psi)",
+                "f": "✅ 正确。计算绝对压力必须加上这个大气基数。"
+            },
+            {
+                "t": "29.9 psi@@(29.9 psi)",
+                "f": "❌ 错误。那是英寸汞柱（inHg）的值。"
+            },
+            {
+                "t": "100 psi@@(100 psi)",
+                "f": "❌ 错误。"
+            }
+        ],
+        "a": 1,
+        "exp": "解析: 绝对压力 (PSIA) = 表压 (PSIG) + 大气压。在工程计算中，海平面的标准大气压常数固定取值为 14.7 psi。",
+        "src": "• 课文出处: Quick Reference Table\n• 原文语句: \"Atmospheric pressure (sea level): 14.7 psi | PSIA = PSIG + 14.7\""
+    },
+    {
+        "u": "Quick Reference",
+        "q": "How is 1 British Thermal Unit (BTU) defined?@@(1 个大英热量单位 (BTU) 是如何定义的？)",
+        "hint": "BTU definition",
+        "opts": [
+            {
+                "t": "Heat required to raise 1 gram of water by 1°C@@(将 1 克水升高 1°C 所需的热量)",
+                "f": "❌ 错误。这是卡路里的定义。"
+            },
+            {
+                "t": "Heat required to raise 1 lb of water by 1°F@@(将 1 磅水升高 1°F 所需的热量)",
+                "f": "✅ 正确。这是能量的基准单位。"
+            },
+            {
+                "t": "Heat required to raise 1 gallon of water by 1°C@@(将 1 加仑水升高 1°C 所需的热量)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "Heat required to raise 1 kg of water by 1°F@@(将 1 千克水升高 1°F 所需的热量)",
+                "f": "❌ 错误。"
+            }
+        ],
+        "a": 1,
+        "exp": "解析: BTU 是北美暖通行业的灵魂单位。记住两个 '1'：1 磅水 (lb water) 和 1 华氏度 (1°F)。",
+        "src": "• 课文出处: Quick Reference Table\n• 原文语句: \"BTU definition: 1 lb water, 1°F | Base energy unit\""
+    },
+    {
+        "u": "Quick Reference",
+        "q": "What is the approximate energy content of #2 heating oil?@@(2 号燃油的近似能量含量是多少？)",
+        "hint": "Heating oil energy content",
+        "opts": [
+            {
+                "t": "91,500 Btu/gal@@(91,500 Btu/加仑)",
+                "f": "❌ 错误。这是液态丙烷的热值。"
+            },
+            {
+                "t": "100,000 Btu/gal@@(100,000 Btu/加仑)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "140,000 Btu/gal@@(140,000 Btu/加仑)",
+                "f": "✅ 正确。燃油的能量密度极高。"
+            },
+            {
+                "t": "200,000 Btu/gal@@(200,000 Btu/加仑)",
+                "f": "❌ 错误。"
+            }
+        ],
+        "a": 2,
+        "exp": "解析: 在进行房屋能源评估或设备油改气（Oil to NG conversion）时，必须记住 #2 燃油的热值为每美制加仑 140,000 Btu。",
+        "src": "• 课文出处: Quick Reference Table\n• 原文语句: \"Heating oil energy content: 140,000 Btu/gal | #2 fuel oil, US gallon\""
+    },
+	{
+        "u": "Quick Reference",
+        "q": "What is the approximate composition of air by volume?@@(按体积计算，空气的近似组成是什么？)",
+        "hint": "Air composition",
+        "opts": [
+            {
+                "t": "80% Oxygen / 20% Nitrogen@@(80% 氧气 / 20% 氮气)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "80% Nitrogen / 20% Oxygen@@(80% 氮气 / 20% 氧气)",
+                "f": "✅ 正确。这是燃烧计算的基础比例。"
+            },
+            {
+                "t": "50% Nitrogen / 50% Oxygen@@(50% 氮气 / 50% 氧气)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "70% Nitrogen / 30% Oxygen@@(70% 氮气 / 30% 氧气)",
+                "f": "❌ 错误。"
+            }
+        ],
+        "a": 1,
+        "exp": "解析: 快速参考表格死记考点。大自然空气中约有 79-80% 的惰性氮气和 20-21% 的助燃氧气。",
+        "src": "• 课文出处: Quick Reference Table\n• 原文语句: \"Air composition: 80% N₂ / 20% O₂ | By volume\""
+    },
+    {
+        "u": "Quick Reference",
+        "q": "What is the stoichiometric air-to-gas ratio for propane?@@(丙烷的化学计量空燃比是多少？)",
+        "hint": "Air:Gas ratio - propane",
+        "opts": [
+            {
+                "t": "10:1@@(10:1)",
+                "f": "❌ 错误。这是天然气。"
+            },
+            {
+                "t": "15:1@@(15:1)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "24:1@@(24:1)",
+                "f": "✅ 正确。丙烷分子大，需要更多空气才能完美燃烧。"
+            },
+            {
+                "t": "30:1@@(30:1)",
+                "f": "❌ 错误。"
+            }
+        ],
+        "a": 2,
+        "exp": "解析: 完美（Stoichiometric）燃烧意味着没有一点过剩空气。理论上 1 份丙烷需要 24 份空气才能 100% 烧干净。",
+        "src": "• 课文出处: Quick Reference Table\n• 原文语句: \"Air:Gas ratio - propane: 24:1 | Stoichiometric\""
+    },
+    {
+        "u": "Quick Reference",
+        "q": "What is the target $O_{2}$ (oxygen) reading for a properly adjusted atmospheric burner?@@(调节良好的常压燃烧器，其目标氧气 ($O_{2}$) 读数是多少？)",
+        "hint": "Atmospheric burner O2 target",
+        "opts": [
+            {
+                "t": "0%@@(0%)",
+                "f": "❌ 错误。非常危险，极易产生 CO。"
+            },
+            {
+                "t": "1-3%@@(1-3%)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "5-8%@@(5-8%)",
+                "f": "✅ 正确。废气中必须残留适量氧气以确保安全。"
+            },
+            {
+                "t": "10-12%@@(10-12%)",
+                "f": "❌ 错误。"
+            }
+        ],
+        "a": 2,
+        "exp": "解析: 实际设备运行中，为了保证所有的碳原子都能找到氧气，必须注入过剩空气，导致排烟中正常情况会残留 5-8% 的氧气。",
+        "src": "• 课文出处: Quick Reference Table\n• 原文语句: \"Atmospheric burner O2 (target): 5-8% | Properly adjusted\""
+    },
+    {
+        "u": "Quick Reference",
+        "q": "What is the normal operating $CO_{2}$ range for a natural gas appliance?@@(天然气设备的正常运行 $CO_{2}$ 范围是多少？)",
+        "hint": "Natural gas CO2 normal operating",
+        "opts": [
+            {
+                "t": "4-6%@@(4-6%)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "7-8.5%@@(7-8.5%)",
+                "f": "✅ 正确。这个区间说明燃烧比例非常健康。"
+            },
+            {
+                "t": "9-10%@@(9-10%)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "11-12%@@(11-12%)",
+                "f": "❌ 错误。"
+            }
+        ],
+        "a": 1,
+        "exp": "解析: 不管是原装天然气火炉还是油改气（Oil-NG conversion），只要烧的是天然气，其正常的 $CO_{2}$ 排放目标就必须落在 7-8.5% 之间。",
+        "src": "• 课文出处: Quick Reference Table\n• 原文语句: \"Natural gas CO2 (normal operating): 7-8.5% | Also oil-NG conversion\""
+    },
+    {
+        "u": "Quick Reference",
+        "q": "What is the Ultimate $CO_{2}$ (theoretical maximum with zero excess air) for natural gas?@@(天然气的极限 $CO_{2}$（零过剩空气时的理论最大值）是多少？)",
+        "hint": "Ultimate CO2 - natural gas",
+        "opts": [
+            {
+                "t": "~8.5%@@(~8.5%)",
+                "f": "❌ 错误。这是实际运行上限。"
+            },
+            {
+                "t": "~10%@@(~10%)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "~12%@@(~12%)",
+                "f": "✅ 正确。这是天然气的物理燃烧极限天花板。"
+            },
+            {
+                "t": "~13.9%@@(~13.9%)",
+                "f": "❌ 错误。这是丙烷的极限。"
+            }
+        ],
+        "a": 2,
+        "exp": "解析: 理论上，如果不掺入任何过剩空气，完美燃烧的天然气能产生的最大二氧化碳浓度大约是 12%。",
+        "src": "• 课文出处: Quick Reference Table\n• 原文语句: \"Ultimate CO2 - natural gas: ~12% | Zero excess air (theoretical)\""
+    },
+    {
+        "u": "Quick Reference",
+        "q": "What is the Ultimate $CO_{2}$ (theoretical maximum with zero excess air) for propane?@@(丙烷的极限 $CO_{2}$（零过剩空气时的理论最大值）是多少？)",
+        "hint": "Ultimate CO2 - propane",
+        "opts": [
+            {
+                "t": "~10%@@(~10%)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "~12%@@(~12%)",
+                "f": "❌ 错误。这是天然气。"
+            },
+            {
+                "t": "~13.9%@@(~13.9%)",
+                "f": "✅ 正确。丙烷含碳多，二氧化碳极限更高。"
+            },
+            {
+                "t": "~15.5%@@(~15.5%)",
+                "f": "❌ 错误。"
+            }
+        ],
+        "a": 2,
+        "exp": "解析: 丙烷（Propane）的理论最大二氧化碳浓度（Ultimate CO2）约为 13.9%。这是考试必须要死记的基准数据。",
+        "src": "• 课文出处: Quick Reference Table\n• 原文语句: \"Ultimate CO2 - propane: ~13.9% | Zero excess air (theoretical)\""
+    },
+    {
+        "u": "Quick Reference",
+        "q": "Which formula is used to calculate appliance input (Btu/h) when clocking a gas meter?@@(在给燃气表打表测试时，使用哪个公式计算设备的输入功率 (Btu/h)？)",
+        "hint": "Clocking formula",
+        "opts": [
+            {
+                "t": "(3600 ÷ seconds) × ft³ × Btu/ft³@@((3600 ÷ 秒数) × 立方英尺 × Btu/立方英尺)",
+                "f": "✅ 正确。先算一小时转几圈，乘容积，再乘热值。"
+            },
+            {
+                "t": "(seconds ÷ 3600) × ft³ × Btu/ft³@@((秒数 ÷ 3600) × 立方英尺 × Btu/立方英尺)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "(3600 × seconds) ÷ (ft³ × Btu/ft³)@@((3600 × 秒数) ÷ (立方英尺 × Btu/立方英尺))",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "(3600 ÷ ft³) × seconds × Btu/ft³@@((3600 ÷ 立方英尺) × 秒数 × Btu/立方英尺)",
+                "f": "❌ 错误。"
+            }
+        ],
+        "a": 0,
+        "exp": "解析: 这是最经典的 Clocking Formula。3600代表一小时的秒数。用 3600 除以表盘转一圈所需的秒数（sec），得到每小时转数。再乘以表盘刻度体积（ft³），最后乘以该气体的热值（天然气通常取1000），就能得出设备精确的 Btu/h 输入量。",
+        "src": "• 课文出处: Quick Reference Table\n• 原文语句: \"Clocking formula: (3600/sec) x ft³ x Btu/ft³ | = appliance input in Btu/h\""
+    },
+    {
+        "u": "Quick Reference",
+        "q": "What are the three fundamental functional elements of a gas pressure regulator?@@(燃气减压阀的三个基本功能元件是什么？)",
+        "hint": "Three regulator elements",
+        "opts": [
+            {
+                "t": "Venting, Piping, Sensing@@(排气、管道、感应)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "Restricting, Measuring, Loading@@(节流、测量、加载)",
+                "f": "✅ 正确。分别对应：阀盘、膜片、弹簧。"
+            },
+            {
+                "t": "Bleeding, Surging, Limiting@@(放气、喘振、限制)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "Sensing, Regulating, Venting@@(感应、调节、排气)",
+                "f": "❌ 错误。"
+            }
+        ],
+        "a": 1,
+        "exp": "解析: 减压阀的三大铁三角：节流元件（Restricting - Valve disc 阻止气体）、测量元件（Measuring - Diaphragm 感知压力）、加载元件（Loading - Spring 提供下压力量）。",
+        "src": "• 课文出处: Quick Reference Table\n• 原文语句: \"Three regulator elements: Restrict + Measure + Load | Valve disc + diaphragm + spring\""
+    },
+    {
+        "u": "Quick Reference",
+        "q": "According to Cl. 5.3, what are the three approved methods for overpressure protection?@@(根据规范 Cl. 5.3，哪三种是获批准的过压保护方法？)",
+        "hint": "Three overpressure methods",
+        "opts": [
+            {
+                "t": "Relief, Limit, Shut-off@@(泄放、限制、切断)",
+                "f": "✅ 正确。这是防过压的三板斧。"
+            },
+            {
+                "t": "Vent, Bypass, Filter@@(排气、旁通、过滤)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "Monitor, Flare, Drop@@(监控、燃烧放出、降压)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "Limit, Purge, Vent@@(限制、吹扫、排气)",
+                "f": "❌ 错误。"
+            }
+        ],
+        "a": 0,
+        "exp": "解析: 保护下游系统不被高压撑爆的合法手段只有三个：排气泄压（Relief）、副阀门限压接管（Limit）、直接切断供气（Shut-off）。",
+        "src": "• 课文出处: Quick Reference Table\n• 原文语句: \"Three overpressure methods: Relief / Limit / Shut-off | Cl. 5.3\""
+    },
+    {
+        "u": "Quick Reference",
+        "q": "How is the maximum allowable downstream pressure determined for a gas system?@@(燃气系统的最大允许下游压力是如何确定的？)",
+        "hint": "Max allowable downstream pressure",
+        "opts": [
+            {
+                "t": "By the highest rated component in the line@@(由管线中额定值最高的组件决定)",
+                "f": "❌ 错误。这样低额定的组件会爆炸。"
+            },
+            {
+                "t": "By the lowest rated component in the line (weakest link)@@(由管线中额定值最低的组件决定 —— 最弱的一环)",
+                "f": "✅ 正确。木桶理论，必须保护最脆弱的那个零件。"
+            },
+            {
+                "t": "By the average rating of all components@@(由所有组件的平均额定值决定)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "By the municipal supply pressure@@(由市政供应压力决定)",
+                "f": "❌ 错误。"
+            }
+        ],
+        "a": 1,
+        "exp": "解析: 极其重要的安全理念。如果系统里最弱的煤气灶只能承受 0.5 psi，哪怕你的主管子能承受 100 psi，整个下游系统的最大允许压力也只能定在 0.5 psi（Lowest rated component wins）。",
+        "src": "• 课文出处: Quick Reference Table\n• 原文语句: \"Max allowable downstream pressure: Lowest rated component | Not highest - weakest link wins\""
+    },
+    {
+        "u": "Quick Reference",
+        "q": "What is the requirement for resetting an Overpressure Shut-Off (OPSO) device?@@(复位超压切断装置 (OPSO) 的要求是什么？)",
+        "hint": "OPSO reset",
+        "opts": [
+            {
+                "t": "It auto-resets after 10 minutes@@(10分钟后自动复位)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "It auto-resets when pressure drops to normal@@(当压力降至正常时自动复位)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "It requires a manual reset only@@(它仅需要手动复位)",
+                "f": "✅ 正确。绝不允许自动复位。"
+            },
+            {
+                "t": "It cannot be reset and must be replaced@@(无法复位，必须更换)",
+                "f": "❌ 错误。排除故障后是可以复位的。"
+            }
+        ],
+        "a": 2,
+        "exp": "解析: OPSO 就像跳闸开关。一旦因为超压被触发，意味着上游系统发生了严重故障。为了防止危险重复发生，它被设计为绝对不能自动复原（Never auto-resets），必须由技工排查完隐患后手动（Manual only）重置。",
+        "src": "• 课文出处: Quick Reference Table\n• 原文语句: \"OPSO reset: Manual only | Never auto-resets\""
+    },
+	{
+        "u": "Classic Traps & Exam Tips",
+        "q": "Watch for the classic trap (1): If a regulator's vent becomes blocked while the regulator is open, what is the result?@@(注意经典陷阱 1：如果减压阀在开启状态下排气孔被堵塞，结果是什么？)",
+        "hint": "Trap 1: Blocked vent",
+        "opts": [
+            {
+                "t": "It stays CLOSED@@(它保持关闭)",
+                "f": "❌ 错误。这是大家最容易猜错的。"
+            },
+            {
+                "t": "It stays OPEN, causing excessive downstream pressure@@(它保持开启，导致下游压力过高)",
+                "f": "✅ 正确。牢记这个反直觉的陷阱：排气孔堵塞会导致膜片无法运动，阀门关不上，高压直通下游。"
+            },
+            {
+                "t": "It auto-resets@@(它会自动复位)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "It vents gas backwards@@(它会向后排气)",
+                "f": "❌ 错误。"
+            }
+        ],
+        "a": 1,
+        "exp": "解析: 考官最爱考的陷阱。Blocked vent 导致 Regulator stays OPEN (not closed)。",
+        "src": "• 课文出处: Classic Traps to Watch For\n• 原文语句: \"(1) Blocked vent with regulator open = stays OPEN (not closed) - excessive downstream pressure.\""
+    },
+    {
+        "u": "Classic Traps & Exam Tips",
+        "q": "Watch for the classic trap (2): If a gas regulator is installed backward, what will happen?@@(注意经典陷阱 2：如果燃气减压阀反向安装，会发生什么？)",
+        "hint": "Trap 2: Backward install",
+        "opts": [
+            {
+                "t": "It closes completely@@(它完全关闭)",
+                "f": "❌ 错误。又是直觉陷阱。"
+            },
+            {
+                "t": "It opens COMPLETELY@@(它完全开启)",
+                "f": "✅ 正确。高压气体会从反方向直接掀开节流阀盘。"
+            },
+            {
+                "t": "It operates at half capacity@@(它以一半的容量运行)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "It triggers the relief valve immediately@@(它立即触发泄压阀)",
+                "f": "❌ 错误。"
+            }
+        ],
+        "a": 1,
+        "exp": "解析: 陷阱题。不要以为装反了就会断气。Regulator installed backward = opens COMPLETELY (not closes)。",
+        "src": "• 课文出处: Classic Traps to Watch For\n• 原文语句: \"(2) Regulator installed backward = opens COMPLETELY (not closes).\""
+    },
+    {
+        "u": "Classic Traps & Exam Tips",
+        "q": "Watch for the classic trap (3): To INCREASE the downstream pressure on a regulator, what must you do to the adjusting screw?@@(注意经典陷阱 3：为了增加减压阀的下游压力，你必须对调节螺丝做什么？)",
+        "hint": "Trap 3: Increase downstream pressure",
+        "opts": [
+            {
+                "t": "Screw it OUT (counter-clockwise)@@(向外拧松 / 逆时针)",
+                "f": "❌ 错误。这会降低压力。"
+            },
+            {
+                "t": "Screw it DOWN (clockwise)@@(向下拧紧 / 顺时针)",
+                "f": "✅ 正确。向下拧紧会压缩弹簧，从而提供更大的开启力来对抗下游压力。"
+            },
+            {
+                "t": "Remove it completely@@(完全移除它)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "Tighten the bottom cap@@(拧紧底盖)",
+                "f": "❌ 错误。"
+            }
+        ],
+        "a": 1,
+        "exp": "解析: 操作方向陷阱。记住：向下压紧弹簧（Screw DOWN）= 增加压力（not out）。",
+        "src": "• 课文出处: Classic Traps to Watch For\n• 原文语句: \"(3) Increase downstream pressure = screw DOWN (not out).\""
+    },
+    {
+        "u": "Classic Traps & Exam Tips",
+        "q": "Watch for the classic trap (4): A relief valve senses which pressure to determine when to open?@@(注意经典陷阱 4：泄压阀感应哪里的压力来决定何时开启？)",
+        "hint": "Trap 4: Relief valve sensing",
+        "opts": [
+            {
+                "t": "UPSTREAM pressure@@(上游压力)",
+                "f": "❌ 错误。泄压阀不关心上游管网压力多高。"
+            },
+            {
+                "t": "Atmospheric pressure@@(大气压力)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "DOWNSTREAM pressure@@(下游压力)",
+                "f": "✅ 正确。泄压阀的使命是保护下游设备，因此它的探头必须感应下游管网的压力。"
+            },
+            {
+                "t": "Differential pressure@@(压差)",
+                "f": "❌ 错误。"
+            }
+        ],
+        "a": 2,
+        "exp": "解析: 逻辑陷阱。泄压阀防的是过压冲垮设备。Relief valve senses DOWNSTREAM pressure (not upstream)。",
+        "src": "• 课文出处: Classic Traps to Watch For\n• 原文语句: \"(4) Relief valve senses DOWNSTREAM pressure (not upstream).\""
+    },
+    {
+        "u": "Classic Traps & Exam Tips",
+        "q": "Watch for the classic trap (5): How is an Overpressure Shut-Off (OPSO) device reset after it trips?@@(注意经典陷阱 5：超压切断装置 (OPSO) 跳闸后如何复位？)",
+        "hint": "Trap 5: OPSO reset",
+        "opts": [
+            {
+                "t": "It resets automatically after 5 minutes@@(5分钟后自动复位)",
+                "f": "❌ 错误。严重违规。"
+            },
+            {
+                "t": "It auto-resets when pressure drops@@(压力下降时自动复位)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "It requires a MANUAL reset@@(它需要手动复位)",
+                "f": "✅ 正确。排查出安全隐患前，绝不允许系统自动供气。"
+            },
+            {
+                "t": "It cannot be reset@@(它不能被复位)",
+                "f": "❌ 错误。"
+            }
+        ],
+        "a": 2,
+        "exp": "解析: 安全机制红线。OPSO requires MANUAL reset (not automatic)。",
+        "src": "• 课文出处: Classic Traps to Watch For\n• 原文语句: \"(5) OPSO requires MANUAL reset (not automatic).\""
+    },
+    {
+        "u": "Classic Traps & Exam Tips",
+        "q": "Watch for the classic trap (6): Is it permitted to install a 1st stage regulator indoors in a domestic propane system?@@(注意经典陷阱 6：允许在家庭丙烷系统中将一级减压阀安装在室内吗？)",
+        "hint": "Trap 6: 1st stage indoors",
+        "opts": [
+            {
+                "t": "Yes, if properly vented@@(可以，如果排气得当)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "Yes, but only in commercial buildings@@(可以，但仅限商业建筑)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "NOT PERMITTED@@(绝对不允许)",
+                "f": "✅ 正确。一级调压器承受直接来自储罐的数百 psi 高压，极其危险，严禁入户。"
+            },
+            {
+                "t": "Yes, if a leak limiter is used@@(可以，如果使用了泄漏限制器)",
+                "f": "❌ 错误。"
+            }
+        ],
+        "a": 2,
+        "exp": "解析: 规范红线。1st stage regulator indoors in a domestic propane system = NOT PERMITTED。",
+        "src": "• 课文出处: Classic Traps to Watch For\n• 原文语句: \"(6) 1st stage regulator indoors in a domestic propane system = NOT PERMITTED.\""
+    },
+    {
+        "u": "Classic Traps & Exam Tips",
+        "q": "Watch for the classic trap (7): If a service regulator is incorrectly adjusted, what is the proper action for a gas technician?@@(注意经典陷阱 7：如果服务调压器调整不当，燃气技工的正确操作是什么？)",
+        "hint": "Trap 7: Service regulator incorrectly adjusted",
+        "opts": [
+            {
+                "t": "Adjust it using a manometer@@(使用压力表进行调整)",
+                "f": "❌ 错误。严禁私自调整。"
+            },
+            {
+                "t": "Replace the spring@@(更换弹簧)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "Call the UTILITY/gas supplier - DO NOT touch@@(致电公用事业公司/燃气供应商 —— 严禁触碰)",
+                "f": "✅ 正确。服务调压器及其铅封是燃气公司的私有财产。"
+            },
+            {
+                "t": "Bypass the regulator temporarily@@(暂时旁通调压器)",
+                "f": "❌ 错误。"
+            }
+        ],
+        "a": 2,
+        "exp": "解析: 产权红线。Service regulator incorrectly adjusted = call the UTILITY/gas supplier - DO NOT touch。",
+        "src": "• 课文出处: Classic Traps to Watch For\n• 原文语句: \"(7) Service regulator incorrectly adjusted = call the UTILITY/gas supplier - DO NOT touch.\""
+    },
+    {
+        "u": "Classic Traps & Exam Tips",
+        "q": "Watch for the classic trap (8): What causes a noisy, lifting pilot flame?@@(注意经典陷阱 8：什么导致常明火产生噪音和飞离？)",
+        "hint": "Trap 8: Noisy lifting pilot",
+        "opts": [
+            {
+                "t": "LOW pressure@@(压力过低)",
+                "f": "❌ 错误。低压会导致火焰无力。"
+            },
+            {
+                "t": "HIGH pressure@@(压力过高)",
+                "f": "✅ 正确。喷射速度过快把火焰吹离了底座。"
+            },
+            {
+                "t": "Orifice too SMALL@@(喷嘴过小)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "Lack of oxygen@@(缺氧)",
+                "f": "❌ 错误。"
+            }
+        ],
+        "a": 1,
+        "exp": "解析: 现象判断。Noisy lifting pilot = HIGH pressure (not low)。",
+        "src": "• 课文出处: Classic Traps to Watch For\n• 原文语句: \"(8) Noisy lifting pilot = HIGH pressure (not low).\""
+    },
+    {
+        "u": "Classic Traps & Exam Tips",
+        "q": "Watch for the classic trap (9): What causes a lazy, yellow pilot flame?@@(注意经典陷阱 9：什么导致无力、发黄的常明火？)",
+        "hint": "Trap 9: Lazy yellow pilot",
+        "opts": [
+            {
+                "t": "Orifice too SMALL@@(喷嘴过小)",
+                "f": "❌ 错误。这会导致火苗极小。"
+            },
+            {
+                "t": "Orifice too LARGE@@(喷嘴过大)",
+                "f": "✅ 正确。出来的气太多，一次空气不够混合，导致缺氧发黄。"
+            },
+            {
+                "t": "HIGH pressure@@(压力过高)",
+                "f": "❌ 错误。这会导致噪音和飞离。"
+            },
+            {
+                "t": "Excessive primary air@@(一次空气过多)",
+                "f": "❌ 错误。"
+            }
+        ],
+        "a": 1,
+        "exp": "解析: 现象判断。Lazy yellow pilot = orifice too LARGE (not small)。",
+        "src": "• 课文出处: Classic Traps to Watch For\n• 原文语句: \"(9) Lazy yellow pilot = orifice too LARGE (not small).\""
+    },
+    {
+        "u": "Classic Traps & Exam Tips",
+        "q": "Watch for the classic trap (10): How is the maximum downstream pressure determined for a system?@@(注意经典陷阱 10：系统的最大允许下游压力是如何确定的？)",
+        "hint": "Trap 10: Max downstream pressure",
+        "opts": [
+            {
+                "t": "By the HIGHEST rated component@@(由额定值最高的组件决定)",
+                "f": "❌ 错误。这会导致弱小组件被撑爆。"
+            },
+            {
+                "t": "By the average rating@@(由平均额定值决定)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "By the LOWEST rated component (weakest link)@@(由额定值最低的组件决定 —— 最弱一环)",
+                "f": "✅ 正确。木桶效应，安全上限由最脆弱的零件决定。"
+            },
+            {
+                "t": "By the supply pressure from the utility@@(由燃气公司供气压力决定)",
+                "f": "❌ 错误。"
+            }
+        ],
+        "a": 2,
+        "exp": "解析: 安全设计逻辑。Max downstream pressure = LOWEST rated component (weakest link), not the highest。",
+        "src": "• 课文出处: Classic Traps to Watch For\n• 原文语句: \"(10) Max downstream pressure = LOWEST rated component (weakest link), not the highest.\""
+    },
+    {
+        "u": "Classic Traps & Exam Tips",
+        "q": "Exam Tip 1: When you see a regulator troubleshooting question, what signal path should you mentally walk through to find the failure?@@(考试技巧 1：当看到减压阀故障排查问题时，你应该在脑海中梳理哪条信号路径来寻找故障点？)",
+        "hint": "Exam Tip: Troubleshooting path",
+        "opts": [
+            {
+                "t": "Meter → manifold → burner@@(燃气表 → 歧管 → 燃烧器)",
+                "f": "❌ 错误。这是供气路径，不是调压器内部反馈路径。"
+            },
+            {
+                "t": "Inlet → orifice → diaphragm → vent@@(入口 → 阀口/节流孔 → 膜片 → 排气孔)",
+                "f": "✅ 正确。任何一个环节出问题（比如阀口脏污、膜片破裂、排气堵塞），顺着这条逻辑链就能推导出设备的最终表现。"
+            },
+            {
+                "t": "Spring → screw → cap@@(弹簧 → 螺丝 → 盖子)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "Downstream → upstream → outdoors@@(下游 → 上游 → 室外)",
+                "f": "❌ 错误。"
+            }
+        ],
+        "a": 1,
+        "exp": "解析: 这是一个非常实用的做题套路。调压器的内部工作机制是一条紧密相连的动作链，只要按照 “Inlet → orifice → diaphragm → vent” 走一遍，问自己“如果这个零件卡住了会怎样”，就能破解所有疑难杂症。",
+        "src": "• 课文出处: Exam Tips\n• 原文语句: \"When you see a regulator troubleshooting question, walk through the signal path: inlet → orifice → diaphragm → vent. Ask: what happens if this component fails?\""
+    },
+    {
+        "u": "Classic Traps & Exam Tips",
+        "q": "Exam Tip 2: For combustion analysis questions, what is the fundamental relationship between $CO_{2}$, $O_{2}$, and excess air?@@(考试技巧 2：在燃烧分析问题中，$CO_{2}$、$O_{2}$ 和过剩空气之间的基本关系是什么？)",
+        "hint": "Exam Tip: Combustion pairs",
+        "opts": [
+            {
+                "t": "They all rise and fall together@@(它们一起上升和下降)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "$CO_{2}$ up = $O_{2}$ up, and excess air increases temperature@@($CO_{2}$ 升 = $O_{2}$ 升，过剩空气会提高温度)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "$CO_{2}$ up = $O_{2}$ down, and excess air dilutes both $CO_{2}$ and combustion temperature@@($CO_{2}$ 升 = $O_{2}$ 降，且过剩空气会稀释 $CO_{2}$ 浓度并降低燃烧温度)",
+                "f": "✅ 正确。牢记这个“跷跷板效应”。氧气消耗得多，二氧化碳自然产得多；大量没用的冷空气涌进来，既会稀释烟气浓度，也会带走热量。"
+            },
+            {
+                "t": "Excess air only affects CO, not $CO_{2}$@@(过剩空气只影响一氧化碳，不影响二氧化碳)",
+                "f": "❌ 错误。"
+            }
+        ],
+        "a": 2,
+        "exp": "解析: 做燃烧理论题的万能钥匙。记住两点：1. $O_{2}$ 和 $CO_{2}$ 永远是反比关系。2. 过量空气（Excess air）就像是在热汤里兑凉水，加得越多，汤（$CO_{2}$）越淡，温度也越低。",
+        "src": "• 课文出处: Exam Tips\n• 原文语句: \"For combustion questions, learn the O2/CO2 pairs - CO2 up = O2 down, and excess air dilutes both CO2 and combustion temperature.\""
+    },
+    {
+        "u": "Classic Traps & Exam Tips",
+        "q": "Exam Tip 3: For clocking math questions, what is the very FIRST step you should perform before multiplying the variables?@@(考试技巧 3：在进行打表计算问题时，在进行变量相乘之前，你应该执行的“第一步”是什么？)",
+        "hint": "Exam Tip: Clocking math first step",
+        "opts": [
+            {
+                "t": "Multiply the test dial volume by the heat value@@(将测试拨盘体积乘以热值)",
+                "f": "❌ 错误。"
+            },
+            {
+                "t": "Convert seconds to revolutions per minute (60 ÷ sec)@@(将秒数转换为每分钟转数 60 ÷ sec)",
+                "f": "❌ 错误。单位是小时（h）。"
+            },
+            {
+                "t": "Convert seconds to revolutions per hour first (3600 ÷ sec)@@(首先将秒数转换为每小时转数 3600 ÷ sec)",
+                "f": "✅ 正确。先把转一圈的秒数，折算成一小时（3600秒）能转多少圈，后续的计算就不容易出错。"
+            },
+            {
+                "t": "Apply the pressure correction factor immediately@@(立即应用压力修正系数)",
+                "f": "❌ 错误。修正系数是最后乘的（如果有的话）。"
+            }
+        ],
+        "a": 2,
+        "exp": "解析: 计算题防错秘籍。拿到 Clocking 的题目，第一件事永远是拿 3600 去除以题目给出的时间（秒），算出“每小时转数”。在这个基础上再乘拨盘体积和热值，公式逻辑就顺理成章了。",
+        "src": "• 课文出处: Exam Tips\n• 原文语句: \"For clocking math, convert seconds to revolutions per hour first (3600 ÷ sec), then multiply by dial volume x heat value.\""
+    }
+];
+
+/* ==========================================================
+   STATE
+========================================================== */
+var SAVE_KEY = 'g2_quiz_v1';
+var EDIT_KEY = 'g2_quiz_edits_v1';
+var timerInterval = null;
+var timeRemaining = 3.5 * 3600;
+var windowSlideDirection = ''; 
+
+var state = { masterList: [], list: [], optionMaps: {}, pointer: 0, records: {}, filter: 'all', source: 'all', search: '', isExam: false, examSubmitted: false, shuffled: false, showChinese: false };
+
+/* ==========================================================
+   THEME & HIGHLIGHT
+========================================================== */
+function toggleTheme() { var dark = document.documentElement.classList.toggle('dark'); localStorage.setItem('g2_theme', dark ? 'dark' : 'light'); document.getElementById('themeBtn').textContent = dark ? '☀️' : '🌙'; }
+function initTheme() { var saved = localStorage.getItem('g2_theme'); var sysDark = window.matchMedia('(prefers-color-scheme: dark)').matches; var useDark = saved ? saved === 'dark' : sysDark; if (useDark) document.documentElement.classList.add('dark'); document.getElementById('themeBtn').textContent = useDark ? '☀️' : '🌙'; }
+function hl(text) { if (!state.search || !text) return text; var kw = state.search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); return text.replace(new RegExp('(' + kw + ')(?![^<]*>)', 'gi'), '<span class="hl">$1</span>'); }
+
+/* ==========================================================
+   INIT & TABS
+========================================================== */
+function init() {
+  initTheme(); initChinese(); if (!quizData || quizData.length === 0) return;
+  try { var em = JSON.parse(localStorage.getItem(EDIT_KEY)); if (em) Object.keys(em).forEach(function(i) { if (quizData[i]) quizData[i].src = em[i]; }); } catch(e) {}
+  state.masterList = quizData.map(function(_, i) { return i; }); loadProgress();
+  if (state.list.length === 0) state.list = state.masterList.slice();
+  document.getElementById('totalNum').textContent = quizData.length;
+  renderSourceTabs(); applyFilter(); document.addEventListener('keydown', handleKey);
+}
+function renderSourceTabs() {
+  var container = document.getElementById('sourceList'); container.innerHTML = ''; var sources = {};
+  quizData.forEach(function(q) { sources[q.u || 'Uncategorized'] = true; });
+  function makeTag(label, value) { var el = document.createElement('div'); el.className = 'source-tag' + (state.source === value ? ' active' : ''); el.textContent = label; el.onclick = function() { setSource(value); }; container.appendChild(el); }
+  makeTag('All', 'all'); Object.keys(sources).sort().forEach(function(s) { makeTag(s, s); });
+}
+function setSource(src) { state.source = src; renderSourceTabs(); applyFilter(); }
+function setFilter(type) { state.filter = type; ['all','wrong','star'].forEach(function(t) { document.getElementById('tab-' + t).classList.toggle('active', t === type); }); applyFilter(); }
+function handleSearch() { state.search = document.getElementById('searchBox').value.toLowerCase(); applyFilter(); }
+function applyFilter() {
+  state.list = state.masterList.filter(function(id) {
+    var q = quizData[id], rec = state.records[id], src = q.u || 'Uncategorized';
+    if (state.source !== 'all' && src !== state.source) return false;
+    if (state.search) { var full = (q.q || '') + (q.exp || '') + (q.src || ''); if (q.opts) full += q.opts.map(function(o){ return o.t; }).join(''); if (!full.toLowerCase().includes(state.search)) return false; }
+    if (state.filter === 'wrong') return rec && rec.status === 'wrong';
+    if (state.filter === 'star') return rec && rec.marked; return true;
+  });
+  state.pointer = 0; windowSlideDirection = ''; 
+  document.querySelector('.content-scroll').scrollTop = 0; // 切换过滤条件时回顶
+  renderSidebar(); renderQuestion();
+}
+function shuffleQuestions() {
+  if (state.masterList.length < 2) return;
+  for (var i = state.masterList.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var tmp = state.masterList[i]; state.masterList[i] = state.masterList[j]; state.masterList[j] = tmp; }
+  state.optionMaps = {};
+  state.masterList.forEach(function(id) {
+    var count = quizData[id].opts.length; var arr = Array.from({length: count}, function(_, i) { return i; });
+    for (var i = count - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp; }
+    state.optionMaps[id] = arr;
+  });
+  state.shuffled = true; applyFilter();
+}
+
+/* ==========================================================
+   RENDER CORE
+========================================================== */
+function renderSidebar() {
+  var grid = document.getElementById('qGrid'); grid.innerHTML = '';
+  state.list.forEach(function(id, idx) {
+    var dot = document.createElement('div'); dot.className = 'q-dot'; dot.textContent = id + 1;
+    var rec = state.records[id];
+    if (rec) {
+      if (rec.marked) dot.classList.add('star');
+      if (state.isExam && !state.examSubmitted) { if (rec.userChoice !== undefined) dot.classList.add('answered'); } 
+      else { if (rec.status === 'correct') dot.classList.add('correct'); if (rec.status === 'wrong') dot.classList.add('wrong'); }
+    }
+    if (idx === state.pointer) dot.classList.add('active');
+    dot.onclick = function() { 
+      state.pointer = idx; windowSlideDirection = ''; 
+      document.querySelector('.content-scroll').scrollTop = 0; // 点击侧边栏题号时回顶
+      renderQuestion(); 
+    }; 
+    grid.appendChild(dot);
+  });
+  var done = Object.keys(state.records).filter(function(k) { return state.records[k].userChoice !== undefined; }).length;
+  document.getElementById('totalStats').textContent = 'Done: ' + done + ' / ' + quizData.length;
+  document.getElementById('miniBar').style.width = (state.list.length ? Math.round((state.pointer + 1) / state.list.length * 100) : 0) + '%';
+}
+
+function renderQuestion() {
+  var card = document.getElementById('questionCard');
+  var empty = document.getElementById('emptyState');
+  var optList = document.getElementById('optList');
+  var fb = document.getElementById('feedbackBox');
+
+  if (state.list.length === 0) { card.style.display = 'none'; empty.style.display = 'block'; return; }
+  card.style.display = 'block'; empty.style.display = 'none';
+
+  if (windowSlideDirection === 'swipe_snap') {
+    card.style.transition = 'none';
+    card.style.transform = 'translateX(0)';
+    card.style.opacity = '1';
+  } else if (windowSlideDirection === 'left') {
+    card.style.transition = 'none'; card.style.transform = 'translateX(60vw)'; card.style.opacity = '0';
+    void card.offsetWidth;
+    card.style.transition = 'transform 0.25s ease-out, opacity 0.25s ease';
+    card.style.transform = 'translateX(0)'; card.style.opacity = '1';
+  } else if (windowSlideDirection === 'right') {
+    card.style.transition = 'none'; card.style.transform = 'translateX(-60vw)'; card.style.opacity = '0';
+    void card.offsetWidth;
+    card.style.transition = 'transform 0.25s ease-out, opacity 0.25s ease';
+    card.style.transform = 'translateX(0)'; card.style.opacity = '1';
+  } else {
+    card.style.transition = 'none'; card.style.transform = 'translateX(0)'; card.style.opacity = '1';
+  }
+  windowSlideDirection = ''; 
+
+  var id = state.list[state.pointer]; var q = quizData[id]; var rec = state.records[id] || {};
+  document.getElementById('currNum').textContent = state.pointer + 1; document.getElementById('totalNum').textContent = state.list.length;
+  document.getElementById('unitBadge').textContent = q.u || 'Question';
+
+  var parts = (q.q || '').split('@@');
+  document.getElementById('qText').innerHTML = hl(parts[0] || '');
+  document.getElementById('qTrans').innerHTML = hl(parts[1] || ''); document.getElementById('qTrans').style.display = state.showChinese ? 'block' : 'none';
+
+  var favBtn = document.getElementById('favBtn'); favBtn.textContent = rec.marked ? '⭐' : '☆'; favBtn.style.color = rec.marked ? '#f59e0b' : 'var(--text-muted)';
+
+  var labels = ['A','B','C','D','E'];
+  var order = (state.shuffled && state.optionMaps[id]) ? state.optionMaps[id] : q.opts.map(function(_, i){ return i; });
+  optList.innerHTML = '';
+  
+  order.forEach(function(origIdx, visIdx) {
+    var opt = q.opts[origIdx]; var optParts = (opt.t || '').split('@@');
+    var extraClass = '';
+    if (rec.userChoice === origIdx && !state.isExam) { extraClass = (origIdx === q.a) ? 'highlight-correct' : 'highlight-wrong'; } 
+    else if (state.isExam && rec.userChoice === origIdx) { extraClass = 'exam-selected'; }
+
+    var transVisible = state.showChinese && optParts[1] ? 'block' : 'none';
+    var btn = document.createElement('div'); btn.className = 'opt-btn ' + extraClass;
+    btn.innerHTML = '<span class="opt-key">' + labels[visIdx] + '</span>' +
+      '<div><div>' + hl(optParts[0]) + '</div><div class="opt-trans" style="display:' + transVisible + ';">' + hl(optParts[1]||'') + '</div></div>';
+    btn.onclick = function() { handleAnswer(id, origIdx); }; optList.appendChild(btn);
+  });
+
+  if (rec.userChoice !== undefined && !state.isExam) { showFeedback(id, rec.userChoice); } 
+  else { fb.style.display = 'none'; fb.innerHTML = ''; }
+  renderSidebar(); saveProgress();
+}
+
+function handleAnswer(id, origIdx) {
+  var q = quizData[id]; var isRight = origIdx === q.a; var oldMarked = state.records[id] ? state.records[id].marked : false;
+  if (state.isExam && !state.examSubmitted) {
+    if (!state.records[id]) state.records[id] = {}; state.records[id].userChoice = origIdx; state.records[id].status = 'answered'; renderQuestion(); return;
+  }
+  state.records[id] = { status: isRight ? 'correct' : 'wrong', userChoice: origIdx, marked: oldMarked }; saveProgress(); renderQuestion(); 
+}
+
+/* ==========================================================
+   FEEDBACK
+========================================================== */
+function showFeedback(id, choiceIdx) {
+  var q = quizData[id];
+  var isRight = choiceIdx === q.a;
+  var fb = document.getElementById('feedbackBox');
+  fb.className = 'feedback ' + (isRight ? 'ok' : 'bad');
+  fb.style.display = 'block';
+
+  var fText = (q.opts[choiceIdx].f || '').replace(/^[✅❌⚠️]+\s*/, '');
+
+  var html = '<span class="fb-title">' + (isRight ? '✅ Correct' : '❌ Incorrect') + '</span>';
+  html += '<div class="fb-msg">' + hl(fText) + '</div>';
+  html += '<hr class="fb-divider">';
+  html += '<div class="fb-section-label">Explanation</div>';
+  html += '<div class="fb-exp">' + hl(q.exp || '(no explanation)') + '</div>';
+
+  if (q.src !== undefined) {
+    html += '<hr class="fb-divider">';
+    html += '<div class="fb-row">';
+    html += '  <span class="fb-section-label">Source</span>';
+    html += '  <button class="edit-btn" onclick="enableEdit(' + id + ')">✏️ Edit</button>';
+    html += '</div>';
+    html += '<div class="fb-src" id="src-display-' + id + '">' + hl(q.src || '') + '</div>';
+    html += '<div id="editor-area-' + id + '" style="display:none;">';
+    html += '  <textarea class="src-textarea" id="src-input-' + id + '">' + (q.src || '') + '</textarea>';
+    html += '  <div class="save-row">';
+    html += '    <button class="primary" onclick="saveEdit(' + id + ', this)">Save</button>';
+    html += '    <button onclick="cancelEdit(' + id + ')">Cancel</button>';
+    html += '  </div>';
+    html += '  <div class="edit-warn">⚠️ Saved to browser. Use "Save updated file" in sidebar to persist.</div>';
+    html += '</div>';
+  }
+
+  fb.innerHTML = html;
+}
+
+function enableEdit(id) { document.getElementById('src-display-' + id).style.display = 'none'; var ea = document.getElementById('editor-area-' + id); ea.style.display = 'block'; var ta = document.getElementById('src-input-' + id); ta.value = quizData[id].src || ''; ta.focus(); }
+function cancelEdit(id) { document.getElementById('src-display-' + id).style.display = 'block'; document.getElementById('editor-area-' + id).style.display = 'none'; }
+function saveEdit(id, btn) {
+  var newSrc = document.getElementById('src-input-' + id).value; quizData[id].src = newSrc;
+  document.getElementById('src-display-' + id).textContent = newSrc; cancelEdit(id);
+  var edits = {}; try { edits = JSON.parse(localStorage.getItem(EDIT_KEY) || '{}'); } catch(e) {}
+  edits[id] = newSrc; localStorage.setItem(EDIT_KEY, JSON.stringify(edits));
+  if (btn) { var orig = btn.textContent; btn.textContent = 'Saved!'; btn.style.background = '#059669'; btn.style.color = 'white'; setTimeout(function() { btn.textContent = orig; btn.style.background = ''; btn.style.color = ''; }, 1200); }
+}
+
+/* ==========================================================
+   INTERACTIONS & UTILS
+========================================================== */
+function nextQ() { 
+  if (state.pointer < state.list.length - 1) { 
+    if (windowSlideDirection !== 'swipe_snap') windowSlideDirection = 'left'; 
+    state.pointer++; 
+    document.querySelector('.content-scroll').scrollTop = 0; // 切下一题时强制回顶
+    renderQuestion(); 
+  } 
+}
+function prevQ() { 
+  if (state.pointer > 0) { 
+    if (windowSlideDirection !== 'swipe_snap') windowSlideDirection = 'right'; 
+    state.pointer--; 
+    document.querySelector('.content-scroll').scrollTop = 0; // 切上一题时强制回顶
+    renderQuestion(); 
+  } 
+}
+function toggleStar() {
+  var id = state.list[state.pointer]; if (id === undefined) return;
+  if (!state.records[id]) state.records[id] = {}; var isNowMarked = !state.records[id].marked; state.records[id].marked = isNowMarked;
+  if (state.filter === 'star' && !isNowMarked) { state.list.splice(state.pointer, 1); if (state.pointer >= state.list.length) state.pointer = Math.max(0, state.list.length - 1); }
+  renderQuestion(); saveProgress(); showToast(isNowMarked ? '⭐ Starred' : 'Removed from Starred');
+}
+function showToast(msg) {
+  var t = document.getElementById('toastMsg'); if (!t) { t = document.createElement('div'); t.id = 'toastMsg'; t.className = 'toast'; document.body.appendChild(t); }
+  t.textContent = msg; t.classList.add('show'); setTimeout(function(){ t.classList.remove('show'); }, 1500);
+}
+function toggleChinese() { state.showChinese = document.getElementById('cnToggle').checked; document.getElementById('cnLabel').textContent = state.showChinese ? 'CN' : 'EN'; localStorage.setItem('g2_cn', state.showChinese ? '1' : '0'); renderQuestion(); }
+function initChinese() { if (localStorage.getItem('g2_cn') === '1') { state.showChinese = true; document.getElementById('cnToggle').checked = true; document.getElementById('cnLabel').textContent = 'CN'; } }
+function saveProgress() { try { localStorage.setItem(SAVE_KEY, JSON.stringify({ records: state.records, pointer: state.pointer, filter: state.filter, source: state.source })); } catch(e) {} }
+function loadProgress() { try { var s = JSON.parse(localStorage.getItem(SAVE_KEY)); if (s) { state.records = s.records||{}; state.pointer = s.pointer||0; state.filter = s.filter||'all'; state.source = s.source||'all'; } } catch(e) {} }
+
+/* ===== 新增的防误触、防拦截双击清除功能 ===== */
+var resetTimer = null;
+function resetProgress() { 
+  var link = document.querySelector('.reset-link');
+  var bBtn = document.querySelector('.result-btn.primary');
+  
+  if (!resetTimer) {
+    showToast("⚠️ Tap again to confirm"); 
+    if (link) { link.textContent = 'Sure to clear?'; link.style.color = '#e05a5a'; }
+    if (bBtn) { bBtn.textContent = 'Sure to Restart?'; bBtn.style.background = '#e05a5a'; bBtn.style.borderColor = '#e05a5a'; }
+    resetTimer = setTimeout(function() {
+      resetTimer = null;
+      if (link) { link.textContent = 'Clear progress'; link.style.color = ''; }
+      if (bBtn) { bBtn.textContent = 'Restart'; bBtn.style.background = ''; bBtn.style.borderColor = ''; }
+    }, 3000);
+    return;
+  }
+  if (resetTimer) { clearTimeout(resetTimer); resetTimer = null; }
+  if (link) { link.textContent = 'Clear progress'; link.style.color = ''; }
+  if (bBtn) { bBtn.textContent = 'Restart'; bBtn.style.background = ''; bBtn.style.borderColor = ''; }
+
+  localStorage.removeItem(SAVE_KEY); 
+  state.records = {}; state.pointer = 0; state.filter = 'all'; state.source = 'all'; 
+  if (state.isExam) toggleExam(); 
+  ['all','wrong','star'].forEach(function(t) { document.getElementById('tab-' + t).classList.toggle('active', t === 'all'); }); 
+  renderSourceTabs(); windowSlideDirection = 'swipe_snap'; applyFilter(); 
+  showToast("✅ Progress cleared!"); 
+}
+/* ======================================= */
+
+function toggleSidebar() { var sb = document.querySelector('.sidebar'); var ov = document.getElementById('sidebarOverlay'); var open = sb.classList.toggle('open'); ov.classList.toggle('show', open); }
+function closeSidebar() { document.querySelector('.sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('show'); }
+
+/* ==========================================================
+   EXAM MODE
+========================================================== */
+function toggleExam() {
+  if (document.getElementById('examToggle').checked) {
+    if (!confirm('Enable exam mode?\n- Answers hidden until submission\n- Timer starts\n- Submit when done')) { document.getElementById('examToggle').checked = false; return; }
+    state.isExam = true; state.examSubmitted = false; document.getElementById('timerBadge').style.display = 'block'; document.getElementById('topSubmitBtn').style.display = 'inline-block'; startTimer();
+  } else {
+    state.isExam = false; state.examSubmitted = false; clearInterval(timerInterval); document.getElementById('timerBadge').style.display = 'none'; document.getElementById('topSubmitBtn').style.display = 'none';
+  }
+  windowSlideDirection = ''; 
+  document.querySelector('.content-scroll').scrollTop = 0; // 切换模式回顶
+  renderQuestion(); saveProgress();
+}
+function startTimer() {
+  clearInterval(timerInterval);
+  timerInterval = setInterval(function() {
+    timeRemaining--; if (timeRemaining <= 0) { clearInterval(timerInterval); submitExam(); return; }
+    var h = Math.floor(timeRemaining / 3600), m = Math.floor((timeRemaining % 3600) / 60), s = timeRemaining % 60;
+    document.getElementById('timerBadge').textContent = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+  }, 1000);
+}
+function submitExam() {
+  state.examSubmitted = true; clearInterval(timerInterval); var correct = 0, wrong = 0;
+  quizData.forEach(function(q, i) { var rec = state.records[i]; if (rec && rec.userChoice !== undefined) { if (rec.userChoice === q.a) { correct++; rec.status = 'correct'; } else { wrong++; rec.status = 'wrong'; } } });
+  document.getElementById('resScore').textContent = Math.round(correct / quizData.length * 100) + '%'; document.getElementById('resTotal').textContent = quizData.length; document.getElementById('resRight').textContent = correct; document.getElementById('resWrong').textContent = wrong;
+  document.getElementById('overlay').style.display = 'flex'; document.getElementById('topSubmitBtn').style.display = 'none'; renderSidebar(); saveProgress();
+}
+function closeResult() { document.getElementById('overlay').style.display = 'none'; state.isExam = false; document.getElementById('examToggle').checked = false; document.getElementById('timerBadge').style.display = 'none'; windowSlideDirection = ''; renderQuestion(); }
+
+/* ==========================================================
+   PHANTOM RENDERER (带有解析满血状态的幻影卡片预加载)
+========================================================== */
+function renderPhantomCard(targetIdx) {
+  if(targetIdx < 0 || targetIdx >= state.list.length) return false;
+  var id = state.list[targetIdx]; var q = quizData[id]; var rec = state.records[id] || {};
+  
+  var html = '<div class="unit-badge">' + (q.u || 'Question') + '</div>';
+  var parts = (q.q || '').split('@@');
+  html += '<div class="q-text">' + hl(parts[0]) + '</div>';
+  if(state.showChinese && parts[1]) { html += '<div class="q-trans" style="display:block;">' + hl(parts[1]) + '</div>'; }
+  
+  html += '<div class="opt-list">';
+  var labels = ['A','B','C','D','E'];
+  var order = (state.shuffled && state.optionMaps[id]) ? state.optionMaps[id] : q.opts.map(function(_, i){ return i; });
+  
+  order.forEach(function(origIdx, visIdx) {
+    var opt = q.opts[origIdx]; var optParts = (opt.t || '').split('@@');
+    var extraClass = '';
+    if (rec.userChoice === origIdx && !state.isExam) { extraClass = (origIdx === q.a) ? 'highlight-correct' : 'highlight-wrong'; } 
+    else if (state.isExam && rec.userChoice === origIdx) { extraClass = 'exam-selected'; }
+    
+    html += '<div class="opt-btn ' + extraClass + '"><span class="opt-key">' + labels[visIdx] + '</span>';
+    html += '<div><div>' + hl(optParts[0]) + '</div>';
+    if(state.showChinese && optParts[1]) { html += '<div class="opt-trans" style="display:block;">' + hl(optParts[1]) + '</div>'; }
+    html += '</div></div>';
+  });
+  html += '</div>';
+  
+  // 🌟【修复点】把解析和错题记录也加进幻影卡片了
+  if (rec.userChoice !== undefined && !state.isExam) {
+    var choiceIdx = rec.userChoice;
+    var isRight = choiceIdx === q.a;
+    var fText = (q.opts[choiceIdx].f || '').replace(/^[✅❌⚠️]+\s*/, '');
+
+    html += '<div class="feedback ' + (isRight ? 'ok' : 'bad') + '" style="display:block;">';
+    html += '<span class="fb-title">' + (isRight ? '✅ Correct' : '❌ Incorrect') + '</span>';
+    html += '<div class="fb-msg">' + hl(fText) + '</div>';
+    html += '<hr class="fb-divider">';
+    html += '<div class="fb-section-label">Explanation</div>';
+    html += '<div class="fb-exp">' + hl(q.exp || '(no explanation)') + '</div>';
+
+    if (q.src !== undefined) {
+      html += '<hr class="fb-divider">';
+      html += '<div class="fb-row">';
+      html += '  <span class="fb-section-label">Source</span>';
+      html += '</div>';
+      html += '<div class="fb-src">' + hl(q.src || '') + '</div>';
+    }
+    html += '</div>';
+  }
+  
+  var pc = document.getElementById('phantomCard');
+  pc.innerHTML = html; pc.style.display = 'block'; return true;
+}
+
+/* ==========================================================
+   TOUCH TRACKING 
+========================================================== */
+var touchStartX = 0, touchStartY = 0;
+var currentDx = 0;
+var longPressTimer = null;
+var isLongPress = false;
+var isDragging = false;
+var isSwiping = false; 
+var phantomLoadedFor = -1;
+
+var scrollArea = document.querySelector('.content-scroll');
+var qCard = document.getElementById('questionCard');
+var pCard = document.getElementById('phantomCard');
+
+scrollArea.addEventListener('touchstart', function(e) {
+  if (e.touches.length > 1) return; 
+  touchStartX = e.touches[0].screenX; touchStartY = e.touches[0].screenY;
+  isLongPress = false; isDragging = true; isSwiping = false; currentDx = 0;
+  qCard.style.transition = 'none'; pCard.style.transition = 'none';
+
+  var tag = e.target.tagName;
+  if (tag === 'BUTTON' || tag === 'INPUT' || tag === 'TEXTAREA' || e.target.closest('.opt-btn') || e.target.closest('.search-box')) return; 
+
+  longPressTimer = setTimeout(function() {
+    if (!isSwiping) { isLongPress = true; toggleStar(); if('vibrate' in navigator) navigator.vibrate(40); }
+  }, 600);
+}, {passive: true});
+
+scrollArea.addEventListener('touchmove', function(e) {
+  if (!isDragging) return;
+  var dx = e.touches[0].screenX - touchStartX;
+  var dy = e.touches[0].screenY - touchStartY;
+
+  if (!isSwiping) {
+    if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 10) { isDragging = false; if (longPressTimer) clearTimeout(longPressTimer); return; } 
+    else if (Math.abs(dx) > 10) { isSwiping = true; if (longPressTimer) clearTimeout(longPressTimer); }
+  }
+
+  if (isSwiping) {
+    currentDx = dx; var screenW = window.innerWidth;
+    
+    if ((state.pointer === 0 && dx > 0) || (state.pointer === state.list.length - 1 && dx < 0)) {
+      dx = dx * 0.25; 
+      qCard.style.transform = 'translateX(' + dx + 'px)'; 
+      pCard.style.display = 'none';
+    } else {
+       var targetIdx = dx < 0 ? state.pointer + 1 : state.pointer - 1;
+       if (phantomLoadedFor !== targetIdx) { if(renderPhantomCard(targetIdx)) phantomLoadedFor = targetIdx; }
+       
+       qCard.style.transform = 'translateX(' + dx + 'px)';
+       qCard.style.opacity = '1'; 
+       
+       if(phantomLoadedFor !== -1) {
+          var pOffset = dx < 0 ? screenW + dx : -screenW + dx;
+          pCard.style.transform = 'translateX(' + pOffset + 'px)';
+          pCard.style.opacity = '1'; 
+       }
+    }
+  }
+}, {passive: true});
+
+scrollArea.addEventListener('touchend', function(e) {
+  if (longPressTimer) clearTimeout(longPressTimer);
+  if (!isDragging) return; isDragging = false;
+
+  if (!isLongPress && isSwiping) {
+    var threshold = window.innerWidth * 0.25; if (threshold < 80) threshold = 80;
+    
+    qCard.style.transition = 'transform 0.25s ease-out';
+    pCard.style.transition = 'transform 0.25s ease-out';
+
+    if (currentDx < -threshold && state.pointer < state.list.length - 1) {
+      qCard.style.transform = 'translateX(-100vw)'; 
+      pCard.style.transform = 'translateX(0)';
+      setTimeout(function() { 
+        windowSlideDirection = 'swipe_snap'; 
+        nextQ(); // 里面已经包含了自动回到顶部的代码
+        resetPhantom(); 
+      }, 250);
+    } else if (currentDx > threshold && state.pointer > 0) {
+      qCard.style.transform = 'translateX(100vw)'; 
+      pCard.style.transform = 'translateX(0)';
+      setTimeout(function() { 
+        windowSlideDirection = 'swipe_snap'; 
+        prevQ(); // 里面已经包含了自动回到顶部的代码
+        resetPhantom(); 
+      }, 250);
+    } else {
+      qCard.style.transform = 'translateX(0)'; 
+      if(phantomLoadedFor !== -1) pCard.style.transform = 'translateX(' + (currentDx < 0 ? window.innerWidth : -window.innerWidth) + 'px)';
+      setTimeout(resetPhantom, 250);
+    }
+  } else if (isSwiping) {
+      qCard.style.transition = 'transform 0.25s ease-out';
+      qCard.style.transform = 'translateX(0)'; 
+      setTimeout(resetPhantom, 250);
+  }
+  isSwiping = false;
+}, {passive: true});
+
+function resetPhantom() {
+  pCard.style.display = 'none'; pCard.style.transition = 'none'; phantomLoadedFor = -1;
+}
+
+/* ==========================================================
+   KEYBOARD SHORTCUTS
+========================================================== */
+function handleKey(e) {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  var k = e.key.toUpperCase();
+  if (k === 'ARROWRIGHT' || k === 'ENTER') { nextQ(); return; }
+  if (k === 'ARROWLEFT') { prevQ(); return; }
+  if (k === 'S') { toggleStar(); return; }
+
+  var id = state.list[state.pointer];
+  if (id === undefined) return;
+  var order = (state.shuffled && state.optionMaps[id]) ? state.optionMaps[id] : quizData[id].opts.map(function(_, i){ return i; });
+  var map = { '1': 0, 'A': 0, '2': 1, 'B': 1, '3': 2, 'C': 2, '4': 3, 'D': 3, '5': 4, 'E': 4 };
+  var visIdx = map[k];
+  if (visIdx !== undefined && visIdx < order.length) {
+    var btns = document.querySelectorAll('.opt-btn');
+    if (btns[visIdx]) btns[visIdx].click();
+  }
+}
+
+window.onload = init;
+</script>
+</body>
+</html>
