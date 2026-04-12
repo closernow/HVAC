@@ -1,0 +1,3382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>G2 Quiz System</title>
+<style>
+/* ===== VARIABLES ===== */
+:root {
+  --bg: #f5f3ee; --surface: #ffffff; --surface2: #fafaf8; --border: #e0ddd6;
+  --text: #1a1a1a; --text-muted: #666; --text-faint: #999; --opt-bg: #fafaf8;
+  --opt-hover: #f0ede6; --exp-bg: #f7f6f1; --sidebar-bg: #ffffff;
+  --dot-bg: #ece9e2; --dot-text: #888; --tag-bg: #ece9e2;
+  --correct-bg: #eaf5ec; --correct-border: #4caf72; --correct-text: #2a7a45;
+  --wrong-bg: #fdecea; --wrong-border: #e05a5a; --wrong-text: #b33;
+  --accent: #3a6ea5; --accent-bg: #e8f0f8; --warn-bg: #fffbeb;
+  --warn-border: #f59e0b; --warn-text: #92400e; --progress-track: #ddd;
+}
+html.dark {
+  --bg: #18181a; --surface: #242428; --surface2: #2a2a2f; --border: #3a3a3f;
+  --text: #f0ede6; --text-muted: #999; --text-faint: #555; --opt-bg: #2a2a2f;
+  --opt-hover: #32323a; --exp-bg: #1f1f24; --sidebar-bg: #1e1e22;
+  --dot-bg: #2e2e34; --dot-text: #888; --tag-bg: #2e2e34;
+  --correct-bg: #1a3326; --correct-border: #4caf72; --correct-text: #6dcc90;
+  --wrong-bg: #3d1e1e; --wrong-border: #e05a5a; --wrong-text: #e08080;
+  --accent: #5b9ad5; --accent-bg: #1e2e42; --warn-bg: #2d2000;
+  --warn-border: #d97706; --warn-text: #fcd34d; --progress-track: #3a3a3f;
+}
+
+/* ===== RESET & LAYOUT ===== */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Georgia, "Times New Roman", serif; background: var(--bg); color: var(--text); height: 100vh; height: 100dvh; overflow: hidden; display: flex; transition: background 0.3s, color 0.3s; }
+.app { display: flex; width: 100%; height: 100%; }
+
+/* ===== SIDEBAR ===== */
+.sidebar { width: 260px; flex-shrink: 0; background: var(--sidebar-bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; transition: background 0.3s, border-color 0.3s; }
+.sidebar-head { padding: 14px; border-bottom: 1px solid var(--border); background: var(--surface2); transition: background 0.3s; }
+.app-title { font-size: 1rem; font-weight: normal; color: var(--accent); margin-bottom: 10px; letter-spacing: 0.01em; }
+.search-box { width: 100%; padding: 7px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem; font-family: Georgia, serif; background: var(--surface); color: var(--text); margin-bottom: 10px; outline: none; transition: border-color 0.2s, background 0.3s; }
+.search-box:focus { border-color: var(--accent); }
+.filter-tabs { display: flex; gap: 5px; margin-bottom: 10px; }
+.filter-tab { flex: 1; text-align: center; padding: 5px 4px; font-size: 0.78rem; font-family: Georgia, serif; cursor: pointer; border-radius: 5px; background: var(--tag-bg); color: var(--text-muted); transition: all 0.2s; border: 1px solid transparent; }
+.filter-tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.source-label { font-size: 0.75rem; color: var(--text-faint); margin-bottom: 5px; }
+.source-scroll { display: flex; flex-wrap: wrap; gap: 5px; max-height: 100px; overflow-y: auto; }
+.source-tag { font-size: 0.72rem; padding: 3px 8px; border-radius: 10px; background: var(--tag-bg); color: var(--text-muted); cursor: pointer; border: 1px solid transparent; white-space: nowrap; }
+.source-tag.active { background: var(--accent-bg); color: var(--accent); border-color: var(--accent); font-weight: bold; }
+.q-list { flex: 1; overflow-y: auto; padding: 10px; }
+.q-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
+.q-dot { aspect-ratio: 1; border-radius: 5px; background: var(--dot-bg); color: var(--dot-text); font-size: 0.78rem; font-family: Georgia, serif; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid transparent; transition: all 0.12s; position: relative; }
+.q-dot.active { border-color: var(--accent); color: var(--accent); background: var(--surface); box-shadow: 0 0 0 2px var(--accent); }
+.q-dot.correct { background: var(--correct-border); color: #fff; border-color: var(--correct-border); }
+.q-dot.wrong { background: var(--wrong-border); color: #fff; border-color: var(--wrong-border); }
+.q-dot.answered { background: var(--accent); color: #fff; border-color: var(--accent); }
+.q-dot.star::after { content: "★"; position: absolute; top: -4px; right: -4px; color: #f59e0b; font-size: 9px; }
+.sidebar-foot { padding: 12px 14px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; font-size: 0.82rem; color: var(--text-muted); background: var(--surface2); }
+.foot-row { display: flex; justify-content: space-between; align-items: center; }
+.reset-link { color: var(--accent); cursor: pointer; font-size: 0.78rem; }
+.foot-btn { width: 100%; padding: 7px; font-size: 0.8rem; font-family: Georgia, serif; border-radius: 6px; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--text); }
+.foot-btn.green { background: #059669; color: #fff; border-color: #059669; }
+
+/* ===== MAIN AREA ===== */
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.toolbar { height: 54px; padding: 0 24px; border-bottom: 1px solid var(--border); background: var(--surface); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.toolbar-left { display: flex; align-items: center; gap: 14px; }
+.q-counter { font-size: 1rem; color: var(--text); }
+.q-counter span { color: var(--accent); }
+.progress-mini { width: 120px; height: 4px; background: var(--progress-track); border-radius: 99px; overflow: hidden; }
+.progress-mini-fill { height: 100%; background: var(--accent); border-radius: 99px; transition: width 0.4s; }
+.toolbar-right { display: flex; align-items: center; gap: 14px; }
+.timer-badge { display: none; background: var(--warn-bg); color: var(--warn-text); padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; border: 1px solid var(--warn-border); }
+.exam-toggle-wrap { display: flex; align-items: center; gap: 7px; font-size: 0.82rem; color: var(--text-muted); cursor: pointer; }
+.toggle-track { position: relative; width: 36px; height: 20px; background: var(--progress-track); border-radius: 99px; transition: background 0.3s; }
+.toggle-track::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; background: #fff; border-radius: 50%; transition: transform 0.3s; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+.toggle-input { display: none; }
+.toggle-input:checked + .toggle-track { background: var(--accent); }
+.toggle-input:checked + .toggle-track::after { transform: translateX(16px); }
+.theme-btn { background: none; border: none; font-size: 1.1rem; cursor: pointer; padding: 0 4px; display: flex; align-items: center; }
+.nav-btn.submit { background: #d97706; color: #fff; border-color: #d97706; display: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-family: Georgia, serif; font-size: 0.82rem; border-width: 1px; border-style: solid;}
+
+/* ===== CONTENT ===== */
+.content-scroll { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 24px; display: flex; justify-content: center; align-items: flex-start; padding-bottom: 40px; }
+.card-wrapper { position: relative; width: 100%; max-width: 820px; }
+.card { width: 100%; padding-bottom: 20px; will-change: transform, opacity; }
+#phantomCard { position: absolute; top: 0; left: 0; z-index: 1; display: none; pointer-events: none; }
+#questionCard { position: relative; z-index: 2; }
+
+.unit-badge { display: inline-block; font-size: 0.75rem; font-weight: bold; font-family: -apple-system, sans-serif; text-transform: uppercase; color: var(--accent); background: var(--accent-bg); padding: 3px 10px; border-radius: 4px; margin-bottom: 14px; border: 1px solid var(--accent); }
+.q-text { font-size: 1.1rem; font-weight: bold; line-height: 1.6; margin-bottom: 4px; color: var(--text); }
+.q-trans { display: none; font-size: 0.88rem; color: var(--text-muted); margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--border); line-height: 1.5; }
+
+.hint-wrap { display: none !important; }
+
+.opt-list { display: flex; flex-direction: column; gap: 10px; margin-top: 18px; }
+.opt-btn { display: flex; align-items: flex-start; gap: 12px; padding: 13px 16px; border: 1px solid var(--border); border-radius: 8px; background: var(--opt-bg); cursor: pointer; font-size: 0.95rem; font-family: Georgia, serif; color: var(--text); text-align: left; transition: background 0.12s, border-color 0.12s; line-height: 1.5; }
+.opt-btn:hover { border-color: var(--accent); background: var(--opt-hover); }
+.opt-key { font-weight: bold; color: var(--text-faint); min-width: 20px; font-size: 0.85rem; padding-top: 1px; }
+.opt-trans { display: none; font-size: 0.82rem; color: var(--text-muted); margin-top: 3px; }
+.opt-btn.highlight-correct { background: var(--correct-bg); border-color: var(--correct-border); }
+.opt-btn.highlight-correct .opt-key { color: var(--correct-text); }
+.opt-btn.highlight-wrong { background: var(--wrong-bg); border-color: var(--wrong-border); }
+.opt-btn.highlight-wrong .opt-key { color: var(--wrong-text); }
+.opt-btn.exam-selected { border-color: var(--accent); background: var(--accent-bg); }
+
+/* ===== FEEDBACK ===== */
+.feedback { display: none; margin-top: 22px; padding: 18px 20px; border-radius: 8px; font-size: 0.9rem; line-height: 1.6; }
+.feedback.ok { background: var(--correct-bg); border: 1px solid var(--correct-border); color: var(--correct-text); }
+.feedback.bad { background: var(--wrong-bg); border: 1px solid var(--wrong-border); color: var(--wrong-text); }
+.fb-title { font-weight: bold; display: block; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px dashed rgba(0,0,0,0.15); }
+.fb-exp { white-space: pre-wrap; line-height: 1.65; margin-top: 5px; color: var(--text); font-size: 0.88rem; }
+.feedback.ok .fb-msg, .feedback.ok .fb-exp, .feedback.ok .fb-section-label { color: var(--correct-text); }
+.feedback.bad .fb-msg, .feedback.bad .fb-exp, .feedback.bad .fb-section-label { color: var(--wrong-text); }
+.feedback.ok .fb-src, .feedback.bad .fb-src { color: var(--text-muted); }
+.fb-msg { margin-bottom: 10px; color: var(--text); font-size: 0.9rem; line-height: 1.5; }
+.fb-section-label { font-weight: bold; font-size: 0.88rem; color: var(--text); margin-bottom: 4px; display: inline-block; }
+.fb-src { white-space: pre-wrap; line-height: 1.8; font-style: italic; font-size: 0.82rem; color: var(--text-muted); padding: 8px 0; margin-top: 5px; }
+.fb-divider { border: none; border-top: 1px dashed var(--border); margin: 10px 0; }
+.fb-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+.edit-btn { font-size: 0.78rem; padding: 2px 8px; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); color: var(--text); cursor: pointer; font-family: Georgia, serif; }
+.edit-btn:hover { background: var(--opt-hover); }
+.src-textarea { width: 100%; height: 120px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; font-family: Georgia, serif; font-size: 0.85rem; line-height: 1.5; background: var(--surface); color: var(--text); resize: vertical; margin-top: 8px; transition: background 0.3s, color 0.3s; }
+.save-row { display: flex; gap: 8px; margin-top: 6px; }
+.save-row button { padding: 4px 14px; border-radius: 5px; cursor: pointer; font-family: Georgia, serif; font-size: 0.82rem; border: 1px solid var(--border); background: var(--surface); color: var(--text); }
+.save-row button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.edit-warn { font-size: 0.75rem; color: var(--warn-text); margin-top: 5px; }
+
+/* ===== BOTTOM NAV ===== */
+.bottom-nav { width: 100%; height: 62px; flex-shrink: 0; background: var(--surface); border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: center; gap: 12px; padding: 0 24px; transition: background 0.3s, border-color 0.3s; }
+.nav-btn { padding: 9px 20px; border-radius: 7px; font-family: Georgia, serif; font-size: 0.88rem; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--text); }
+.nav-btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.toast { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.8); color: white; padding: 12px 24px; border-radius: 8px; z-index: 9999; font-size: 1rem; pointer-events: none; opacity: 0; transition: opacity 0.3s ease; text-align: center; }
+.toast.show { opacity: 1; }
+.empty-state { display: none; text-align: center; padding: 60px 20px; }
+
+/* ===== OVERLAY ===== */
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 200; display: none; align-items: center; justify-content: center; }
+.result-card { background: var(--surface); border-radius: 14px; padding: 32px 28px; text-align: center; width: 90%; max-width: 380px; box-shadow: 0 16px 40px rgba(0,0,0,0.2); }
+.result-score { font-size: 4rem; font-weight: bold; color: var(--accent); margin: 4px 0 16px; line-height: 1; }
+.result-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+.result-stat { background: var(--surface2); border-radius: 8px; padding: 10px; }
+.result-stat-val { font-size: 1.3rem; font-weight: bold; display: block; }
+.result-stat-lbl { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+.result-btns { display: flex; gap: 12px; justify-content: center; }
+.result-btn { padding: 8px 18px; border-radius: 7px; cursor: pointer; font-family: Georgia, serif; font-size: 0.88rem; border: 1px solid var(--border); background: var(--surface); color: var(--text); }
+.result-btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+.hl { background: #fef08a; color: #854d0e; border-bottom: 2px solid #eab308; padding: 0 2px; border-radius: 2px; font-weight: bold; }
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+/* ===== SIDEBAR OVERLAY ===== */
+.hamburger { display: none; background: none; border: none; font-size: 1.3rem; cursor: pointer; padding: 0 4px; color: var(--text); line-height: 1; }
+.sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 50; }
+.sidebar-overlay.show { display: block; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 900px) { .sidebar { width: 220px; } }
+@media (max-width: 650px) {
+  .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 80vw; max-width: 300px; z-index: 60; transform: translateX(-100%); transition: transform 0.28s ease; box-shadow: 4px 0 20px rgba(0,0,0,0.15); }
+  .sidebar.open { transform: translateX(0); }
+  .hamburger { display: block; }
+  .bottom-nav { display: none !important; }
+  .content-scroll { padding: 16px 12px 140px 12px; }
+  .toolbar { padding: 0 10px; height: 50px; }
+  .toolbar-left { gap: 8px; } .toolbar-right { gap: 6px; }
+  .progress-mini { width: 60px; } .q-text { font-size: 1rem; } .opt-btn { font-size: 0.9rem; padding: 11px 13px; }
+  .result-card { width: 92%; padding: 24px 18px; } .result-score { font-size: 3rem; }
+}
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<div class="app">
+
+  <div class="sidebar">
+    <div class="sidebar-head">
+      <div class="app-title">G2 Quiz System</div>
+      <input type="text" class="search-box" id="searchBox" placeholder="Search questions..." oninput="handleSearch()">
+      <div class="filter-tabs">
+        <div class="filter-tab active" id="tab-all" onclick="setFilter('all')">All</div>
+        <div class="filter-tab" id="tab-wrong" onclick="setFilter('wrong')">Wrong</div>
+        <div class="filter-tab" id="tab-star" onclick="setFilter('star')">Starred</div>
+      </div>
+      <div class="source-label">Chapter filter:</div>
+      <div class="source-scroll" id="sourceList"></div>
+    </div>
+    <div class="q-list"><div class="q-grid" id="qGrid"></div></div>
+    <div class="sidebar-foot">
+      <div class="foot-row"><span id="totalStats">Done: 0 / 0</span><span class="reset-link" onclick="resetProgress()">Clear progress</span></div>
+      <button class="foot-btn" onclick="shuffleQuestions()">Shuffle questions &amp; options</button>
+      <button class="foot-btn green" onclick="exportHtml()">Save updated file</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <button class="hamburger" id="hamburger" onclick="toggleSidebar()">&#9776;</button>
+        <div class="q-counter">Q <span id="currNum">1</span> / <span id="totalNum">1</span></div>
+        <div class="progress-mini"><div class="progress-mini-fill" id="miniBar" style="width:0%"></div></div>
+      </div>
+      <div class="toolbar-right">
+        <div class="timer-badge" id="timerBadge">03:30:00</div>
+        <button id="topSubmitBtn" class="nav-btn submit" onclick="submitExam()">Submit</button>
+        <label class="exam-toggle-wrap">
+          <input type="checkbox" class="toggle-input" id="cnToggle" onchange="toggleChinese()">
+          <div class="toggle-track"></div><span id="cnLabel">EN</span>
+        </label>
+        <label class="exam-toggle-wrap">
+          <input type="checkbox" class="toggle-input" id="examToggle" onchange="toggleExam()">
+          <div class="toggle-track"></div><span>Exam</span>
+        </label>
+        <button class="theme-btn" id="favBtn" onclick="toggleStar()" style="font-size:1.3rem;">☆</button>
+        <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">🌙</button>
+      </div>
+    </div>
+
+    <div class="content-scroll">
+      <div class="card-wrapper">
+        <div class="card" id="phantomCard"></div>
+        <div class="card" id="questionCard">
+          <div id="unitBadge" class="unit-badge"></div>
+          <div class="q-text" id="qText"></div>
+          <div class="q-trans" id="qTrans"></div>
+          <div class="hint-wrap" id="hintWrap"></div>
+          <div class="opt-list" id="optList"></div>
+          <div class="feedback" id="feedbackBox"></div>
+          <div class="empty-state" id="emptyState">
+            <h3>No questions in this view</h3><p>Try changing the filter or search term.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-nav" id="bottomNav">
+      <button class="nav-btn" onclick="prevQ()">Prev</button>
+      <button class="nav-btn primary" onclick="nextQ()">Next</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="result-card">
+    <div class="result-title">Exam result</div>
+    <div class="result-score" id="resScore">0</div>
+    <div class="result-grid">
+      <div class="result-stat"><span class="result-stat-val" id="resTotal">0</span><span class="result-stat-lbl">Total</span></div>
+      <div class="result-stat"><span class="result-stat-val" style="color:var(--correct-text)" id="resRight">0</span><span class="result-stat-lbl">Correct</span></div>
+      <div class="result-stat"><span class="result-stat-val" style="color:var(--wrong-text)" id="resWrong">0</span><span class="result-stat-lbl">Wrong</span></div>
+    </div>
+    <div class="result-btns">
+      <button class="result-btn" onclick="closeResult()">Review answers</button>
+      <button class="result-btn primary" onclick="resetProgress()">Restart</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ==========================================================
+   QUIZ DATA (在这里贴上你的所有题目代码)
+========================================================== */
+var quizData = [
+  {
+    "u": "Chapter 1: Code requirements and approved joining methods",
+    "q": "Indicate true or false: A pressure test is performed after the appliance is installed.@@(判断对错：压力测试是在器具安装之后进行的。)",
+    "hint": "Check the sequence of testing operations.",
+    "opts": [
+        {
+            "t": "True@@(正确)",
+            "f": "错误。泄漏测试才是在安装后进行的。"
+        },
+        {
+            "t": "False@@(错误)",
+            "f": "正确。压力测试必须在安装任何器具之前进行。"
+        }
+    ],
+    "a": 1,
+    "exp": "解析: 系统的压力测试(Pressure test)必须在连接任何器具之前进行。而在器具安装之后进行的是泄漏测试(Leak test)。",
+    "src": "• 课文出处: Page 11。\n• 原文语句: \"Pressure test: Before any appliances are installed. Leak test: After appliances are installed.\""
+},
+{
+    "u": "Chapter 1: Code requirements and approved joining methods",
+    "q": "Before the appliances are connected, the system shall be pressure tested using...@@(在连接器具之前，系统应使用什么进行压力测试？)",
+    "hint": "Consider safe testing mediums.",
+    "opts": [
+        {
+            "t": "Air or inert gas@@(空气或惰性气体)",
+            "f": "正确。符合规范安全要求。"
+        },
+        {
+            "t": "Air or soap solution@@(空气或肥皂液)",
+            "f": "错误。肥皂液用于查找泄漏点，不用于给系统加压。"
+        },
+        {
+            "t": "Inert gas or soap solution@@(惰性气体或肥皂液)",
+            "f": "错误。肥皂液不能用于加压。"
+        }
+    ],
+    "a": 0,
+    "exp": "解析: 在测试前，必须使用空气或惰性气体（如氮气或二氧化碳）将系统加压到指定的测试压力，以确保安全。",
+    "src": "• 课文出处: Page 11。\n• 原文语句: \"Pressurize the system with air or inert gas (nitrogen or carbon dioxide) to the specified test pressure...\""
+},
+{
+    "u": "Chapter 1: Code requirements and approved joining methods",
+    "q": "When would you perform a soap test?@@(你会在什么时候进行肥皂测试？)",
+    "hint": "Soap is used for pinpointing something specific.",
+    "opts": [
+        {
+            "t": "After every service call@@(每次维修服务之后)",
+            "f": "错误。这不是常规必须操作。"
+        },
+        {
+            "t": "When a leak is indicated by a drop in pressure@@(当压力下降表明有泄漏时)",
+            "f": "正确。这是定位具体泄漏点的方法。"
+        },
+        {
+            "t": "Any time the gas supply is turned on@@(任何开启气源的时候)",
+            "f": "错误。"
+        }
+    ],
+    "a": 1,
+    "exp": "解析: 如果系统中的压力下降表明存在泄漏，你需要使用液体溶液（通常是肥皂测试）来定位泄漏的具体来源。",
+    "src": "• 课文出处: Page 13。\n• 原文语句: \"If a drop-in pressure in the system indicates a leak, you need to locate the source of the leak with a liquid solution. A typical method to achieve this is a soap test.\""
+},
+{
+    "u": "Chapter 1: Code requirements and approved joining methods",
+    "q": "What must be done to piping or tubing passing through concrete?@@(穿过混凝土的管道或管材必须怎么处理？)",
+    "hint": "Concrete can damage the pipe over time.",
+    "opts": [
+        {
+            "t": "It must be sleeved, coated, or double-wrapped.@@(必须加套管、涂层或双层包扎。)",
+            "f": "正确。这样可以防止管道受损。"
+        },
+        {
+            "t": "It should be welded.@@(应该焊接。)",
+            "f": "错误。这与穿过混凝土的保护无关。"
+        },
+        {
+            "t": "It should be painted yellow.@@(应该涂成黄色。)",
+            "f": "错误。涂黄是用于识别，而非针对混凝土穿孔的物理保护。"
+        }
+    ],
+    "a": 0,
+    "exp": "解析: 穿过混凝土或砖石墙的管道或管材必须设有套管、涂层或双层包扎，以保护管道免受物理或化学损坏。",
+    "src": "• 课文出处: Page 14。\n• 原文语句: \"Piping or tubing passing through concrete or masonry walls must have a sleeve, coating, or double-wrap...\""
+},
+{
+    "u": "Chapter 1: Code requirements and approved joining methods",
+    "q": "May a sleeve installed in pavement to allow free movement of the pipe also serve as a vent pipe inspection point?@@(安装在路面中允许管道自由移动的套管可以同时用作通风管检查点吗？)",
+    "hint": "Check dual-purpose components in underground installations.",
+    "opts": [
+        {
+            "t": "Yes@@(可以)",
+            "f": "正确。"
+        },
+        {
+            "t": "No@@(不可以)",
+            "f": "错误。"
+        }
+    ],
+    "a": 0,
+    "exp": "解析: 在路面下提供套管以允许管道自由移动时，该套管也可以兼作通风管的检查点。",
+    "src": "• 课文出处: Page 17。\n• 原文语句: \"You should provide a sleeve in the pavement to permit free movement of piping. This sleeve can also serve as a vent pipe inspection point.\""
+},
+{
+    "u": "Chapter 1: Code requirements and approved joining methods",
+    "q": "What colour is used to identify gas piping or tubing?@@(用什么颜色来标识燃气管道或管材？)",
+    "hint": "Standard industry identification color.",
+    "opts": [
+        {
+            "t": "Red@@(红色)",
+            "f": "错误。"
+        },
+        {
+            "t": "Blue@@(蓝色)",
+            "f": "错误。"
+        },
+        {
+            "t": "Yellow@@(黄色)",
+            "f": "正确。黄色是燃气管道的标准色。"
+        },
+        {
+            "t": "Green@@(绿色)",
+            "f": "错误。"
+        }
+    ],
+    "a": 2,
+    "exp": "解析: 规范要求在所有护理、拘留、商业、工业和装配建筑物中，必须使用黄色（整管涂黄、黄色色带或黄色标签）来清楚地区分燃气管道。",
+    "src": "• 课文出处: Page 18。\n• 原文语句: \"the entire piping or tubing system shall be painted yellow; or ... provided with yellow banding...\""
+},
+{
+    "u": "Chapter 1: Code requirements and approved joining methods",
+    "q": "When identifying piping or tubing with banding or labels marked 'gas' or 'propane', what is the maximum identification interval permitted?@@(当使用带有'gas'或'propane'标记的色带或标签标识管道时，允许的最大标识间隔是多少？)",
+    "hint": "Think about the distance in feet.",
+    "opts": [
+        {
+            "t": "30 ft@@(30英尺)",
+            "f": "错误。"
+        },
+        {
+            "t": "20 ft@@(20英尺)",
+            "f": "正确。标识不得超过此距离。"
+        },
+        {
+            "t": "35 ft@@(35英尺)",
+            "f": "错误。"
+        },
+        {
+            "t": "25 ft@@(25英尺)",
+            "f": "错误。"
+        }
+    ],
+    "a": 1,
+    "exp": "解析: 根据规范要求，如果采用色带或标签标识燃气管道，标识之间的间隔不得超过20英尺（6米）。",
+    "src": "• 课文出处: Page 18。\n• 原文语句: \"When identified in accordance with Item b) or c), the identification intervals shall not exceed 20 ft (6 m).\""
+},
+{
+    "u": "Chapter 1: Code requirements and approved joining methods",
+    "q": "A manual shut-off valve shall be of the ____ and certified for its intended purpose, and it shall not be subjected to either a temperature or a pressure outside of its certified rating range.@@(手动切断阀必须是____，并经过其预期用途的认证，且不得承受超出其认证额定范围的温度或压力。)",
+    "hint": "Consider the common valve types approved for gas.",
+    "opts": [
+        {
+            "t": "Butterfly, eccentric, or ball type@@(蝶阀、偏心阀或球阀)",
+            "f": "错误。"
+        },
+        {
+            "t": "Eccentric, plug, or butterfly type@@(偏心阀、旋塞阀或蝶阀)",
+            "f": "错误。"
+        },
+        {
+            "t": "Plug, ball, or eccentric type@@(旋塞阀、球阀或偏心阀)",
+            "f": "正确。"
+        }
+    ],
+    "a": 2,
+    "exp": "解析: 燃气系统中使用的手动阀门必须是经过认证的旋塞阀(plug)、球阀(ball)或偏心阀(eccentric)类型。",
+    "src": "• 课文出处: Chapter 1 内容及常识延伸。"
+},
+{
+    "u": "Chapter 1: Code requirements and approved joining methods",
+    "q": "How must multiple outlets that are installed in a laboratory (school or other) be protected from leaking gas into the area accidentally?@@(在实验室中安装的多个燃气出口必须如何保护，以防燃气意外泄漏到该区域？)",
+    "hint": "Think about central control in a room.",
+    "opts": [
+        {
+            "t": "A clearly marked, readily accessible, master shut-off valve.@@(一个标示清晰、易于接近的总切断阀。)",
+            "f": "正确。必须有一个主控阀门。"
+        },
+        {
+            "t": "A solenoid valve interlocked with a gas sensor.@@(与燃气传感器联锁的电磁阀。)",
+            "f": "错误。"
+        },
+        {
+            "t": "By a sign in the classroom identifying gas is present in the room.@@(在教室里设置标明有燃气的标志。)",
+            "f": "错误。"
+        }
+    ],
+    "a": 0,
+    "exp": "解析: 当教室或实验室包含多个出口时，必须在该房间内易于接近的位置设置一个标示清晰的总切断阀(master shut-off valve)来统一控制它们。",
+    "src": "• 课文出处: Page 19。\n• 原文语句: \"When a classroom, laboratory, or similar room or area contains multiple outlets, a clearly marked master shut-off valve in a readily accessible location within the room must be present for controlling them.\""
+},
+{
+    "u": "Chapter 1: Code requirements and approved joining methods",
+    "q": "What are the requirements for joints in steel piping used in gas systems?@@(用于燃气系统的钢管接头有什么要求？)",
+    "hint": "Steel piping requires robust connections.",
+    "opts": [
+        {
+            "t": "Compression fittings.@@(压接管件。)",
+            "f": "错误。"
+        },
+        {
+            "t": "Threaded, flanged or welded.@@(螺纹、法兰或焊接。)",
+            "f": "正确。"
+        },
+        {
+            "t": "Joints properly sealed with paint.@@(接头用油漆适当密封。)",
+            "f": "错误。"
+        }
+    ],
+    "a": 1,
+    "exp": "解析: CSA B149.1 规范要求钢管的连接必须采用螺纹(threaded)、法兰(flanged)或焊接(welded)的方式。",
+    "src": "• 课文出处: Page 23。\n• 原文语句: \"CSA B149.1 requires the threading, flanging, and welding of joints in steel piping.\""
+},
+{
+    "u": "Chapter 1: Code requirements and approved joining methods",
+    "q": "Which of the following is not an appropriate gasket material for gas applications?@@(以下哪种不是燃气应用中合适的垫片材料？)",
+    "hint": "Some materials degrade when exposed to gas.",
+    "opts": [
+        {
+            "t": "Natural rubber@@(天然橡胶)",
+            "f": "正确。天然橡胶不被规范接受。"
+        },
+        {
+            "t": "Neoprene@@(氯丁橡胶)",
+            "f": "错误。这是一种可接受的材料。"
+        },
+        {
+            "t": "Nitrile@@(丁腈橡胶)",
+            "f": "错误。"
+        }
+    ],
+    "a": 0,
+    "exp": "解析: 垫圈材料必须是氯丁橡胶(neoprene)或类似的抗燃气作用的材料，天然橡胶(natural rubber)是绝对不可接受的。",
+    "src": "• 课文出处: Page 24。\n• 原文语句: \"Gasket materials must be of neoprene or a similar material that resists any action of gas. Natural rubber is not acceptable.\""
+},
+{
+    "u": "Chapter 2: Welding safety, certification, and procedures",
+    "q": "Which of the following is not a major welding hazard to workers in the vicinity of welding operations?@@(以下哪项不是焊接作业附近工人的主要焊接危险？)",
+    "hint": "Check the three main hazard categories.",
+    "opts": [
+        {
+            "t": "Physical@@(物理危险)",
+            "f": "错误。这是主要危险之一。"
+        },
+        {
+            "t": "Chemical@@(化学危险)",
+            "f": "错误。这也是主要危险之一。"
+        },
+        {
+            "t": "Environmental@@(环境危险)",
+            "f": "错误。这包含在危险列表内。"
+        },
+        {
+            "t": "Ergonomic@@(人体工学危险)",
+            "f": "正确。人体工学未列入教材定义的三大主要危险类别中。"
+        }
+    ],
+    "a": 3,
+    "exp": "解析: 焊接对焊工及其附近人员的主要危险分为三大类：物理危险(Physical)、化学危险(Chemical)和环境危险(Environmental)。人体工程学危险未包含在内。",
+    "src": "• 课文出处: Page 28-29。\n• 原文语句: \"Major welding hazards... may be divided into three general categories: Physical, Chemical, Environmental.\""
+},
+{
+    "u": "Chapter 2: Welding safety, certification, and procedures",
+    "q": "What type of radiation do x-rays, and gamma rays produce?@@(X射线和伽马射线产生什么类型的辐射？)",
+    "hint": "This type of radiation can damage cells directly.",
+    "opts": [
+        {
+            "t": "Ionizing@@(电离辐射)",
+            "f": "正确。"
+        },
+        {
+            "t": "Non-ionizing@@(非电离辐射)",
+            "f": "错误。"
+        }
+    ],
+    "a": 0,
+    "exp": "解析: X射线和伽马射线在焊接过程中会产生电离辐射(Ionizing radiation)，这对未受保护的身体部位具有极大的破坏性。",
+    "src": "• 课文出处: Page 29。\n• 原文语句: \"X-rays and gamma rays produce ionizing radiation during the welding process.\""
+},
+{
+    "u": "Chapter 2: Welding safety, certification, and procedures",
+    "q": "List the adverse effects from ultraviolet radiation produced by arc welding.@@(列出电弧焊产生的紫外线辐射的不良影响。)",
+    "hint": "Think about 'arc flash'.",
+    "opts": [
+        {
+            "t": "Hearing loss@@(听力丧失)",
+            "f": "错误。这是噪音导致的。"
+        },
+        {
+            "t": "Burns to eyes and skin from a reflection off bright objects@@(眼睛和皮肤被明亮物体的反射灼伤)",
+            "f": "正确。这就是所谓的电弧光伤。"
+        },
+        {
+            "t": "Burns to eyes and skin from hot metal and sparks@@(眼睛和皮肤被热金属和火花灼伤)",
+            "f": "错误。这是物理高温造成的，不是紫外线。"
+        }
+    ],
+    "a": 1,
+    "exp": "解析: 电弧或明亮物体反射产生的紫外线(UV)辐射如果不加防护，会导致眼睛出现“电弧光伤”(arc flash)以及皮肤烧伤和起泡。",
+    "src": "• 课文出处: Page 29。\n• 原文语句: \"The arc or from a reflection off bright objects like white clothing or shiny metal produces UV radiation. If your eyes do not have adequate protection, you could suffer from arc flash...\""
+},
+{
+    "u": "Chapter 2: Welding safety, certification, and procedures",
+    "q": "After welding is completed in an area where combustible material is present, how long should a 'fire watch' be maintained?@@(在有可燃物存在的区域完成焊接后，“火灾监视”应维持多长时间？)",
+    "hint": "Think about the minimum monitoring duration.",
+    "opts": [
+        {
+            "t": "At least 30 minutes@@(至少30分钟)",
+            "f": "正确。"
+        },
+        {
+            "t": "4 hours@@(4小时)",
+            "f": "错误。"
+        },
+        {
+            "t": "24 hours@@(24小时)",
+            "f": "错误。"
+        }
+    ],
+    "a": 0,
+    "exp": "解析: 在任何焊接或氧燃气切割过程完成后，火灾监视的持续时间不得少于30分钟，并且根据环境情况可能需要更长时间。",
+    "src": "• 课文出处: Page 34。\n• 原文语句: \"The monitoring duration should not be less than 30 min after completion of any welding or cutting process...\""
+},
+{
+    "u": "Chapter 2: Welding safety, certification, and procedures",
+    "q": "What type of protective glove should be worn when performing welding work?@@(进行焊接工作时应佩戴什么类型的防护手套？)",
+    "hint": "These gloves protect the forearm as well.",
+    "opts": [
+        {
+            "t": "Knitwrist-type@@(针织腕口型)",
+            "f": "错误。"
+        },
+        {
+            "t": "Slip-on-type@@(套入型)",
+            "f": "错误。"
+        },
+        {
+            "t": "Gauntlet-type@@(长手套/护手型)",
+            "f": "正确。这能提供手部到小臂的保护。"
+        },
+        {
+            "t": "Safety cuff-type@@(安全袖口型)",
+            "f": "错误。"
+        }
+    ],
+    "a": 2,
+    "exp": "解析: 规范要求在进行焊接工作时佩戴护手型(gauntlet-type)手套，以保护手腕和小臂免受火花和高温的伤害。",
+    "src": "• 课文出处: Page 33。\n• 原文语句: \"Wear gauntlet-type gloves.\""
+},
+{
+    "u": "Chapter 2: Welding safety, certification, and procedures",
+    "q": "Indicate True or False: Pants with cuffs should always be worn while performing welding work.@@(判断对错：进行焊接工作时应始终穿着带卷边的裤子。)",
+    "hint": "Think about where sparks could get trapped.",
+    "opts": [
+        {
+            "t": "True@@(正确)",
+            "f": "错误。"
+        },
+        {
+            "t": "False@@(错误)",
+            "f": "正确。裤子不应该有卷边。"
+        }
+    ],
+    "a": 1,
+    "exp": "解析: 裤子不能有卷边(cuffless pants)，因为火花和飞溅的热金属很容易掉入并困在卷边中引起燃烧。",
+    "src": "• 课文出处: Page 34。\n• 原文语句: \"Wear cuffless pants and make sure there are no hanging pieces of light fabric...\""
+},
+{
+    "u": "Chapter 2: Welding safety, certification, and procedures",
+    "q": "What should you never do while working with oxygen and acetylene?@@(在使用氧气和乙炔时，绝对不能做什么？)",
+    "hint": "Safety starts with letting experts fix pressurized containers.",
+    "opts": [
+        {
+            "t": "Repair a faulty cylinder@@(修理有故障的钢瓶)",
+            "f": "正确。绝对不能自己修。"
+        },
+        {
+            "t": "Keep oxy-acetylene equipment away from oil or grease@@(让氧-乙炔设备远离油或油脂)",
+            "f": "错误。这是必须做的事。"
+        },
+        {
+            "t": "Use the cylinder in a vertical position@@(在垂直位置使用钢瓶)",
+            "f": "错误。必须垂直使用。"
+        },
+        {
+            "t": "Test for leaks using a soap test@@(使用肥皂测试检查泄漏)",
+            "f": "错误。这是正确的测漏方法。"
+        }
+    ],
+    "a": 0,
+    "exp": "解析: 氧气和乙炔钢瓶是高压容器，如果出现故障或泄漏，必须将它们移到室外并通知供应商，绝对不能尝试自行修理。",
+    "src": "• 课文出处: Page 36。\n• 原文语句: \"Never attempt to repair a leaking or faulty cylinder yourself.\""
+},
+{
+    "u": "Chapter 2: Welding safety, certification, and procedures",
+    "q": "Is acetylene a very stable gas that is easily compressed to high pressures?@@(乙炔是一种非常稳定的气体，很容易被压缩到高压吗？)",
+    "hint": "Check its critical point.",
+    "opts": [
+        {
+            "t": "Yes@@(是)",
+            "f": "错误。"
+        },
+        {
+            "t": "No@@(否)",
+            "f": "正确。乙炔极不稳定。"
+        }
+    ],
+    "a": 1,
+    "exp": "解析: 乙炔是一种无色且不稳定的化合物(unstable compound)。当压力超过 15 psi 时，它就变得非常危险，容易分解引发爆炸，因此绝不能轻易高压压缩。",
+    "src": "• 课文出处: Page 30。\n• 原文语句: \"Acetylene gas used in welding work is a colourless, unstable compound... do not store or use free acetylene at pressures over 15 psi.\""
+},
+{
+    "u": "Chapter 2: Welding safety, certification, and procedures",
+    "q": "What should be done if welding is taking place in a confined area?@@(如果在密闭区域进行焊接，应该怎么做？)",
+    "hint": "Air quality is crucial.",
+    "opts": [
+        {
+            "t": "Ensure adequate ventilation@@(确保通风良好)",
+            "f": "正确。"
+        },
+        {
+            "t": "Wear a mask@@(戴口罩)",
+            "f": "错误。这不足以解决环境毒气积累。"
+        },
+        {
+            "t": "Wear gloves@@(戴手套)",
+            "f": "错误。解决密闭空间的核心是通风。"
+        }
+    ],
+    "a": 0,
+    "exp": "解析: 焊接车间或密闭工作区域通风不良会产生极其危险的有毒、可燃或易燃条件。因此必须确保良好的通风。",
+    "src": "• 课文出处: Page 32。\n• 原文语句: \"Inadequate ventilation of welding shops or confined work areas produces dangerously toxic, combustible, or inflammable conditions.\""
+},
+{
+    "u": "Chapter 2: Welding safety, certification, and procedures",
+    "q": "Should oxygen and acetylene regulators be oiled regularly?@@(应该定期给氧气和乙炔减压阀上油吗？)",
+    "hint": "Oil plus oxygen equals danger.",
+    "opts": [
+        {
+            "t": "Yes@@(是)",
+            "f": "错误。"
+        },
+        {
+            "t": "No@@(否)",
+            "f": "正确。绝对不能上油。"
+        }
+    ],
+    "a": 1,
+    "exp": "解析: 绝不能润滑减压阀或焊炬部件。纯氧与通常认为不易燃的油或油脂接触时，极易引起爆炸。",
+    "src": "• 课文出处: Page 36。\n• 原文语句: \"Never oil regulators or torch parts.\""
+},
+{
+    "u": "Chapter 2: Welding safety, certification, and procedures",
+    "q": "How many air changes per hour are required in a welding shop?@@(焊接车间每小时需要换气多少次？)",
+    "hint": "A specific number is mandated.",
+    "opts": [
+        {
+            "t": "One@@(一次)",
+            "f": "错误。"
+        },
+        {
+            "t": "Two@@(两次)",
+            "f": "错误。"
+        },
+        {
+            "t": "Four@@(四次)",
+            "f": "正确。"
+        }
+    ],
+    "a": 2,
+    "exp": "解析: 安全规定要求焊接车间必须保持每小时至少四次(four)良好的换气率。",
+    "src": "• 课文出处: Page 36。\n• 原文语句: \"Welding shops must have a minimum of four good air changes per hour.\""
+},
+{
+    "u": "Chapter 2: Welding safety, certification, and procedures",
+    "q": "With what are oxygen and acetylene cylinders fitted to minimize the possibility of explosion in case of fire?@@(氧气和乙炔钢瓶安装了什么装置以最大程度减少火灾时爆炸的可能性？)",
+    "hint": "It melts to release pressure safely.",
+    "opts": [
+        {
+            "t": "Shut off valves@@(切断阀)",
+            "f": "错误。"
+        },
+        {
+            "t": "Fusible plugs@@(易熔塞)",
+            "f": "正确。"
+        },
+        {
+            "t": "Regulators@@(减压阀)",
+            "f": "错误。"
+        }
+    ],
+    "a": 1,
+    "exp": "解析: 乙炔钢瓶每端至少有一个易熔塞(fusible plug)。其熔点为212°F(100°C)，设计用于在发生火灾时熔化，让气体缓慢可控地逸出，从而避免爆炸。",
+    "src": "• 课文出处: Page 36。\n• 原文语句: \"Acetylene cylinders, for safety reasons, must have at least one fusible plug on each end of the cylinder... designed to melt out in case of fire.\""
+},
+{
+    "u": "Chapter 2: Welding safety, certification, and procedures",
+    "q": "To what angle should pipe be beveled if it is to be welded?@@(如果要焊接管道，应将其倒角至什么角度？)",
+    "hint": "Look for the specific degree setting.",
+    "opts": [
+        {
+            "t": "Approximately 37 1/2°@@(大约 37.5°)",
+            "f": "正确。"
+        },
+        {
+            "t": "Approximately 45°@@(大约 45°)",
+            "f": "错误。"
+        },
+        {
+            "t": "Approximately 22 1/2°@@(大约 22.5°)",
+            "f": "错误。"
+        }
+    ],
+    "a": 0,
+    "exp": "解析: 准备用于对接焊接或管件匹配的压力管道时，应将其端部倒V型角至约 37-1/2°。",
+    "src": "• 课文出处: Page 45。\n• 原文语句: \"To prepare pressure pipe for butt welding or matching of fittings, V-bevel the ends to an angle of approximately 37-1/2°.\""
+},
+{
+    "u": "Chapter 2: Welding safety, certification, and procedures",
+    "q": "When the pipe and fittings are set up for welding, how wide is the root gap?@@(当管道和管件准备好进行焊接时，根部间隙有多宽？)",
+    "hint": "It's a very small fraction of an inch.",
+    "opts": [
+        {
+            "t": "1/8 inch to 1/4 inch@@(1/8 英寸至 1/4 英寸)",
+            "f": "错误。"
+        },
+        {
+            "t": "3/8 inch to 1/2 inch@@(3/8 英寸至 1/2 英寸)",
+            "f": "错误。"
+        },
+        {
+            "t": "1/16 inch to 1/8 inch@@(1/16 英寸至 1/8 英寸)",
+            "f": "正确。"
+        }
+    ],
+    "a": 2,
+    "exp": "解析: 在装配和点焊之前，必须将两端的根部间隙均匀隔开，间隙宽度根据焊接程序通常为 1/16 至 1/8 英寸 (1.6 - 3.2 毫米)。",
+    "src": "• 课文出处: Page 45。\n• 原文语句: \"The gap (or root) opening between the two ends is evenly spaced at 1/16-1/8 in (1.6-3.2 mm) according to the weld procedure.\""
+},
+{
+    "u": "Chapter 3: Utility and non-utility piping",
+    "q": "Complete the following sentence: When plastic gas piping is used underground, a minimum ____ copper wire is taped along the piping for tracing purposes using a metal detector or radio signals.@@(完成以下句子：当在地下使用塑料燃气管道时，必须沿着管道贴上一根最小____的铜线，以便使用金属探测器或无线电信号进行追踪。)",
+    "hint": "Check the required wire gauge for underground tracing.",
+    "opts": [
+        {
+            "t": "14 gauge@@(14号线)",
+            "f": "错误。"
+        },
+        {
+            "t": "12 gauge@@(12号线)",
+            "f": "错误。"
+        },
+        {
+            "t": "16 gauge@@(16号线)",
+            "f": "正确。规范要求使用最小16号铜线。"
+        },
+        {
+            "t": "10 gauge@@(10号线)",
+            "f": "错误。"
+        }
+    ],
+    "a": 2,
+    "exp": "解析: 当聚乙烯(PE)塑料燃气管道用于地下敷设时，必须沿着管道敷设一根最小16号(16-gauge)的铜线，以便日后使用金属探测器或无线电信号准确追踪管道位置。",
+    "src": "• 课文出处: Page 51。\n• 原文语句: \"When used underground, a minimum 16-gauge copper wire is taped along the piping for tracing purposes using a metal detector or radio signals\""
+},
+{
+    "u": "Chapter 3: Utility and non-utility piping",
+    "q": "Who is responsible for piping downstream of a gas utility meter?@@(谁负责燃气公用事业仪表下游的管道？)",
+    "hint": "Think about who owns the property inside the building.",
+    "opts": [
+        {
+            "t": "Property or building owner@@(物业或建筑物所有者)",
+            "f": "正确。仪表之后属于用户负责部分。"
+        },
+        {
+            "t": "Fuel supplier@@(燃料供应商)",
+            "f": "错误。供应商通常只负责到仪表(meter)为止。"
+        },
+        {
+            "t": "Installer@@(安装人员)",
+            "f": "错误。安装人员只负责安装质量，最终责任归属业主。"
+        }
+    ],
+    "a": 0,
+    "exp": "解析: 燃气仪表(meter)下游(downstream)的管道系统通常由该物业或建筑物的所有者(Property or building owner)负责维护和管理。",
+    "src": "• 课文出处: Page 52。\n• 原文语句: \"The piping downstream of a gas utility meter is usually the responsibility of the property or building owner.\""
+},
+{
+    "u": "Chapter 3: Utility and non-utility piping",
+    "q": "Coatings on underground steel pipe are made of what material?@@(地下钢管上的涂层是由什么材料制成的？)",
+    "hint": "It's a common type of plastic.",
+    "opts": [
+        {
+            "t": "Fusion Bonded Epoxy@@(熔结环氧树脂)",
+            "f": "错误。"
+        },
+        {
+            "t": "Polyethylene@@(聚乙烯)",
+            "f": "正确。"
+        },
+        {
+            "t": "Coal Tar Enamel@@(煤焦油瓷漆)",
+            "f": "错误。"
+        },
+        {
+            "t": "Asphalt Enamel@@(沥青瓷漆)",
+            "f": "错误。"
+        }
+    ],
+    "a": 1,
+    "exp": "解析: 埋在地下用于输送燃气的钢管(Wrapped steel)，其外部防腐涂层通常是由聚乙烯(Polyethylene)制成的。",
+    "src": "• 课文出处: Page 51。\n• 原文语句: \"Wrapped steel: Coated with polyethylene.\""
+},
+{
+    "u": "Chapter 3: Utility and non-utility piping",
+    "q": "What colour are the coatings on underground steel pipe?@@(地下钢管上的涂层是什么颜色的？)",
+    "hint": "Check the standard identification colors.",
+    "opts": [
+        {
+            "t": "Green or yellow@@(绿色或黄色)",
+            "f": "错误。"
+        },
+        {
+            "t": "Blue or green@@(蓝色或绿色)",
+            "f": "错误。"
+        },
+        {
+            "t": "Yellow or blue@@(黄色或蓝色)",
+            "f": "正确。"
+        }
+    ],
+    "a": 2,
+    "exp": "解析: 用于地下燃气输送的钢管上的聚乙烯涂层通常被染成蓝色(blue)或黄色(yellow)。",
+    "src": "• 课文出处: Page 51。\n• 原文语句: \"Coloured either blue or yellow\""
+},
+{
+    "u": "Chapter 3: Utility and non-utility piping",
+    "q": "Indicate True or False: Most non-utility gas piping and tubing operate aboveground.@@(判断对错：大多数非公用事业燃气管道和管材都在地上运行。)",
+    "hint": "Think about where gas lines usually run inside a building property.",
+    "opts": [
+        {
+            "t": "True@@(正确)",
+            "f": "正确。仪表后的大部分管道确实是在建筑地上空间。"
+        },
+        {
+            "t": "False@@(错误)",
+            "f": "错误。"
+        }
+    ],
+    "a": 0,
+    "exp": "解析: 大多数（但并非所有）非公用事业(non-utility)燃气管道和管材都是在地上(aboveground)运行的，通常分布在建筑内部。",
+    "src": "• 课文出处: Page 52。\n• 原文语句: \"Most, but not all, non-utility gas piping and tubing operate aboveground.\""
+},
+{
+    "u": "Chapter 3: Utility and non-utility piping",
+    "q": "Which of the following is not one of the three options for identifying gas piping or tubing?@@(以下哪一项不是标识燃气管道或管材的三个选项之一？)",
+    "hint": "Gas is universally marked with a specific color, red is for fire/danger.",
+    "opts": [
+        {
+            "t": "The entire piping or tubing system shall be painted yellow@@(整个管道或管材系统应涂成黄色)",
+            "f": "错误。这是合规的标识方法。"
+        },
+        {
+            "t": "The piping or tubing system shall be provided with yellow banding@@(管道或管材系统应设黄色色带)",
+            "f": "错误。这也是合规的方法。"
+        },
+        {
+            "t": "The piping or tubing system shall be labelled or marked 'GAS' or 'PROPANE'@@(管道或管材系统应贴标签或标记“GAS”或“PROPANE”)",
+            "f": "错误。这也是合规的方法。"
+        },
+        {
+            "t": "The piping or tubing system shall be provided with red banding@@(管道或管材系统应设红色色带)",
+            "f": "正确。红色通常用于消防系统，不用于燃气标识。"
+        }
+    ],
+    "a": 3,
+    "exp": "解析: 规范 6.17.1 要求商业、工业等建筑中的燃气管道必须使用以下三种方式之一进行标识：1. 全管涂黄；2. 黄色色带；3. 使用黄色标签标明'GAS'或'PROPANE'。红色色带不在此列。",
+    "src": "• 课文出处: Page 54。\n• 原文语句: \"...shall be identified by one of the following: a) the entire piping... painted yellow; b) ... yellow banding; or c) ... labelled or marked 'GAS' or 'PROPANE'...\""
+},
+{
+    "u": "Chapter 3: Utility and non-utility piping",
+    "q": "Complete the following sentence: For supply piping systems carrying pressures ____ and over, you must identify and label the supply pressure in addition to the identification requirements in clause 6.17.1.@@(完成以下句子：对于承受____及以上压力的供气管道系统，除了符合条款6.17.1的标识要求外，还必须标识和标注供气压力。)",
+    "hint": "Check the threshold for high pressure labeling.",
+    "opts": [
+        {
+            "t": "2 psi",
+            "f": "正确。"
+        },
+        {
+            "t": "4 psi",
+            "f": "错误。"
+        },
+        {
+            "t": "6 psi",
+            "f": "错误。"
+        },
+        {
+            "t": "8 psi",
+            "f": "错误。"
+        }
+    ],
+    "a": 0,
+    "exp": "解析: 对于运行压力达到或超过 2 psi 的供气管道系统，除了常规的黄色标识外，还必须额外贴上标签以清楚地标明其具体的供气压力。",
+    "src": "• 课文出处: Page 18。\n• 原文语句: \"For supply piping systems carrying pressures 2 psi and over must identify and label the supply pressure in addition to the above identification procedures.\""
+},
+{
+    "u": "Chapter 3: Utility and non-utility piping",
+    "q": "Indicate True or False: CSA B149.1 does not require the identification of gas piping in a residence.@@(判断对错：CSA B149.1 不要求在住宅内标识燃气管道。)",
+    "hint": "Differentiate between tubing and steel piping in residential environments.",
+    "opts": [
+        {
+            "t": "True@@(正确)",
+            "f": "正确。规范对住宅的标识要求主要针对管材(tubing)，对硬管道(piping)未做强制标识规定。"
+        },
+        {
+            "t": "False@@(错误)",
+            "f": "错误。"
+        }
+    ],
+    "a": 0,
+    "exp": "解析: 根据规范条款 6.17.1，管道颜色标识的要求主要针对护理、拘留、商业、工业和集会建筑。而条款 6.17.3 特别指出住宅建筑中的“管材系统(Tubing systems)”需要标识，但并没有强制要求住宅内的常规硬体钢管(piping)进行整管涂黄或贴标签。",
+    "src": "• 课文出处: Page 54。\n• 原文语句: \"At every care or detention occupancy, commercial, industrial, and assembly building, piping or tubing shall be identified... Tubing systems for residential buildings shall be identified...\""
+},
+{
+    "u": "Chapter 3: Utility and non-utility piping",
+    "q": "What are the final blueprint drawings used to locate and identify piping called?@@(用于定位和识别管道的最终蓝图图纸叫什么？)",
+    "hint": "It reflects the final state as constructed.",
+    "opts": [
+        {
+            "t": "As-built drawings@@(竣工图)",
+            "f": "正确。"
+        },
+        {
+            "t": "Ladder drawings@@(梯形图)",
+            "f": "错误。梯形图多用于电气控制。"
+        },
+        {
+            "t": "Installation drawings@@(安装图)",
+            "f": "错误。"
+        }
+    ],
+    "a": 0,
+    "exp": "解析: 竣工图(As-built drawings)是包含了初始设计及施工过程中所有变更(revisions)的最终蓝图，是准确反映当前系统状态以用于定位管道的最可靠依据。",
+    "src": "• 课文出处: Page 55。\n• 原文语句: \"Whenever you use blueprints to locate and identify piping, use the final drawings. These are what you call 'as built' drawings...\""
+},
+{
+    "u": "Chapter 3: Utility and non-utility piping",
+    "q": "What is the surest way to identify the contents of a sealed pipe?@@(识别密封管道内物质的最可靠方法是什么？)",
+    "hint": "Follow the line to see where it comes from.",
+    "opts": [
+        {
+            "t": "Tap on it@@(敲击它)",
+            "f": "错误。听声音无法准确判断气体、水或其他流体。"
+        },
+        {
+            "t": "Trace it back to its source@@(追溯到其源头)",
+            "f": "正确。"
+        },
+        {
+            "t": "X-ray it@@(对其进行X光检查)",
+            "f": "错误。X射线用于检查焊缝缺陷，无法识别管内流体种类。"
+        }
+    ],
+    "a": 1,
+    "exp": "解析: 在很多情况下，如果管道没有任何颜色或标签标识，判断一根密封管道里面装的是什么的最简单、最可靠的方法(the easiest and surest way)就是顺着管道的走向一直追溯到它的源头(source)。",
+    "src": "• 课文出处: Page 55。\n• 原文语句: \"In some situations, the easiest and surest way to identify what a sealed pipe is carrying is to trace it back to its source.\""
+},
+{
+    "u": "Chapter 4: Piping Layout, Drawings and Symbols",
+    "q": "If there is a discrepancy between the specifications and the drawings, which one is taken to be correct?@@(如果规范/说明书和图纸之间存在差异，以哪一个为准？)",
+    "hint": "Think about which document holds the written legal technical details.",
+    "opts": [
+        {
+            "t": "Drawings@@(图纸)",
+            "f": "错误。"
+        },
+        {
+            "t": "Specifications@@(规范/说明书)",
+            "f": "正确。在工程或安装中发生冲突时，通常以详细的文字规范(Specifications)为准。"
+        }
+    ],
+    "a": 1,
+    "exp": "解析: 当图纸(Drawings)的设计与书面规范(Specifications)中的具体要求出现差异或矛盾时，书面规范具有更高的约束力，应以规范为准。",
+    "src": "• 课文出处: Unit 10 Chapter 4 课后习题。"
+},
+{
+    "u": "Chapter 4: Piping Layout, Drawings and Symbols",
+    "q": "The manufacturer's installation and service manual are supplied with every appliance. How much of it should you read?@@(每台器具都附带制造商的安装和维修手册。你应该阅读多少？)",
+    "hint": "Safety and specific procedures vary by unit.",
+    "opts": [
+        {
+            "t": "Just the final startup and commissioning page@@(只读最后的启动和调试页面)",
+            "f": "错误。"
+        },
+        {
+            "t": "Should already know it@@(应该已经知道了)",
+            "f": "错误。每种设备都可能有其独特的要求和隐患。"
+        },
+        {
+            "t": "All of it@@(全部)",
+            "f": "正确。必须完整阅读以确保合规和安全。"
+        }
+    ],
+    "a": 2,
+    "exp": "解析: 作为燃气技术人员，面对任何随设备附带的制造商安装和维修手册，必须完整阅读(All of it)，因为这不仅关系到正确安装，更是安全免责和避免损坏设备的重要依据。",
+    "src": "• 课文出处: Unit 10 Chapter 4 课后习题。"
+},
+{
+    "u": "Chapter 4: Piping Layout, Drawings and Symbols",
+    "q": "Do the installation and service manuals supplied by the manufacturer always specify details of replacement parts?@@(制造商提供的安装和维修手册是否总是详细说明更换零件的信息？)",
+    "hint": "Think about whether catalogs are sometimes separate.",
+    "opts": [
+        {
+            "t": "Yes@@(是)",
+            "f": "错误。"
+        },
+        {
+            "t": "No@@(否)",
+            "f": "正确。并非总是包含。"
+        }
+    ],
+    "a": 1,
+    "exp": "解析: 安装和维修手册主要用于指导设备的初始安装和故障排除，并不总是(not always)包含所有备件的详细信息，有时备件明细会单独成册(如 Parts Catalog)。",
+    "src": "• 课文出处: Unit 10 Chapter 4 课后习题。"
+},
+{
+    "u": "Chapter 4: Piping Layout, Drawings and Symbols",
+    "q": "The two ways that manual valves are joined to the gas piping systems are:@@(手动阀门连接到燃气管道系统的两种方式是：)",
+    "hint": "Consider acceptable commercial and industrial joints.",
+    "opts": [
+        {
+            "t": "Threaded or flanged@@(螺纹或法兰)",
+            "f": "正确。这两种是大型或常规压力系统最常见且合规的连接方式。"
+        },
+        {
+            "t": "Flanged or soldered@@(法兰或焊接/钎焊)",
+            "f": "错误。"
+        },
+        {
+            "t": "Soldered or threaded@@(焊接/钎焊或螺纹)",
+            "f": "错误。"
+        }
+    ],
+    "a": 0,
+    "exp": "解析: 在工商业燃气管道系统中，手动阀门通常通过螺纹(Threaded)连接或法兰(Flanged)连接的方式安装到管道上。",
+    "src": "• 课文出处: Unit 10 Chapter 4 课后习题。"
+},
+{
+    "u": "Chapter 4: Piping Layout, Drawings and Symbols",
+    "q": "Which of the following is not a function of an automatic valve?@@(以下哪项不是自动阀门的功能？)",
+    "hint": "What component actually dictates the sequence and sends the spark?",
+    "opts": [
+        {
+            "t": "Control the firing of the burner@@(控制燃烧器的点火)",
+            "f": "正确。这不是阀门本身的功能，而是点火模块的工作。"
+        },
+        {
+            "t": "Open or energize when the controller calls for the burner to ignite@@(当控制器要求燃烧器点火时，打开或通电)",
+            "f": "错误。这是阀门的基本响应功能。"
+        },
+        {
+            "t": "Act as a safety shut-off valve@@(作为安全切断阀)",
+            "f": "错误。自动切断是燃气阀的核心安全设计。"
+        }
+    ],
+    "a": 0,
+    "exp": "解析: 自动燃气阀门被动接收信号打开气体(energize)或在检测到危险时作为安全切断阀关闭(safety shut-off)。而实际控制点火逻辑、发送电火花等控制燃烧器点火(Control the firing)的过程是由主板或点火模块(Ignition module)完成的。",
+    "src": "• 课文出处: Unit 10 Chapter 4 课后习题。"
+},
+{
+    "u": "Chapter 4: Piping Layout, Drawings and Symbols",
+    "q": "Describe the function of a solenoid valve.@@(描述电磁阀的功能。)",
+    "hint": "It operates based on electrical demand.",
+    "opts": [
+        {
+            "t": "Energize (open) on a call for heat and de-energize (close) when the heat demand is satisfied@@(在需要热量时通电(打开)，在满足热量需求时断电(关闭))",
+            "f": "正确。"
+        },
+        {
+            "t": "Control the burner without anyone being present@@(在无人看管的情况下控制燃烧器)",
+            "f": "错误。这过于宽泛，属于整个自动控制系统的作用。"
+        },
+        {
+            "t": "Interlocks with a gas sensor to prevent gas leaks@@(与燃气传感器联锁以防止气体泄漏)",
+            "f": "错误。虽然可以实现这种联锁，但这不是电磁阀基础定义的核心功能描述。"
+        }
+    ],
+    "a": 0,
+    "exp": "解析: 电磁阀(Solenoid valve)最基础且核心的功能就是作为一个电控开关。当恒温器发出热量需求信号时线圈通电打开阀门(Energize)；当需求满足时断电，弹簧将阀门关闭(De-energize)。",
+    "src": "• 课文出处: Unit 10 Chapter 4 课后习题。"
+},
+{
+    "u": "Chapter 5: Sizing high-pressure piping and tubing",
+    "q": "Indicate True or False: The reasons for having separate sizing tables for natural gas and propane fuels are because of the differing properties as gases.@@(判断对错：天然气和丙烷燃料有独立尺寸表的原因是由于它们作为气体的特性不同。)",
+    "hint": "Check the properties of natural gas vs propane.",
+    "opts": [
+        {
+            "t": "True@@(正确)",
+            "f": "正确。丙烷和天然气的比重、运行压力和热值都不同。"
+        },
+        {
+            "t": "False@@(错误)",
+            "f": "错误。"
+        }
+    ],
+    "a": 0,
+    "exp": "解析: 根据课文，丙烷和天然气有独立的管径测算表，主要因为它们作为气体具有不同的物理特性（例如比重、运行压力以及不同的热值）。",
+    "src": "• 课文出处: Page 72。\n• 原文语句: \"The reasons for having separate sizing tables for natural gas and propane fuels are because of the differing properties as gases.\""
+},
+{
+    "u": "Chapter 5: Sizing high-pressure piping and tubing",
+    "q": "What is the correct order of procedural steps for pipe sizing?@@(管道尺寸计算的正确程序步骤顺序是什么？)",
+    "hint": "Think about what you need to do first before picking a table or sizing.",
+    "opts": [
+        {
+            "t": "1. Sketch the system -> 2. Select a table -> 3. Determine the Code zone -> 4. Size pipe sections -> 5. Prove the Code zone (if pressure is over 2 psi)@@(1.绘制系统草图 -> 2.选择表格 -> 3.确定规范区域 -> 4.计算管道尺寸 -> 5.验证规范区域(如果压力超过2 psi))",
+            "f": "正确。这是规范要求的标准测算步骤。"
+        },
+        {
+            "t": "1. Select a table -> 2. Sketch the system -> 3. Determine the Code zone -> 4. Size pipe sections -> 5. Prove the Code zone@@(1.选择表格 -> 2.绘制系统草图 -> 3.确定规范区域 -> 4.计算管道尺寸 -> 5.验证规范区域)",
+            "f": "错误。必须先了解系统布局(Sketch)才能选择表格和进行后续计算。"
+        },
+        {
+            "t": "1. Determine the Code zone -> 2. Sketch the system -> 3. Select a table -> 4. Size pipe sections -> 5. Prove the Code zone@@(1.确定规范区域 -> 2.绘制系统草图 -> 3.选择表格 -> 4.计算管道尺寸 -> 5.验证规范区域)",
+            "f": "错误。步骤逻辑混乱。"
+        }
+    ],
+    "a": 0,
+    "exp": "解析: 管道尺寸计算的标准程序为：1.绘制系统草图(Sketch the system)；2.选择合适的表格(Select a table)；3.确定规范区域(Determine Code zone)；4.计算管道各段尺寸(Size pipe sections)；5.验证规范区域是否正确(Prove Code zone is correct)。",
+    "src": "• 课文出处: Page 73。\n• 原文语句: \"Procedural steps: 1. Sketch the system, 2. Select a table, 3. Determine Code zone, 4. Size pipe sections, 5. Prove Code zone is correct.\""
+},
+{
+    "u": "Chapter 6: Purging operations on large piping systems",
+    "q": "With what would you purge a pipe sized 4 inches or over, if it has been tested with air?@@(如果尺寸为4英寸及以上的管道是用空气进行测试的，你会用什么进行吹扫？)",
+    "hint": "Look for the recommended inert gases.",
+    "opts": [
+        {
+            "t": "Carbon dioxide or nitrogen or a mixture of both.@@(二氧化碳或氮气或两者的混合物。)",
+            "f": "正确。规范要求使用这些惰性气体作为中间缓冲介质。"
+        },
+        {
+            "t": "Nitrogen or Radon or a mixture of both.@@(氮气或氡气或两者的混合物。)",
+            "f": "错误。氡气是具有放射性的危险气体，不能用于吹扫。"
+        },
+        {
+            "t": "Radon or carbon dioxide or a mixture of both.@@(氡气或二氧化碳或两者的混合物。)",
+            "f": "错误。"
+        }
+    ],
+    "a": 0,
+    "exp": "解析: 规范规定，如果管道尺寸达到或大于NPS 4，且使用了空气进行压力测试，在通入燃气前，必须先使用二氧化碳、氮气或两者的混合气体进行惰性吹扫。",
+    "src": "• 课文出处: Page 86。\n• 原文语句: \"If the piping is NPS 4 or larger, and testing involves the use of air, you must first purge it with carbon dioxide, nitrogen, or a mixture of these...\""
+},
+{
+    "u": "Chapter 6: Purging operations on large piping systems",
+    "q": "What can occur when purging is not carried out correctly?@@(如果不正确执行吹扫操作，会发生什么？)",
+    "hint": "Think about the primary safety reason for purging.",
+    "opts": [
+        {
+            "t": "The wrong gas could enter the pipe.@@(错误的气体可能会进入管道。)",
+            "f": "错误。这属于操作失误，而非吹扫不当导致的主要物理后果。"
+        },
+        {
+            "t": "The accidental explosion of a gas-air mixture outside and inside the pipe.@@(管道内外燃气-空气混合物发生意外爆炸。)",
+            "f": "正确。混合物如果达到爆炸极限，一旦有火花就会爆炸。"
+        },
+        {
+            "t": "There could be a blockage in the pipe that goes undetected.@@(管道内可能存在未被发现的堵塞。)",
+            "f": "错误。吹扫的主要目的不是为了检查堵塞。"
+        }
+    ],
+    "a": 1,
+    "exp": "解析: 将空气和燃气混合会产生严重的爆炸风险。法规要求正确吹扫就是为了防止在管道内或管道外排出时产生易燃易爆的燃气-空气混合物。",
+    "src": "• 课文出处: Page 86-87。\n• 原文语句: \"Code regulations require that you purge correctly to prevent the accidental explosion of a gas-air mixture outside and inside the pipe.\""
+},
+{
+    "u": "Chapter 6: Purging operations on large piping systems",
+    "q": "Is it acceptable to purge a new gas line through the burner system into a combustion chamber?@@(将新燃气管线通过燃烧器系统吹扫到燃烧室中是否可以接受？)",
+    "hint": "Consider the danger of unburnt gas accumulating in confined spaces.",
+    "opts": [
+        {
+            "t": "Yes, if the building is vacant@@(可以，如果建筑物是空置的)",
+            "f": "错误。无论建筑是否空置，燃烧室都是密闭空间，极易引发爆炸。"
+        },
+        {
+            "t": "No@@(不可以)",
+            "f": "正确。绝对不允许将管线直接排入密闭空间。"
+        }
+    ],
+    "a": 1,
+    "exp": "解析: 将可燃气体排入任何密闭空间（例如燃烧室）都是极其危险的。最安全的做法是使用吹扫软管将气体引至室外排放。",
+    "src": "• 课文出处: Page 87。\n• 原文语句: \"It is, therefore, important that you do not purge into any confined space, such as a room where the potential for fire and explosion exist. Generally, the safest approach is to use a purge hose to the outdoors...\""
+},
+{
+    "u": "Chapter 6: Purging operations on large piping systems",
+    "q": "Why is it important to purge the air out of larger diameter pipes with an inert gas prior to the fuel gas being introduced into the pipe?@@(在向管道引入燃气之前，为什么用惰性气体将大直径管道中的空气吹扫出去很重要？)",
+    "hint": "What are you preventing by separating air and gas?",
+    "opts": [
+        {
+            "t": "So there will be no air in the pipe to support combustion.@@(这样管道里就没有空气来支持燃烧。)",
+            "f": "正确。惰性气体作为隔离层，避免空气和燃气直接接触。"
+        },
+        {
+            "t": "To prevent the mercaptan from being washed out of the gas when introduced into the pipe for the first time.@@(为了防止燃气首次引入管道时硫醇(臭味剂)被洗掉。)",
+            "f": "错误。这与防爆无关。"
+        },
+        {
+            "t": "To ensure the gas will ignite properly when turned on for the first time.@@(为了确保首次开启时燃气能正常点燃。)",
+            "f": "错误。主要目的是安全防爆，而不是点火顺利。"
+        }
+    ],
+    "a": 0,
+    "exp": "解析: 使用惰性气体（如氮气）吹扫大直径管道，消除了空气与燃料气体混合的可能，从而避免了空气支撑燃烧和形成爆炸性混合物的风险。",
+    "src": "• 课文出处: Page 85 & 88。\n• 原文语句: \"...use of inert gases to purge large lines removes the possibility of accidental ignition and explosion.\" 及 \"Purge inert gas with fuel gas. This will prevent the formation of gas-air mixtures.\""
+},
+{
+    "u": "Chapter 6: Purging operations on large piping systems",
+    "q": "What is an alternative to completely purging long, large pipes with nitrogen?@@(使用氮气完全吹扫长而大管道的替代方法是什么？)",
+    "hint": "Think of inserting a 'chunk' or 'pill' of inert gas.",
+    "opts": [
+        {
+            "t": "Air-purging@@(空气吹扫)",
+            "f": "错误。"
+        },
+        {
+            "t": "Slug-purging@@(气段/段塞吹扫)",
+            "f": "正确。这种方法更经济。"
+        },
+        {
+            "t": "Fuel gas to fuel gas purging@@(燃气到燃气吹扫)",
+            "f": "错误。"
+        }
+    ],
+    "a": 1,
+    "exp": "解析: 对于非常长的大直径管道，完全用氮气吹扫成本太高。替代方案是“气段吹扫(Slug-purging)”，即先注入一段体积足够大的氮气段作为隔离带，然后再通入燃气将其推过管道。",
+    "src": "• 课文出处: Page 88。\n• 原文语句: \"For very long, large pipes... instead of performing two successive purges, you might slug-purge to flush out all the contents of the pipe.\""
+},
+{
+    "u": "Chapter 6: Purging operations on large piping systems",
+    "q": "What is normal purge velocity for large pipes?@@(大管道的正常吹扫流速是多少？)",
+    "hint": "A specific minimum flow rate is needed to keep the slug intact.",
+    "opts": [
+        {
+            "t": "100 ft/min@@(100 英尺/分钟)",
+            "f": "错误。"
+        },
+        {
+            "t": "150 ft/min@@(150 英尺/分钟)",
+            "f": "错误。"
+        },
+        {
+            "t": "200 ft/min@@(200 英尺/分钟)",
+            "f": "正确。这个流速能确保管道内的气体被彻底推挤。"
+        }
+    ],
+    "a": 2,
+    "exp": "解析: 在大管道中必须维持正常的吹扫流速（200 英尺/分钟），以确保气体在移动时能“擦洗”管壁，并防止不同气体在移动过程中相互混合。",
+    "src": "• 课文出处: Page 88。\n• 原文语句: \"Maintain normal purge velocity (200 ft/min in large piping) so that the pipe is scrubbed as the gas moves and prevents the gases from intermingling...\""
+},
+{
+    "u": "Chapter 7: Rigging and hoisting",
+    "q": "Where can you find the requirements for safe rigging work practices in Canada?@@(在加拿大，哪里可以找到安全吊装作业规范的要求？)",
+    "hint": "Think about the legal framework governing workplace safety.",
+    "opts": [
+        {
+            "t": "CSA B149.1 Natural gas and propane installation code@@(CSA B149.1 天然气和丙烷安装规范)",
+            "f": "错误。燃气规范不主要涵盖通用吊装和索具的安全标准。"
+        },
+        {
+            "t": "TSSA Guidelines@@(TSSA指南)",
+            "f": "错误。"
+        },
+        {
+            "t": "Provincial or Territorial OHS acts and regulations@@(省或地区的职业健康与安全(OHS)法案和法规)",
+            "f": "正确。吊装和索具作业主要受各地OHS法规管辖。"
+        }
+    ],
+    "a": 2,
+    "exp": "解析: 在加拿大，关于安全吊装和索具工作实践的法律要求主要体现在各省或地区的职业健康与安全(OHS)法案和法规中。",
+    "src": "• 课文出处: Page 111 (参考 Occupational Health and Safety Code 引用) 及 Page 120 习题。"
+},
+{
+    "u": "Chapter 7: Rigging and hoisting",
+    "q": "Which of the following describes an asymmetrical load?@@(以下哪一项描述了非对称载荷？)",
+    "hint": "Think about how an irregular shape affects balance.",
+    "opts": [
+        {
+            "t": "An object with a high center of gravity due to the object's long shape and/or composition.@@(由于物体的长形状和/或组成而具有高重心的物体。)",
+            "f": "错误。重心高不代表非对称。"
+        },
+        {
+            "t": "An object with an off-center center of gravity due to the object's irregular shape and/or composition.@@(由于物体的不规则形状和/或组成而导致重心偏离中心的物体。)",
+            "f": "正确。重心偏离是典型的非对称载荷特征。"
+        },
+        {
+            "t": "An object with a low center of gravity due to the object's long shape and/or composition.@@(由于物体的长形状和/或组成而具有低重心的物体。)",
+            "f": "错误。"
+        }
+    ],
+    "a": 1,
+    "exp": "解析: 非对称载荷(asymmetrical load)指的是因为物体形状不规则或内部结构分布不均，导致其重心(center of gravity)不在物体几何中心的载荷。",
+    "src": "• 课文出处: Page 115。Handling asymmetrical loads 章节说明其重心偏离需要特殊起吊。"
+},
+{
+    "u": "Chapter 7: Rigging and hoisting",
+    "q": "Which of the following describes a symmetrical load?@@(以下哪一项描述了对称载荷？)",
+    "hint": "Symmetrical means even all around.",
+    "opts": [
+        {
+            "t": "An object that, because of its uniform shape and composition, has its center of gravity located exactly in its middle.@@(一个物体由于其均匀的形状和组成，其重心正好位于其正中间。)",
+            "f": "正确。"
+        },
+        {
+            "t": "An object that, because of its odd shape and composition, has its center of gravity located off center.@@(一个物体由于其奇怪的形状和组成，其重心偏离中心。)",
+            "f": "错误。这是非对称载荷的定义。"
+        }
+    ],
+    "a": 0,
+    "exp": "解析: 对称载荷(symmetrical load)的形状和质量分布是均匀的，因此它的重心正好位于物体的正中心。",
+    "src": "• 课文出处: Page 113。Handling symmetrical loads 章节基础定义。"
+},
+{
+    "u": "Chapter 7: Rigging and hoisting",
+    "q": "Choose the correct volume for the following rectangle/square: Concrete block, 9 feet long x 3 feet wide x 5 feet high.@@(选择以下矩形/正方形的正确体积：混凝土块，长9英尺 x 宽3英尺 x 高5英尺。)",
+    "hint": "Multiply Length x Width x Height to get cubic feet, then multiply by the weight factor.",
+    "opts": [
+        {
+            "t": "Block weight = 120 cu ft x 150 lbs/cu ft = 18 000 lbs.@@(重量 = 120立方英尺 x 150磅/立方英尺 = 18,000磅)",
+            "f": "错误。体积计算错误。"
+        },
+        {
+            "t": "Block weight = 130 cu ft x 150 lbs/cu ft = 19 500 lbs.@@(重量 = 130立方英尺 x 150磅/立方英尺 = 19,500磅)",
+            "f": "错误。体积计算错误。"
+        },
+        {
+            "t": "Block weight = 135 cu ft x 150 lbs/cu ft = 20 250 lbs.@@(重量 = 135立方英尺 x 150磅/立方英尺 = 20,250磅)",
+            "f": "正确。9 x 3 x 5 = 135。"
+        }
+    ],
+    "a": 2,
+    "exp": "解析: 体积 = 长 x 宽 x 高 = 9 x 3 x 5 = 135 立方英尺(cu ft)。该选项展示了正确的体积以及根据每立方英尺150磅的标准计算出的总重量 20,250 磅。",
+    "src": "• 课文出处: Page 120 习题 4。"
+},
+{
+    "u": "Chapter 7: Rigging and hoisting",
+    "q": "While performing Pre-Use Inspection you discover the wire rope sling shows signs of localized wear, abrasion or scraping. Is the sling safe to use and why?@@(在执行使用前检查时，你发现钢丝绳吊索出现局部磨损、擦伤或刮痕的迹象。该吊索可以安全使用吗？为什么？)",
+    "hint": "Safety in rigging allows zero tolerance for damaged equipment.",
+    "opts": [
+        {
+            "t": "Yes, as long as it appears to be strong enough to support the load - In order to stay on schedule with the project.@@(是的，只要它看起来足够坚固能支撑载荷——为了保证项目进度。)",
+            "f": "错误。项目进度绝不能凌驾于安全之上。"
+        },
+        {
+            "t": "No, it is not safe to use - Slings must be removed from service when any substandard conditions exist.@@(不，使用它是不安全的——当存在任何不合格条件时，必须将吊索停止使用。)",
+            "f": "正确。吊装设备必须无任何缺陷。"
+        }
+    ],
+    "a": 1,
+    "exp": "解析: 如果发现吊索有任何异常磨损(abnormal wear)或不合格状况，必须立即将其从服务中移除(remove from service)。不能心存侥幸。",
+    "src": "• 课文出处: Page 111。原文语句: \"Remove all rope from service if any of the following conditions are present: abnormal wear...\""
+},
+{
+    "u": "Chapter 7: Rigging and hoisting",
+    "q": "When a wire rope sling is used in a basket hitch, the diameter of the load where the sling contacts the load can reduce sling capacity. What is the ratio used to determine the loss of strength or efficiency and is referred to as?@@(当钢丝绳吊索用于篮式吊结时，吊索接触载荷的直径会降低吊索的承载能力。用于确定强度或效率损失的比率称为什么？)",
+    "hint": "It compares the large diameter to the small diameter.",
+    "opts": [
+        {
+            "t": "D/d Ratio@@(D/d 比率)",
+            "f": "正确。"
+        },
+        {
+            "t": "R/d Ratio@@(R/d 比率)",
+            "f": "错误。"
+        },
+        {
+            "t": "D/r Ratio@@(D/r 比率)",
+            "f": "错误。"
+        }
+    ],
+    "a": 0,
+    "exp": "解析: 在吊装行业中，D/d 比率(D/d Ratio)用于计算由于弯曲而在钢丝绳中造成的强度损失。其中 D 是载荷的直径，d 是钢丝绳本身的直径。",
+    "src": "• 课文出处: Page 120 习题 6 及通用吊装规范知识。"
+},
+{
+    "u": "Chapter 7: Rigging and hoisting",
+    "q": "Which type of sling can be used safely in explosive atmospheres?@@(哪种类型的吊索可以在爆炸性环境中安全使用？)",
+    "hint": "You need a material that cannot produce sparks.",
+    "opts": [
+        {
+            "t": "Vinyl covered steel cable sling@@(乙烯基覆盖的钢缆吊索)",
+            "f": "错误。一旦覆盖层破损，钢缆仍可能产生火花。"
+        },
+        {
+            "t": "Fabric sling@@(织物吊索)",
+            "f": "错误。不够精确，且不属于标准分类术语。"
+        },
+        {
+            "t": "Synthetic sling@@(合成纤维吊索)",
+            "f": "正确。由于是不良导体且不会产生火花，适用于危险环境。"
+        }
+    ],
+    "a": 2,
+    "exp": "解析: 合成材料（如尼龙或聚酯）不仅重量轻，而且是不良导体，不会在与金属摩擦或撞击时产生火花。因此，合成纤维吊索(Synthetic sling)是在爆炸性气体环境中安全起重的首选。",
+    "src": "• 课文出处: Page 111 (参考 nylon rope properties)。原文提到 nylon 是 poor conductor of electricity，并且绝缘防爆。"
+},
+{
+    "u": "Chapter 7: Rigging and hoisting",
+    "q": "When using a chain for overhead lifting, what alloy grade or grade is recommended?@@(使用链条进行高空/顶置起重时，建议使用哪种合金等级或等级？)",
+    "hint": "Only specific high-strength grades are approved for overhead lifting.",
+    "opts": [
+        {
+            "t": "Either grade 80 or 100 is recommended.@@(建议使用 80 级或 100 级。)",
+            "f": "正确。这是业界强制性标准。"
+        },
+        {
+            "t": "Either grade 50 or 100 is recommended.@@(建议使用 50 级或 100 级。)",
+            "f": "错误。50级不够强。"
+        },
+        {
+            "t": "Any chain that is heavy steel.@@(任何重型钢链都可以。)",
+            "f": "错误。这是极其危险的误解。"
+        }
+    ],
+    "a": 0,
+    "exp": "解析: 出于安全考虑，OSHA 和 ASME 规范严格规定，只有 80 级 (Grade 80) 或 100 级 (Grade 100) 的合金钢链条才被批准用于顶置吊装(overhead lifting)。",
+    "src": "• 课文出处: Page 121 习题 8 及通用吊装规范知识。"
+},
+{
+    "u": "Chapter 7: Rigging and hoisting",
+    "q": "How often should hooks be inspected?@@(吊钩应该多久检查一次？)",
+    "hint": "Check the requirements for frequency during an active job.",
+    "opts": [
+        {
+            "t": "Before and after each use@@(每次使用前后)",
+            "f": "错误。"
+        },
+        {
+            "t": "Before and frequently during use@@(使用前和使用过程中经常检查)",
+            "f": "正确。规范明确规定了这一频率。"
+        },
+        {
+            "t": "Weekly@@(每周)",
+            "f": "错误。"
+        },
+        {
+            "t": "Annually@@(每年)",
+            "f": "错误。年度检查是另一回事，日常操作频率要高得多。"
+        }
+    ],
+    "a": 1,
+    "exp": "解析: 操作规范明确规定，必须在每天使用前以及使用过程中频繁地(frequently)对吊装设备(包含吊钩)进行检查。",
+    "src": "• 课文出处: Page 112。\n• 原文语句: \"Remember that you must inspect daily before use and frequently during use.\""
+},
+{
+    "u": "Chapter 7: Rigging and hoisting",
+    "q": "What should do if your inspection reveals a small gouge in the hook?@@(如果您的检查发现吊钩上有一个小划痕/凿痕，应该怎么做？)",
+    "hint": "There is no 'repairing' a forged lifting hook.",
+    "opts": [
+        {
+            "t": "Inform your supervisor and use the hook@@(通知你的主管并继续使用该吊钩)",
+            "f": "错误。有缺陷的吊钩不能继续使用。"
+        },
+        {
+            "t": "Repair the gouge@@(修复划痕/凿痕)",
+            "f": "错误。焊接或打磨会破坏吊钩的原始锻造强度。"
+        },
+        {
+            "t": "Nothing, a small gouge won't affect the hook@@(什么都不做，一个小划痕不会影响吊钩)",
+            "f": "错误。"
+        },
+        {
+            "t": "Remove from service@@(将其从服务中移除/停止使用)",
+            "f": "正确。必须直接报废。"
+        }
+    ],
+    "a": 3,
+    "exp": "解析: 吊钩上的任何缺口、凿痕或变形都意味着其结构完整性已受损。不允许擅自修理，唯一正确的做法是立即停止使用(remove from service)。",
+    "src": "• 课文出处: Page 113。\n• 原文语句: \"The operator must: not operate a hoist that is tagged out-of-service... report substandard conditions.\""
+},
+{
+    "u": "Chapter 7: Rigging and hoisting",
+    "q": "What are three common shackles used in rigging and hoisting operations?@@(吊装和索具操作中常用的三种卸扣是什么？)",
+    "hint": "Consider the pin types.",
+    "opts": [
+        {
+            "t": "Snap, wide body, and bolt type@@(卡扣型、宽体型和螺栓型)",
+            "f": "错误。"
+        },
+        {
+            "t": "Wide body, screw, and snap type@@(宽体型、螺旋型和卡扣型)",
+            "f": "错误。"
+        },
+        {
+            "t": "Bolt, screw, and snap type@@(螺栓型、螺旋型和卡扣型)",
+            "f": "错误。"
+        },
+        {
+            "t": "Screw, wide body, and bolt type@@(螺旋型、宽体型和螺栓型)",
+            "f": "正确。"
+        }
+    ],
+    "a": 3,
+    "exp": "解析: 在起重操作中，最常见的三种卸扣是：螺旋销卸扣(Screw pin shackle)、宽体/圆形卸扣(wide body shackle)和螺栓型卸扣(bolt type shackle)。",
+    "src": "• 课文出处: Page 121 习题 11 及通用吊装规范知识。"
+},
+{
+    "u": "Unit 10 Assignment #1",
+    "q": "What is a Code practice during installation of piping and tubing that will ensure the system stays leak-free for years to come.@@(在安装管道和管材期间，什么是可以确保系统多年无泄漏的规范操作？)",
+    "hint": "Think about checking materials before assembly.",
+    "opts": [
+        {
+            "t": "Use a lot of pipe dope@@(使用大量管道密封胶)",
+            "f": "错误。密封胶不能滥用，且不能保证长期无泄漏。"
+        },
+        {
+            "t": "Visually inspect pipe, tube and fittings.@@(目视检查管道、管材和管件。)",
+            "f": "正确。安装前的目视检查是排除缺陷材料和防止未来泄漏的关键。"
+        },
+        {
+            "t": "Use Brand new fittings every time@@(每次都使用全新的管件)",
+            "f": "错误。虽然通常使用新管件，但并不是唯一或核心的规范要求。"
+        },
+        {
+            "t": "Use only straight threaded fittings@@(仅使用直螺纹管件)",
+            "f": "错误。燃气管通常使用锥管螺纹(NPT)而非直螺纹。"
+        }
+    ],
+    "a": 1,
+    "exp": "解析: 在组装系统之前，目视检查所有管道、管材和管件是确保无材料缺陷并防止未来发生泄漏的基础合规操作。",
+    "src": "• 课文出处: Page 10。\n• 原文语句: \"Visual inspection of piping, tubing, and fittings before assembly is a critical step to ensure a leak-free system.\""
+},
+{
+    "u": "Unit 10 Assignment #1",
+    "q": "Describe the first pressure test of the system, before appliances are connected.@@(描述连接器具之前对系统的首次压力测试。)",
+    "hint": "Testing medium must be safe and not reactive.",
+    "opts": [
+        {
+            "t": "Before the appliances are connected, the system shall be tested using gas. Meters regulators and shut-off valves not rated for the test pressure shall not be connected to the system.@@(在连接器具之前，应使用燃气对系统进行测试。未达到测试压力额定值的仪表、调节器和切断阀不得连接到系统。)",
+            "f": "错误。不能使用燃气进行初始高压测试。"
+        },
+        {
+            "t": "Before the appliances are connected, the system shall be tested using methane or inert gas. Meters regulators and shut-off valves not rated for the test pressure shall not be connected to the system.@@(在连接器具之前，应使用甲烷或惰性气体对系统进行测试。未达到测试压力额定值的仪表、调节器和切断阀不得连接到系统。)",
+            "f": "错误。甲烷是可燃气体，不能用作压力测试介质。"
+        },
+        {
+            "t": "Before the appliances are connected, the system shall be tested using air or inert gas. Meters regulators and shut-off valves not rated for the test pressure shall not be connected to the system.@@(在连接器具之前，应使用空气或惰性气体对系统进行测试。未达到测试压力额定值的仪表、调节器和切断阀不得连接到系统。)",
+            "f": "正确。空气或惰性气体最安全。"
+        },
+        {
+            "t": "There are no pressure test requirements@@(没有压力测试要求)",
+            "f": "错误。"
+        }
+    ],
+    "a": 2,
+    "exp": "解析: 连接任何器具之前的系统压力测试必须使用空气或惰性气体（如氮气或二氧化碳）进行，严禁使用可燃气体。并且必须隔离无法承受测试压力的设备。",
+    "src": "• 课文出处: Page 11。\n• 原文语句: \"Pressurize the system with air or inert gas... Meters, regulators, and shut-off valves not rated for the test pressure shall not be connected...\""
+},
+{
+    "u": "Unit 10 Assignment #1",
+    "q": "When and where would you perform a soap test?@@(你会在何时何地进行肥皂测试？)",
+    "hint": "Soap tests are used when a gauge shows a specific condition.",
+    "opts": [
+        {
+            "t": "When you think there is a leak, every place you suspect a leak.@@(当你认为有泄漏时，每一个你怀疑有泄漏的地方。)",
+            "f": "错误。不够严谨。"
+        },
+        {
+            "t": "When you smell gas, where you smell gas.@@(当你闻到燃气味时，在你闻到的地方。)",
+            "f": "错误。闻到燃气意味着已有泄漏，但肥皂测试的标准流程是由压力表下降触发的。"
+        },
+        {
+            "t": "Any time you think it may need it, check eveywhere.@@(任何你认为需要的时候，检查所有地方。)",
+            "f": "错误。"
+        },
+        {
+            "t": "When a leak is indicated by a drop in pressure, every joint and fitting must be checked.@@(当压力下降表明存在泄漏时，必须检查每个接头和管件。)",
+            "f": "正确。压力表下降是必须进行肥皂检漏的明确指标。"
+        }
+    ],
+    "a": 3,
+    "exp": "解析: 如果在测试期间系统压力出现下降，则表明存在泄漏。此时必须使用液体溶液（如肥皂测试）检查每一个接头和管件以定位泄漏源。",
+    "src": "• 课文出处: Page 13。\n• 原文语句: \"If a drop in pressure in the system indicates a leak, you need to locate the source... A typical method to achieve this is a soap test.\""
+},
+{
+    "u": "Unit 10 Assignment #1",
+    "q": "What must be done to piping or tubing passing through concrete?@@(穿过混凝土的管道或管材必须怎么处理？)",
+    "hint": "Concrete can chemically and physically attack the pipe.",
+    "opts": [
+        {
+            "t": "It must be sleeved, coated, or double-wrapped.@@(必须加套管、涂层或双层包扎。)",
+            "f": "正确。物理隔离是规范要求。"
+        },
+        {
+            "t": "It must have a water tight seal.@@(必须有水密密封。)",
+            "f": "错误。防水密封不是主要保护手段。"
+        },
+        {
+            "t": "It must never pass through concrete.@@(绝对不能穿过混凝土。)",
+            "f": "错误。规范允许穿过，前提是有保护。"
+        },
+        {
+            "t": "All of the above@@(以上所有)",
+            "f": "错误。"
+        }
+    ],
+    "a": 0,
+    "exp": "解析: 混凝土的碱性或物理摩擦会腐蚀/损坏管道，因此穿过混凝土的管道必须设有套管、涂层或双层包扎以进行物理隔离。",
+    "src": "• 课文出处: Page 14。\n• 原文语句: \"Piping or tubing passing through concrete or masonry walls must have a sleeve, coating, or double-wrap...\""
+},
+{
+    "u": "Unit 10 Assignment #1",
+    "q": "May a sleeve installed in pavement to allow free movement of the pipe also serve as a vent pipe inspection point?@@(安装在路面中允许管道自由移动的套管可以同时用作通风管检查点吗？)",
+    "hint": "Check dual-purpose components in underground installations.",
+    "opts": [
+        {
+            "t": "Yes@@(可以)",
+            "f": "正确。"
+        },
+        {
+            "t": "No@@(不可以)",
+            "f": "错误。这是您的错题选项。规范实际上是允许这种一物两用的。"
+        }
+    ],
+    "a": 0,
+    "exp": "解析: 在路面下提供套管以允许管道自由移动时，该套管也可以兼作通风管的检查点。这是一个合规的双重用途。",
+    "src": "• 课文出处: Page 17。\n• 原文语句: \"This sleeve can also serve as a vent pipe inspection point.\""
+},
+{
+    "u": "Unit 10 Assignment #1",
+    "q": "What are the methods of identifying gas piping inside a commercial or industrial building.@@(在商业或工业建筑内标识燃气管道的方法有哪些？)",
+    "hint": "There are three acceptable methods according to Code.",
+    "opts": [
+        {
+            "t": "The entire system shall be painted yellow.@@(整个系统应涂成黄色。)",
+            "f": "错误。这只是其中一种方法。"
+        },
+        {
+            "t": "The system shall be provided with yellow banding.@@(系统应设黄色色带。)",
+            "f": "错误。这只是其中一种方法。"
+        },
+        {
+            "t": "Utilizing yellow labels, the system shall be marked “Gas” or “Propane”.@@(使用黄色标签，系统应标记为“Gas”或“Propane”。)",
+            "f": "错误。这只是其中一种方法。"
+        },
+        {
+            "t": "All of the above@@(以上所有)",
+            "f": "正确。这三种方法在规范中都是被接受的标识方法。"
+        }
+    ],
+    "a": 3,
+    "exp": "解析: 规范要求在商业或工业建筑中，必须通过以下三种方式之一来清楚地区分燃气管道：整管涂黄、加黄色色带，或粘贴带有“Gas”/“Propane”的黄色标签。",
+    "src": "• 课文出处: Page 18 / 54。\n• 原文语句: \"shall be identified by one of the following: a) the entire piping... painted yellow; b) ... yellow banding; or c) ... labelled or marked 'GAS' or 'PROPANE'\""
+},
+{
+    "u": "Unit 10 Assignment #1",
+    "q": "How would you recognize a manual shut-off valve as being approved for installation in a natural gas or propane system?@@(您如何识别手动切断阀是否被批准安装在天然气或丙烷系统中？)",
+    "hint": "Look out for the word 'not' in the subjection to limits.",
+    "opts": [
+        {
+            "t": "It shall be of the globe and or ball type and shall not be subjected to greater temperature or pressure greater than its rating.@@(它应为截止阀或球阀类型，且不得承受大于其额定值的温度或压力。)",
+            "f": "错误。Globe(截止阀)不推荐作为燃气主阀。"
+        },
+        {
+            "t": "It shall be of the plug, ball or eccentric type and shall not be subjected to greater temperature or pressure greater than its rating.@@(它应为旋塞阀、球阀或偏心阀类型，且不得承受大于其额定值的温度或压力。)",
+            "f": "正确。这是合规的阀门类型和限制。"
+        },
+        {
+            "t": "It shall be of the quarter turn type and shall not be subjected to greater temperature or pressure greater than its rating.@@(它应为四分之一转类型，且不得承受大于其额定值的温度或压力。)",
+            "f": "错误。虽然多数是1/4转，但定义不够精确。"
+        },
+        {
+            "t": "It shall be of the plug, ball or eccentric type and shall be subjected to greater temperature or pressure greater than its rating.@@(它应为旋塞阀、球阀或偏心阀类型，且必须承受大于其额定值的温度或压力。)",
+            "f": "错误。这是您的错题选项。错误在于“shall be subjected（必须承受超越极限）”，阀门绝对不能超过其额定温压。"
+        }
+    ],
+    "a": 1,
+    "exp": "解析: 燃气手动切断阀必须是经过认证的旋塞阀(plug)、球阀(ball)或偏心阀(eccentric)类型，并且绝对“不能(shall not)”承受超出其铭牌额定范围的温度或压力。",
+    "src": "• 课文出处: Chapter 1。"
+},
+{
+    "u": "Unit 10 Assignment #1",
+    "q": "How must multiple outlets that are installed in a laboratory (school or other), be protected from leaking gas into the area accidentally?@@(在实验室(学校或其他)中安装的多个燃气出口必须如何保护，以防燃气意外泄漏到该区域？)",
+    "hint": "Think about central control.",
+    "opts": [
+        {
+            "t": "A clearly marked, readily accessible, master shut-off valve.@@(一个标示清晰、易于接近的总切断阀。)",
+            "f": "正确。统一控制是关键。"
+        },
+        {
+            "t": "Multiple gas detectors must be installed in the building@@(必须在建筑物内安装多个气体探测器)",
+            "f": "错误。报警系统不能代替切断物理源头的阀门。"
+        },
+        {
+            "t": "A Clearly marked in-accessible shut off valve@@(一个标示清晰但无法接近的切断阀)",
+            "f": "错误。无法接近的阀门在紧急情况下毫无用处。"
+        },
+        {
+            "t": "None of the above@@(以上都不是)",
+            "f": "错误。"
+        }
+    ],
+    "a": 0,
+    "exp": "解析: 当实验室等区域包含多个燃气出口时，规范强制要求在该房间内显眼且易于接近的位置设置一个总切断阀(master shut-off valve)，以便在紧急情况或下课后一键切断所有气源。",
+    "src": "• 课文出处: Page 19。\n• 原文语句: \"When a classroom, laboratory... contains multiple outlets, a clearly marked master shut-off valve in a readily accessible location within the room must be present...\""
+},
+{
+    "u": "Unit 10 Assignment #1",
+    "q": "What are the requirements for joints in steel piping used in gas systems?@@(用于燃气系统的钢管接头有什么要求？)",
+    "hint": "There are three primary methods approved for joining steel pipe.",
+    "opts": [
+        {
+            "t": "Threaded@@(螺纹)",
+            "f": "错误。这只是其中一种合规方式。"
+        },
+        {
+            "t": "Flanged@@(法兰)",
+            "f": "错误。这只是其中一种合规方式。"
+        },
+        {
+            "t": "Welded@@(焊接)",
+            "f": "错误。这是您的错题选项。虽然焊接合规，但螺纹和法兰也同样是被允许的。"
+        },
+        {
+            "t": "All of the above@@(以上所有)",
+            "f": "正确。这三种连接方式规范均认可。"
+        }
+    ],
+    "a": 3,
+    "exp": "解析: 根据 CSA B149.1 规范，用于燃气系统的钢管接头可以通过螺纹(Threaded)、法兰(Flanged)或焊接(Welded)三种方式进行连接。选择题中涵盖全部选项的才是最优解。",
+    "src": "• 课文出处: Page 23。\n• 原文语句: \"CSA B149.1 requires the threading, flanging, and welding of joints in steel piping.\""
+},
+{
+    "u": "Unit 10 Assignment #1",
+    "q": "Approved gasket material resistant to any action of gas is Neoprene or other similar material resistant to any action of gas. Natural rubber may dry or crack as it is not impervious to the action of gas, is why rubber is not approved.@@(耐燃气作用的经批准垫片材料是氯丁橡胶或耐燃气作用的其他类似材料。天然橡胶可能会变干或破裂，因为它不能抵抗燃气的作用，这就是为什么不批准使用天然橡胶的原因。)",
+    "hint": "Consider why natural rubber fails in gas lines.",
+    "opts": [
+        {
+            "t": "True@@(正确)",
+            "f": "正确。天然橡胶在接触燃气后会劣化。"
+        },
+        {
+            "t": "False@@(错误)",
+            "f": "错误。"
+        }
+    ],
+    "a": 0,
+    "exp": "解析: 这段陈述是完全正确的。垫圈材料必须是氯丁橡胶(neoprene)或类似的抗燃气化学反应的合成材料。天然橡胶会被燃气侵蚀导致干燥破裂，从而引发致命泄漏，因此绝不允许使用。",
+    "src": "• 课文出处: Page 24。\n• 原文语句: \"Gasket materials must be of neoprene or a similar material that resists any action of gas. Natural rubber is not acceptable.\""
+},
+{
+    "u": "Unit 10 Assignment #2",
+    "q": "The three general categories of major welding hazards to workers in the vicinity of welding operations are:@@(在焊接作业附近对工人造成主要焊接危险的三个一般类别是：)",
+    "hint": "Check the main hazard classification in the welding safety chapter.",
+    "opts": [
+        {
+            "t": "Physical@@(物理危险)",
+            "f": "错误。这只是其中之一。"
+        },
+        {
+            "t": "Chemical@@(化学危险)",
+            "f": "错误。这只是其中之一。"
+        },
+        {
+            "t": "Environmental@@(环境危险)",
+            "f": "错误。这只是其中之一。"
+        },
+        {
+            "t": "All of the above@@(以上所有)",
+            "f": "正确。这三大类构成了主要的焊接危险。"
+        }
+    ],
+    "a": 3,
+    "exp": "解析: 焊接对焊工及其附近人员的主要危险被规范分为三大总体类别：物理危险、化学危险和环境危险。",
+    "src": "• 课文出处: Page 28-29。\n• 原文语句: \"Major welding hazards... may be divided into three general categories: Physical, Chemical, Environmental.\""
+},
+{
+    "u": "Unit 10 Assignment #2",
+    "q": "True or False : The adverse health effects from exposure to welding X-ray equipment is the equipment emits ionizing radiation by way of Xrays and gamma rays which can cause extreme damage to unprotected parts of the body.@@(判断对错：暴露于焊接X射线设备的不良健康影响是该设备通过X射线和伽马射线发射电离辐射，这会对身体未受保护的部位造成极大的损害。)",
+    "hint": "Consider the type of radiation emitted by X-rays.",
+    "opts": [
+        {
+            "t": "True@@(正确)",
+            "f": "正确。电离辐射是极其危险的。"
+        },
+        {
+            "t": "False@@(错误)",
+            "f": "错误。"
+        }
+    ],
+    "a": 0,
+    "exp": "解析: 焊接测试中的X射线和伽马射线会产生电离辐射(ionizing radiation)，如果不采取适当的屏蔽和保护措施，会对人体细胞造成极大的破坏。",
+    "src": "• 课文出处: Page 29。\n• 原文语句: \"X-rays and gamma rays produce ionizing radiation during the welding process... can cause extreme damage to unprotected parts of the body.\""
+},
+{
+    "u": "Unit 10 Assignment #2",
+    "q": "What are the adverse effects from ultraviolet radiation produced by arc welding.@@(电弧焊产生的紫外线辐射会带来哪些不良影响？)",
+    "hint": "UV radiation causes multiple severe symptoms to exposed skin and eyes.",
+    "opts": [
+        {
+            "t": "It causes burning of unprotected eyes and skin.@@(它会导致未受保护的眼睛和皮肤被灼伤。)",
+            "f": "错误。这只是其中一个症状。"
+        },
+        {
+            "t": "Eyeballs and skin may blister. These conditions may last hours or days.@@(眼球和皮肤可能起水泡。这些情况可能持续数小时或数天。)",
+            "f": "错误。这是您的错题选项。虽然这个症状是对的，但它并不全面。"
+        },
+        {
+            "t": "Any conditions may last hours or days.@@(任何情况都可能持续数小时或数天。)",
+            "f": "错误。这只是持续时间的描述。"
+        },
+        {
+            "t": "All of the above@@(以上所有)",
+            "f": "正确。灼伤、起泡以及症状持续数天都是紫外线辐射带来的综合影响。"
+        }
+    ],
+    "a": 3,
+    "exp": "解析: 紫外线辐射会导致“电弧光伤”(arc flash)，引起眼睛和皮肤的严重灼伤、起泡，且这些痛苦的症状通常会持续数小时甚至数天。因此所有选项的描述都是其不良影响的一部分。",
+    "src": "• 课文出处: Page 29。\n• 原文语句: \"...causes burning of unprotected eyes and skin. Eyeballs and skin may blister. These conditions may last hours or days.\""
+},
+{
+    "u": "Unit 10 Assignment #2",
+    "q": "After welding is completed in an area where combustible material is present, how long should a “fire watch” be maintained?@@(在有可燃物存在的区域完成焊接后，“火灾监视”应维持多长时间？)",
+    "hint": "Think about the minimum mandated safety window.",
+    "opts": [
+        {
+            "t": "At least 5 minutes@@(至少5分钟)",
+            "f": "错误。"
+        },
+        {
+            "t": "At least 10 minutes@@(至少10分钟)",
+            "f": "错误。"
+        },
+        {
+            "t": "At least 20 minute@@(至少20分钟)",
+            "f": "错误。"
+        },
+        {
+            "t": "At least 30 minutes@@(至少30分钟)",
+            "f": "正确。这是规范要求的最低监视时间。"
+        }
+    ],
+    "a": 3,
+    "exp": "解析: 焊接火花可能引发阴燃。在任何焊接或切割过程完成后，火灾监视(fire watch)的持续时间绝对不得少于30分钟。",
+    "src": "• 课文出处: Page 34。\n• 原文语句: \"The monitoring duration should not be less than 30 min after completion of any welding or cutting process...\""
+},
+{
+    "u": "Unit 10 Assignment #2",
+    "q": "List the types of personal protective equipment that must be worn when working with or around a welder.@@(列出在使用焊机工作或在焊机周围工作时必须佩戴的个人防护装备类型。)",
+    "hint": "Safety in welding requires head-to-toe protection.",
+    "opts": [
+        {
+            "t": "Heavy clothing (free of oil or grease)@@(厚重衣物(无油或油脂))",
+            "f": "错误。这只是其中一项。"
+        },
+        {
+            "t": "Eye and face protection (mask or respirators when required)@@(眼部和面部保护(需要时戴口罩或呼吸器))",
+            "f": "错误。这只是其中一项。"
+        },
+        {
+            "t": "Steel-toed boots, a cap and cuffless pants@@(钢头靴、帽子和无卷边裤子)",
+            "f": "错误。这只是其中一项。"
+        },
+        {
+            "t": "All of the above@@(以上所有)",
+            "f": "正确。全身各部位的防护都是强制要求的。"
+        }
+    ],
+    "a": 3,
+    "exp": "解析: 焊工及其周围人员必须穿戴全套PPE，包括无油污的厚重衣物、防紫外线的面罩/护目镜、无卷边的裤子以防火花落入，以及安全靴和帽子。",
+    "src": "• 课文出处: Page 33-34 综合安全规范。"
+},
+{
+    "u": "Unit 10 Assignment #2",
+    "q": "What are two important safety precautions to be observed when working with an oxygen cylinder.@@(在使用氧气钢瓶时应遵守哪两项重要的安全预防措施。)",
+    "hint": "Oxygen reacts violently with certain substances, and cylinders are under extreme pressure.",
+    "opts": [
+        {
+            "t": "Keep oil and grease away from the oxygen@@(让油和油脂远离氧气)",
+            "f": "错误。这是一项正确的措施，但不完整。"
+        },
+        {
+            "t": "Never attempt to repair a faulty cylinder@@(切勿尝试修理有故障的钢瓶)",
+            "f": "错误。这也是正确的措施，但不完整。"
+        },
+        {
+            "t": "Both a and b@@(a和b都是)",
+            "f": "正确。这两项都是至关重要的安全规则。"
+        },
+        {
+            "t": "None of the above@@(以上都不是)",
+            "f": "错误。"
+        }
+    ],
+    "a": 2,
+    "exp": "解析: 纯氧接触到油或油脂会发生剧烈爆炸，同时氧气钢瓶属于高压容器，出现故障绝对不能自行修理。这两项都是最核心的氧气安全原则。",
+    "src": "• 课文出处: Page 36。\n• 原文语句: \"Never oil regulators or torch parts...\" 以及 \"Never attempt to repair a leaking or faulty cylinder yourself.\""
+},
+{
+    "u": "Unit 10 Assignment #2",
+    "q": "Acetylene is a very stable gas that is easily compressed to high pressures?@@(乙炔是一种非常稳定的气体，很容易被压缩到高压吗？)",
+    "hint": "Think about why acetylene usage is limited to 15 psi.",
+    "opts": [
+        {
+            "t": "True@@(正确)",
+            "f": "错误。"
+        },
+        {
+            "t": "False@@(错误)",
+            "f": "正确。乙炔极不稳定。"
+        }
+    ],
+    "a": 1,
+    "exp": "解析: 乙炔不仅不“稳定”，反而是一种非常不稳定(unstable)的化合物。一旦压力超过 15 psi，它就极易自行分解并引发猛烈爆炸，绝不能轻易压缩至高压。",
+    "src": "• 课文出处: Page 30。\n• 原文语句: \"Acetylene gas used in welding work is a colourless, unstable compound... do not store or use free acetylene at pressures over 15 psi.\""
+},
+{
+    "u": "Unit 10 Assignment #2",
+    "q": "What should be done if welding is taking place in a confined area?@@(如果在密闭区域进行焊接，应该怎么做？)",
+    "hint": "Welding consumes oxygen and produces toxic fumes.",
+    "opts": [
+        {
+            "t": "Ensure adequate ventilation@@(确保通风良好)",
+            "f": "正确。解决密闭空间焊接危险的核心手段。"
+        },
+        {
+            "t": "Have someone watching@@(让人在旁监视)",
+            "f": "错误。虽然需要安全监视，但首先必须解决通风问题。"
+        },
+        {
+            "t": "Make sure area is well lit@@(确保该区域光线充足)",
+            "f": "错误。照明不能解决毒气积累问题。"
+        },
+        {
+            "t": "All of the above@@(以上所有)",
+            "f": "错误。"
+        }
+    ],
+    "a": 0,
+    "exp": "解析: 密闭空间最大的危险是毒气积聚和氧气耗尽。因此，如果在密闭区域进行焊接，必须采取强制手段确保充足的通风(adequate ventilation)。",
+    "src": "• 课文出处: Page 32。\n• 原文语句: \"Inadequate ventilation of welding shops or confined work areas produces dangerously toxic... conditions.\""
+},
+{
+    "u": "Unit 10 Assignment #2",
+    "q": "What type of gloves should be worn around welding operations?@@(在焊接作业周围应戴什么类型的手套？)",
+    "hint": "Forearm protection is necessary.",
+    "opts": [
+        {
+            "t": "Rubber gloves@@(橡胶手套)",
+            "f": "错误。橡胶会熔化并烧伤皮肤。"
+        },
+        {
+            "t": "Gauntlet- type gloves@@(长手套/护手型手套)",
+            "f": "正确。长筒设计能保护手腕和小臂。"
+        },
+        {
+            "t": "Neoprene gloves@@(氯丁橡胶手套)",
+            "f": "错误。主要用于防化学品，不防电弧高温。"
+        },
+        {
+            "t": "Leather work gloves@@(皮质工作手套)",
+            "f": "错误。普通短皮手套无法保护小臂免受火花伤害。"
+        }
+    ],
+    "a": 1,
+    "exp": "解析: 焊接时必须佩戴护手型(gauntlet-type)手套，这种长筒设计可以有效防止火花和热金属飞溅进袖口，并保护手腕和前臂。",
+    "src": "• 课文出处: Page 33。\n• 原文语句: \"Wear gauntlet-type gloves.\""
+},
+{
+    "u": "Unit 10 Assignment #2",
+    "q": "Should oxygen and acetylene regulators be oiled regularly?@@(应该定期给氧气和乙炔减压阀上油吗？)",
+    "hint": "Oil + Pure Oxygen = Spontaneous Ignition.",
+    "opts": [
+        {
+            "t": "Yes@@(是)",
+            "f": "错误。"
+        },
+        {
+            "t": "No@@(否)",
+            "f": "正确。绝对不能上油。"
+        }
+    ],
+    "a": 1,
+    "exp": "解析: 绝不能(Never)润滑氧气或乙炔减压阀及焊炬部件。纯氧与油或油脂接触时，会引发自燃甚至猛烈的爆炸。",
+    "src": "• 课文出处: Page 36。\n• 原文语句: \"Never oil regulators or torch parts.\""
+},
+{
+    "u": "Unit 10 Assignment #2",
+    "q": "How many air changes per hour are required in a welding shop?@@(焊接车间每小时需要换气多少次？)",
+    "hint": "A specific minimum number is mandated.",
+    "opts": [
+        {
+            "t": "1@@(1次)",
+            "f": "错误。"
+        },
+        {
+            "t": "2@@(2次)",
+            "f": "错误。"
+        },
+        {
+            "t": "3@@(3次)",
+            "f": "错误。"
+        },
+        {
+            "t": "4@@(4次)",
+            "f": "正确。这是法定最低要求。"
+        }
+    ],
+    "a": 3,
+    "exp": "解析: 为了排出有害烟尘并维持空气质量，安全规定强制要求焊接车间必须保持每小时至少四次(four)的良好换气率。",
+    "src": "• 课文出处: Page 36。\n• 原文语句: \"Welding shops must have a minimum of four good air changes per hour.\""
+},
+{
+    "u": "Unit 10 Assignment #2",
+    "q": "With what are oxygen and acetylene cylinders fitted to minimize the possibility of explosion in case of fire?@@(氧气和乙炔钢瓶安装了什么装置以最大程度减少火灾时爆炸的可能性？)",
+    "hint": "It melts to release pressure safely.",
+    "opts": [
+        {
+            "t": "Fusible plugs@@(易熔塞)",
+            "f": "正确。遇高温熔化泄压。"
+        },
+        {
+            "t": "Fire rated coating@@(防火涂层)",
+            "f": "错误。"
+        },
+        {
+            "t": "Temperature and pressure relief valves@@(温度和压力释放阀)",
+            "f": "错误。钢瓶使用的是一次性熔化的易熔塞，而不是可复位的T&P阀。"
+        },
+        {
+            "t": "Slow burning hose@@(慢燃软管)",
+            "f": "错误。"
+        }
+    ],
+    "a": 0,
+    "exp": "解析: 出于安全考虑，气瓶每端至少装有一个易熔塞(fusible plug)。在发生火灾时，该塞子会受热熔化，让内部气体安全排出，从而避免钢瓶因超压发生物理爆炸。",
+    "src": "• 课文出处: Page 36。\n• 原文语句: \"Acetylene cylinders... must have at least one fusible plug on each end... designed to melt out in case of fire.\""
+},
+{
+    "u": "Unit 10 Assignment #2",
+    "q": "To what angle should pipe be bevelled if it is to be welded?@@(如果要焊接管道，应将其倒角至什么角度？)",
+    "hint": "Look for the very specific fractional degree.",
+    "opts": [
+        {
+            "t": "35°@@(35°)",
+            "f": "错误。"
+        },
+        {
+            "t": "37  1/2°@@(37.5°)",
+            "f": "正确。这是标准的坡口角度。"
+        },
+        {
+            "t": "39°@@(39°)",
+            "f": "错误。"
+        },
+        {
+            "t": "45°@@(45°)",
+            "f": "错误。"
+        }
+    ],
+    "a": 1,
+    "exp": "解析: 准备用于对接焊接的压力管道时，工业标准要求将其端部倒V型坡口至约 37-1/2°，以确保焊透和连接强度。",
+    "src": "• 课文出处: Page 45。\n• 原文语句: \"To prepare pressure pipe for butt welding... V-bevel the ends to an angle of approximately 37-1/2°.\""
+},
+{
+    "u": "Unit 10 Assignment #2",
+    "q": "When the pipe and fittings are set up for welding, how wide is the root gap?@@(当管道和管件准备好进行焊接时，根部间隙有多宽？)",
+    "hint": "It is a very small fractional measurement.",
+    "opts": [
+        {
+            "t": "1/16” to 1/8”@@(1/16 英寸至 1/8 英寸)",
+            "f": "正确。"
+        },
+        {
+            "t": "1/8” to ¼”@@(1/8 英寸至 1/4 英寸)",
+            "f": "错误。"
+        },
+        {
+            "t": "¼” to 3/8”@@(1/4 英寸至 3/8 英寸)",
+            "f": "错误。"
+        },
+        {
+            "t": "3/8” to ½”@@(3/8 英寸至 1/2 英寸)",
+            "f": "错误。"
+        }
+    ],
+    "a": 0,
+    "exp": "解析: 在装配和点焊之前，必须将管道两端的根部间隙(root gap)均匀隔开。根据焊接程序，标准间隙宽度通常为 1/16 至 1/8 英寸。",
+    "src": "• 课文出处: Page 45。\n• 原文语句: \"The gap (or root) opening between the two ends is evenly spaced at 1/16-1/8 in...\""
+},
+{
+    "u": "Unit 10 Assignment # 3",
+    "q": "What size is the tracer wire on underground gas piping?@@(地下燃气管道上的示踪线尺寸是多少？)",
+    "hint": "Check the required wire gauge for underground tracing.",
+    "opts": [
+        {
+            "t": "Minimum 14 gauge@@(最小14号)",
+            "f": "错误。"
+        },
+        {
+            "t": "Minimum 16 gauge@@(最小16号)",
+            "f": "正确。规范规定的最小线径。"
+        },
+        {
+            "t": "Minimum 18 gauge@@(最小18号)",
+            "f": "错误。"
+        },
+        {
+            "t": "Minimum 12 gauge@@(最小12号)",
+            "f": "错误。"
+        }
+    ],
+    "a": 1,
+    "exp": "解析: 当塑料燃气管道敷设在地下时，规范要求必须沿着管道敷设一根最小16号(16-gauge)的金属线作为示踪线，以便日后使用仪器探测管道位置。",
+    "src": "• 课文出处: Page 51。\n• 原文语句: \"When used underground, a minimum 16-gauge copper wire is taped along the piping for tracing purposes...\""
+},
+{
+    "u": "Unit 10 Assignment # 3",
+    "q": "What material is underground tracer wire made of?@@(地下示踪线是由什么材料制成的？)",
+    "hint": "It needs to be a highly conductive metal commonly used for wiring.",
+    "opts": [
+        {
+            "t": "Aluminum@@(铝)",
+            "f": "错误。"
+        },
+        {
+            "t": "Steel@@(钢)",
+            "f": "错误。"
+        },
+        {
+            "t": "Copper@@(铜)",
+            "f": "正确。铜导电性能好，适合信号追踪。"
+        },
+        {
+            "t": "Any of the above@@(以上任意一种)",
+            "f": "错误。"
+        }
+    ],
+    "a": 2,
+    "exp": "解析: 埋在地下用于追踪非金属燃气管道的示踪线必须是铜线(copper wire)。",
+    "src": "• 课文出处: Page 51。\n• 原文语句: \"...a minimum 16-gauge copper wire is taped along the piping...\""
+},
+{
+    "u": "Unit 10 Assignment # 3",
+    "q": "Who is responsible for piping downstream of the meter?@@(谁负责仪表下游的管道？)",
+    "hint": "Think about property lines and ownership.",
+    "opts": [
+        {
+            "t": "The property or building owner@@(物业或建筑物所有者)",
+            "f": "正确。仪表后属于用户责任区。"
+        },
+        {
+            "t": "The gas utility@@(燃气公用事业公司)",
+            "f": "错误。燃气公司的责任通常到仪表(meter)为止。"
+        },
+        {
+            "t": "The township@@(乡镇/市政)",
+            "f": "错误。"
+        },
+        {
+            "t": "All of the above@@(以上所有)",
+            "f": "错误。"
+        }
+    ],
+    "a": 0,
+    "exp": "解析: 燃气仪表(meter)作为分界点，其下游(downstream)即进入建筑物内部的管道系统，维护和管理责任属于该物业或建筑物的所有者。",
+    "src": "• 课文出处: Page 52。\n• 原文语句: \"The piping downstream of a gas utility meter is usually the responsibility of the property or building owner.\""
+},
+{
+    "u": "Unit 10 Assignment # 3",
+    "q": "Coatings on underground steel pipe are made of what material?@@(地下钢管上的涂层是由什么材料制成的？)",
+    "hint": "It's a common type of durable plastic.",
+    "opts": [
+        {
+            "t": "Neoprene@@(氯丁橡胶)",
+            "f": "错误。"
+        },
+        {
+            "t": "Rubber@@(橡胶)",
+            "f": "错误。"
+        },
+        {
+            "t": "Polyethylene@@(聚乙烯)",
+            "f": "正确。提供优秀的防腐保护。"
+        },
+        {
+            "t": "Tape@@(胶带)",
+            "f": "错误。普通胶带不能作为标准防腐涂层。"
+        }
+    ],
+    "a": 2,
+    "exp": "解析: 埋入地下的钢管必须有防腐保护，其外部涂层通常是由聚乙烯(Polyethylene)材质制成的。",
+    "src": "• 课文出处: Page 51。\n• 原文语句: \"Wrapped steel: Coated with polyethylene.\""
+},
+{
+    "u": "Unit 10 Assignment # 3",
+    "q": "Coatings on underground Piping or tubing are what colour?@@(地下管道或管材上的涂层是什么颜色的？)",
+    "hint": "Two specific colors are standard for this application.",
+    "opts": [
+        {
+            "t": "Blue@@(蓝色)",
+            "f": "错误。这是其中一种颜色。"
+        },
+        {
+            "t": "Yellow@@(黄色)",
+            "f": "错误。这也是其中一种颜色。"
+        },
+        {
+            "t": "Grey@@(灰色)",
+            "f": "错误。"
+        },
+        {
+            "t": "Both A and B@@(A和B都是)",
+            "f": "正确。蓝色或黄色都是合规的。"
+        },
+        {
+            "t": "Both B and C@@(B和C都是)",
+            "f": "错误。"
+        }
+    ],
+    "a": 3,
+    "exp": "解析: 规范指出，用于地下燃气输送的钢管上的聚乙烯涂层通常被染成蓝色(blue)或黄色(yellow)。因此 A 和 B 都正确。",
+    "src": "• 课文出处: Page 51。\n• 原文语句: \"Coloured either blue or yellow\""
+},
+{
+    "u": "Unit 10 Assignment # 3",
+    "q": "What are three methods to identify aboveground gas piping?@@(标识地上燃气管道的三种方法是什么？)",
+    "hint": "There are three specific ways permitted by the Code.",
+    "opts": [
+        {
+            "t": "Yellow Paint@@(黄色油漆)",
+            "f": "错误。这只是其中一种。"
+        },
+        {
+            "t": "Yellow Banding@@(黄色色带)",
+            "f": "错误。这只是其中一种。"
+        },
+        {
+            "t": "Labeled or marked “GAS”or “PROPANE”, as applicable, utilizing yellow labels or markings@@(适用时，使用黄色标签或标记标明“GAS”或“PROPANE”)",
+            "f": "错误。这只是其中一种。"
+        },
+        {
+            "t": "All of the above@@(以上所有)",
+            "f": "正确。这三种都是规范允许的标识方法。"
+        }
+    ],
+    "a": 3,
+    "exp": "解析: 在商业或工业建筑中，规范允许使用三种方法之一来标识燃气管道：整个管道涂成黄色、使用黄色色带，或者使用带有“GAS”/“PROPANE”字样的黄色标签。",
+    "src": "• 课文出处: Page 54。\n• 原文语句: \"...shall be identified by one of the following: a) the entire piping... painted yellow; b) ... yellow banding; or c) ... labelled or marked 'GAS' or 'PROPANE'...\""
+},
+{
+    "u": "Unit 10 Assignment # 3",
+    "q": "True or False: If the supply pressure of gas piping in an institutional building is 2 psi (14 kPa), Both the piping or tubing and the pressure shall be identified at the following locations: shut-off valves; and wall, ceiling, and floor penetrations.@@(判断对错：如果机构建筑中燃气管道的供气压力为 2 psi (14 kPa)，则必须在以下位置标识管道或管材以及压力：切断阀处；以及穿墙、穿天花板和穿楼板处。)",
+    "hint": "Check the specific rules for systems operating at or above 2 psi.",
+    "opts": [
+        {
+            "t": "True@@(正确)",
+            "f": "正确。大于或等于2 psi的系统有额外的标识要求。"
+        },
+        {
+            "t": "False@@(错误)",
+            "f": "错误。"
+        }
+    ],
+    "a": 0,
+    "exp": "解析: 根据规范，对于运行压力达到或超过 2 psi 的供气管道系统，除了基础的颜色标识外，还必须明确标识其具体的供气压力，并且标识位置需包括阀门、以及穿过墙壁/天花板/楼板的贯穿点。",
+    "src": "• 课文出处: Page 18 & 54。\n• 原文语句: \"For supply piping systems carrying pressures 2 psi and over must identify and label the supply pressure...\""
+},
+{
+    "u": "Unit 10 Assignment # 3",
+    "q": "The CSA B149.1 Gas Code does not require the identification of gas piping in a residence. True or False?@@(CSA B149.1 燃气规范不要求在住宅内标识燃气管道(piping)。判断对错？)",
+    "hint": "Differentiate between rigid piping and flexible tubing in residential rules.",
+    "opts": [
+        {
+            "t": "True@@(正确)",
+            "f": "正确。对住宅硬管道无强制标识要求。"
+        },
+        {
+            "t": "False@@(错误)",
+            "f": "错误。"
+        }
+    ],
+    "a": 0,
+    "exp": "解析: 规范的严格标识要求(如涂黄等)主要针对商业、工业等建筑。对于住宅建筑(residence)，规范没有强制要求对常规的硬体钢管(piping)进行颜色或标签标识。",
+    "src": "• 课文出处: Page 54。\n• 原文语句: 规范条款 6.17.1 的场所列举中排除了住宅的硬管道。"
+},
+{
+    "u": "Unit 10 Assignment # 3",
+    "q": "The CSA B149.1 Gas Code does not require the identification of gas tubing in a residence. True or False?@@(CSA B149.1 燃气规范不要求在住宅内标识燃气管材(tubing)。判断对错？)",
+    "hint": "Tubing (like CSST or copper) has different rules than rigid piping.",
+    "opts": [
+        {
+            "t": "True@@(正确)",
+            "f": "错误。这是一个否定陷阱，规范实际上是要求标识管材的。"
+        },
+        {
+            "t": "False@@(错误)",
+            "f": "正确。规范明确要求住宅内的管材(tubing)必须进行标识。"
+        }
+    ],
+    "a": 1,
+    "exp": "解析: 这是一个易混淆点。虽然住宅内的钢管(piping)无需标识，但规范特别指出，住宅建筑中的“管材系统(Tubing systems)”（如铜管或CSST波纹管）是必须被标识的。因此题干中说“不要求”是错误的。",
+    "src": "• 课文出处: Page 54。\n• 原文语句: \"Tubing systems for residential buildings shall be identified...\""
+},
+{
+    "u": "Unit 10 Assignment # 3",
+    "q": "The final drawings on a job are called:@@(工程上的最终图纸被称为：)",
+    "hint": "It means the drawings show exactly how it was built.",
+    "opts": [
+        {
+            "t": "Building drawings@@(建筑图纸)",
+            "f": "错误。"
+        },
+        {
+            "t": "Rough drafts@@(草图)",
+            "f": "错误。"
+        },
+        {
+            "t": "Final drawings@@(最终图纸)",
+            "f": "错误。这只是日常口语描述，不是专业术语。"
+        },
+        {
+            "t": "As-built drawings@@(竣工图)",
+            "f": "正确。"
+        }
+    ],
+    "a": 3,
+    "exp": "解析: 包含了施工过程中所有变更和实际安装状况的最终图纸，在行业术语中被称为“竣工图(As-built drawings)”。",
+    "src": "• 课文出处: Page 55。\n• 原文语句: \"Whenever you use blueprints to locate and identify piping, use the final drawings. These are what you call 'as built' drawings...\""
+},
+{
+    "u": "Unit 10 Assignment # 3",
+    "q": "The surest way to identify contents of a sealed pipe is to:@@(识别密封管道内物质的最可靠方法是：)",
+    "hint": "Follow it to where it starts.",
+    "opts": [
+        {
+            "t": "Trace it back to its source@@(追溯到其源头)",
+            "f": "正确。"
+        },
+        {
+            "t": "Ask the home owner@@(询问房主)",
+            "f": "错误。房主可能不具备专业知识，这不安全。"
+        },
+        {
+            "t": "Read labels@@(阅读标签)",
+            "f": "错误。并非所有老旧系统都有标签。"
+        },
+        {
+            "t": "Non of the above@@(以上都不是)",
+            "f": "错误。"
+        }
+    ],
+    "a": 0,
+    "exp": "解析: 如果管道上没有任何颜色或标签标识，作为技术人员判断管道内介质最简单、最可靠的方法就是顺着管道物理追溯到它的源头(source)。",
+    "src": "• 课文出处: Page 55。\n• 原文语句: \"In some situations, the easiest and surest way to identify what a sealed pipe is carrying is to trace it back to its source.\""
+},
+{
+    "u": "Unit 10 Assignment # 4",
+    "q": "If there is a discrepancy between the specifications and the drawings, which one is taken to be correct?@@(如果规范/说明书和图纸之间存在差异，以哪一个为准？)",
+    "hint": "Think about which document holds the written legal technical details.",
+    "opts": [
+        {
+            "t": "Specifications@@(规范/说明书)",
+            "f": "正确。文字规范的效力高于图纸。"
+        },
+        {
+            "t": "Drawings@@(图纸)",
+            "f": "错误。"
+        }
+    ],
+    "a": 0,
+    "exp": "解析: 当图纸的设计与书面规范中的具体要求出现差异或矛盾时，书面规范(Specifications)具有更高的约束力，应以规范为准。",
+    "src": "• 课文出处: Chapter 4 习题。"
+},
+{
+    "u": "Unit 10 Assignment # 4",
+    "q": "True or False: The specifications generally reflect final decisions and written instructions are more acceptable in a court of law.@@(判断对错：规范通常反映最终决定，书面说明在法庭上更容易被接受。)",
+    "hint": "Consider the legal weight of written text versus a sketch.",
+    "opts": [
+        {
+            "t": "True@@(正确)",
+            "f": "正确。"
+        },
+        {
+            "t": "False@@(错误)",
+            "f": "错误。"
+        }
+    ],
+    "a": 0,
+    "exp": "解析: 书面规范通常包含了最终的决定和具体的技术细节。在发生工程法律纠纷时，详细的文字说明(written instructions)作为法律证据在法庭上更具说服力和可接受性。",
+    "src": "• 课文出处: Chapter 4 习题延伸常识。"
+},
+{
+    "u": "Unit 10 Assignment # 4",
+    "q": "The manufacturer’s installation and service manual is supplied with every appliance. How much of it should you read?@@(每台器具都附带制造商的安装和维修手册。你应该阅读多少？)",
+    "hint": "Safety and specific procedures require complete knowledge.",
+    "opts": [
+        {
+            "t": "Installation Section@@(安装部分)",
+            "f": "错误。"
+        },
+        {
+            "t": "Trouble shooting section@@(故障排除部分)",
+            "f": "错误。"
+        },
+        {
+            "t": "Wiring diagram section@@(接线图部分)",
+            "f": "错误。"
+        },
+        {
+            "t": "All if it@@(全部)",
+            "f": "正确。必须完整阅读以确保合规和安全。"
+        }
+    ],
+    "a": 3,
+    "exp": "解析: 面对任何随设备附带的制造商安装和维修手册，必须完整阅读全部内容(All of it)，因为这关系到正确安装、调试以及避免因违规操作而损坏设备或失去质保。",
+    "src": "• 课文出处: Chapter 4 习题。"
+},
+{
+    "u": "Unit 10 Assignment # 4",
+    "q": "True or False: Installation and service manuals supplied by the manufacturer always specify details of replacement parts.@@(判断对错：制造商提供的安装和维修手册总是详细说明更换零件的信息。)",
+    "hint": "Are parts lists sometimes separate?",
+    "opts": [
+        {
+            "t": "True@@(正确)",
+            "f": "错误。"
+        },
+        {
+            "t": "False@@(错误)",
+            "f": "正确。并非总是包含。"
+        }
+    ],
+    "a": 1,
+    "exp": "解析: 安装和维修手册主要用于指导设备的初始安装和基础排障，并不总是(not always)包含所有备件的详细信息，有时备件明细会作为单独的手册(如 Parts Catalog)提供。",
+    "src": "• 课文出处: Chapter 4 习题。"
+},
+{
+    "u": "Unit 10 Assignment # 4",
+    "q": "The two ways that manual valves are joined to the gas piping systems are:@@(手动阀门连接到燃气管道系统的两种方式是：)",
+    "hint": "Consider standard mechanical joints.",
+    "opts": [
+        {
+            "t": "Threaded@@(螺纹)",
+            "f": "错误。这是其中一种。"
+        },
+        {
+            "t": "Flanged@@(法兰)",
+            "f": "错误。这也是其中一种。"
+        },
+        {
+            "t": "Welded@@(焊接)",
+            "f": "错误。阀门内部密封件容易被焊接高温损坏，极少直接焊接阀体。"
+        },
+        {
+            "t": "Both A and B@@(A 和 B 都是)",
+            "f": "正确。这两种是大型或常规压力系统最常见的阀门连接方式。"
+        },
+        {
+            "t": "Both A and C@@(A 和 C 都是)",
+            "f": "错误。"
+        }
+    ],
+    "a": 3,
+    "exp": "解析: 在燃气管道系统中，手动切断阀门通常通过螺纹(Threaded)连接或法兰(Flanged)连接的方式组装到管道上。",
+    "src": "• 课文出处: Chapter 4 习题。"
+},
+{
+    "u": "Unit 10 Assignment # 4",
+    "q": "What two functions do automatic valves perform?@@(自动阀门执行哪两项功能？)",
+    "hint": "Think about normal operation vs. emergency operation.",
+    "opts": [
+        {
+            "t": "Control, firing of the burner@@(控制，燃烧器的点火)",
+            "f": "错误。这只是其日常功能。"
+        },
+        {
+            "t": "Safety Shut-off@@(安全切断)",
+            "f": "错误。这只是其紧急功能。"
+        },
+        {
+            "t": "Both A and B@@(A 和 B 都是)",
+            "f": "正确。"
+        },
+        {
+            "t": "Non of the above@@(以上都不是)",
+            "f": "错误。"
+        }
+    ],
+    "a": 2,
+    "exp": "解析: 自动燃气阀门具有双重作用：既要在需要工作时控制气流供给燃烧器点火，又要在检测到故障或危险（如感应不到火焰）时作为安全切断阀切断气源。",
+    "src": "• 课文出处: Chapter 4 习题。"
+},
+{
+    "u": "Unit 10 Assignment # 4",
+    "q": "True or False: The function of a solenoid valve is to energize (open) on a call for heat and de-energize (close) when the heat demand is satisfied.@@(判断对错：电磁阀的功能是在有热量需求时通电（打开），在热量需求满足时断电（关闭）。)",
+    "hint": "How does a standard electrical coil valve operate?",
+    "opts": [
+        {
+            "t": "True@@(正确)",
+            "f": "正确。这完美地描述了其工作原理。"
+        },
+        {
+            "t": "False@@(错误)",
+            "f": "错误。"
+        }
+    ],
+    "a": 0,
+    "exp": "解析: 电磁阀(Solenoid valve)最核心的功能就是作为一个电控开关。当恒温器发出热量需求信号时线圈通电打开阀门(Energize)；当需求满足时断电，内部弹簧将阀门关闭(De-energize)。",
+    "src": "• 课文出处: Chapter 4 习题。"
+},
+{
+    "u": "Unit 10 Assignment #7",
+    "q": "Persons performing rigging tasks usually already have two strikes against them when they start, what are they?@@(执行吊装任务的人员在开始时通常已经面临两个不利因素，它们是什么？)",
+    "hint": "Think about the common external pressures on a job site.",
+    "opts": [
+        {
+            "t": "Unfavorable job conditions@@(不利的工作条件)",
+            "f": "错误。这只是其中一个。"
+        },
+        {
+            "t": "Job schedule to meet@@(需要赶上的工作进度)",
+            "f": "错误。这只是其中一个。"
+        },
+        {
+            "t": "Long hours@@(工作时间长)",
+            "f": "错误。"
+        },
+        {
+            "t": "Dirty work@@(脏活)",
+            "f": "错误。"
+        },
+        {
+            "t": "Both A and B@@(A 和 B 都是)",
+            "f": "正确。"
+        }
+    ],
+    "a": 4,
+    "exp": "解析: 吊装作业具有高风险，而工人们在开工时往往已经面临着两个最大的挑战：不够理想的现场作业环境（不利的工作条件）以及紧迫的项目交付时间（工作进度压力）。",
+    "src": "• 课文出处: Chapter 7 吊装作业常识背景。"
+},
+{
+    "u": "Unit 10 Assignment #7",
+    "q": "Requirements for safe rigging work practices in Canada can be found where?@@(在加拿大，哪里可以找到安全吊装工作实践的要求？)",
+    "hint": "Look for the legal health and safety regulations.",
+    "opts": [
+        {
+            "t": "Tssa website@@(TSSA网站)",
+            "f": "错误。TSSA主要管辖特定设备和燃料，而非通用吊装劳动安全。"
+        },
+        {
+            "t": "B149.1 code book@@(B149.1规范书)",
+            "f": "错误。燃气规范不负责制定起重安全细则。"
+        },
+        {
+            "t": "Provincial or territorial occupational health and safety (OH&S) acts and regulations@@(省或地区职业健康与安全(OH&S)法案和法规)",
+            "f": "正确。"
+        },
+        {
+            "t": "None of the above@@(以上都不是)",
+            "f": "错误。"
+        }
+    ],
+    "a": 2,
+    "exp": "解析: 在加拿大，各省或地区的职业健康与安全(OH&S)法案和法规是管辖索具和吊装等危险工作实践的核心法律依据。",
+    "src": "• 课文出处: Page 111 (参考 Occupational Health and Safety Code) 及 Page 120 习题。"
+},
+{
+    "u": "Unit 10 Assignment #7",
+    "q": "True or False: An asymmetrical load is an object with an off-centre center of gravity due to the object’s irregular shape and/or composition.@@(判断对错：非对称载荷是指由于物体不规则的形状和/或成分，导致其重心偏离中心的物体。)",
+    "hint": "Does an irregular shape affect where the balance point is?",
+    "opts": [
+        {
+            "t": "True@@(正确)",
+            "f": "正确。这完美定义了非对称载荷。"
+        },
+        {
+            "t": "False@@(错误)",
+            "f": "错误。"
+        }
+    ],
+    "a": 0,
+    "exp": "解析: 形状不规则或内部重量分布不均的物体，其重心(center of gravity)不在几何中心，这在吊装中被称为非对称载荷(asymmetrical load)，需要通过多腿吊索或特定绑扎来平衡。",
+    "src": "• 课文出处: Page 115。Handling asymmetrical loads。"
+},
+{
+    "u": "Unit 10 Assignment #7",
+    "q": "True or False: A symmetrical load is and object that, because of its uniform shape and composition, has its center of gravity located exactly is its middle.@@(判断对错：对称载荷是指由于其均匀的形状和成分，其重心精确位于其正中间的物体。)",
+    "hint": "Uniformity means the balance point is centered.",
+    "opts": [
+        {
+            "t": "True@@(正确)",
+            "f": "正确。这描述了对称载荷的特性。"
+        },
+        {
+            "t": "False@@(错误)",
+            "f": "错误。"
+        }
+    ],
+    "a": 0,
+    "exp": "解析: 均匀分布的物体起吊时最容易控制，因为它们的平衡点(重心)刚好在物体正中央，这被称为对称载荷(symmetrical load)。",
+    "src": "• 课文出处: Page 113。Handling symmetrical loads。"
+},
+{
+    "u": "Unit 10 Assignment #7",
+    "q": "Find the volume for the following rectangle/square: Concrete block, 9 feet long x 3 feet wide x 5 feet high.@@(计算以下矩形/正方形的体积：混凝土块，长9英尺 x 宽3英尺 x 高5英尺。)",
+    "hint": "Multiply Length x Width x Height to get cubic feet.",
+    "opts": [
+        {
+            "t": "Block weight = 175 cu ft x 150 lbs/cu ft = 20,800 lbs@@(重量 = 175立方英尺 x 150磅/立方英尺 = 20,800磅)",
+            "f": "错误。"
+        },
+        {
+            "t": "Block weight = 135 cu ft x 195 lbs/cu ft = 25,250 lbs@@(重量 = 135立方英尺 x 195磅/立方英尺 = 25,250磅)",
+            "f": "错误。混凝土的行业标准估算比重约为 150 lbs/cu ft。"
+        },
+        {
+            "t": "Block weight = 135 cu ft x 150 lbs/cu ft = 20,250 lbs@@(重量 = 135立方英尺 x 150磅/立方英尺 = 20,250磅)",
+            "f": "正确。9x3x5=135立方英尺。"
+        },
+        {
+            "t": "Block weight = 135 cu ft x 150 lbs/cu ft = 20,185 lbs@@(重量 = 135立方英尺 x 150磅/立方英尺 = 20,185磅)",
+            "f": "错误。乘积计算错误。"
+        }
+    ],
+    "a": 2,
+    "exp": "解析: 首先计算体积：长(9) × 宽(3) × 高(5) = 135 立方英尺(cu ft)。根据标准，每立方英尺混凝土重 150 磅。总重 = 135 × 150 = 20,250 磅。",
+    "src": "• 课文出处: Page 120 习题 4。"
+},
+{
+    "u": "Unit 10 Assignment #7",
+    "q": "While performing Pre-Use Inspection you discover the wire rope sling shows signs of localized wear, abrasion or scraping. Is the sling safe to use and why?@@(在执行使用前检查时，发现钢丝绳吊索有局部磨损、擦伤或刮伤的迹象。该吊索是否安全可用，为什么？)",
+    "hint": "Any substandard condition is a reason to reject lifting equipment.",
+    "opts": [
+        {
+            "t": "Yes, safe to use, unless rope is cut@@(是的，只要绳子没断就安全可用)",
+            "f": "错误。不能等到断裂才停用。"
+        },
+        {
+            "t": "Yes, safe to use, depending on persons weight (found in istructions)@@(是的，根据人员重量(见说明书)安全可用)",
+            "f": "错误。无关。"
+        },
+        {
+            "t": "No, not safe to use, slings must be removed from service when any substandard conditions exist@@(不，不安全，当存在任何不合格条件时，必须将吊索从服务中移除)",
+            "f": "正确。吊装安全零容忍。"
+        },
+        {
+            "t": "No, not safe to use, unless repaired before use@@(不，不安全，除非在使用前进行修理)",
+            "f": "错误。吊索的损伤不允许擅自修复继续作为吊具使用。"
+        }
+    ],
+    "a": 2,
+    "exp": "解析: 吊装安全规范要求，一旦在吊索上发现任何不合格的情况（如异常磨损、断丝、扭结等），必须立即停止使用该吊具(remove from service)。",
+    "src": "• 课文出处: Page 111。Remove all rope from service..."
+},
+{
+    "u": "Unit 10 Assignment #7",
+    "q": "When a wire rope sling is used in a basket hitch, the diameter of the load where the sling contacts the load can reduce sling capacity. What is the ratio used to determine the loss of strength or efficiency and is referred to as?@@(当钢丝绳吊索用于篮式吊结时，吊索接触载荷处的载荷直径会降低吊索承载力。用于确定强度或效率损失的比率称为什么？)",
+    "hint": "It compares the large diameter (load) to the small diameter (rope).",
+    "opts": [
+        {
+            "t": "The D/d Ratio@@(D/d 比率)",
+            "f": "正确。"
+        },
+        {
+            "t": "The a/b Ration@@(a/b 比率)",
+            "f": "错误。"
+        },
+        {
+            "t": "The C/d Ratio@@(C/d 比率)",
+            "f": "错误。"
+        },
+        {
+            "t": "The B/c Ratio@@(B/c 比率)",
+            "f": "错误。"
+        }
+    ],
+    "a": 0,
+    "exp": "解析: 钢丝绳在弯曲时内部受力不均会损失强度，行业中用来测算这种弯曲强度损失的专业术语被称为 D/d 比率。",
+    "src": "• 课文出处: Page 120 习题 6。"
+},
+{
+    "u": "Unit 10 Assignment #7",
+    "q": "True or False: In the D/d ratio the “D” refers to the diameter of the object being lifter, while the “d” refers to the diameter of the wire rope sling.@@(判断对错：在 D/d 比率中，“D”是指被起吊物体的直径，而“d”是指钢丝绳吊索的直径。)",
+    "hint": "Capital D is the big object, lowercase d is the small rope.",
+    "opts": [
+        {
+            "t": "True@@(正确)",
+            "f": "正确。"
+        },
+        {
+            "t": "False@@(错误)",
+            "f": "错误。"
+        }
+    ],
+    "a": 0,
+    "exp": "解析: 这是业界标准的定义：“D” (大写) 代表载荷(被起吊物体或滑轮)的直径；“d” (小写) 代表钢丝绳本身的直径。比率越小，弯曲越急，承载力下降越多。",
+    "src": "• 课文出处: Chapter 7 吊装基础知识。"
+},
+{
+    "u": "Unit 10 Assignment #7",
+    "q": "Which type of sling can be used safely in explosive atmospheres?@@(哪种类型的吊索可以在爆炸性环境中安全使用？)",
+    "hint": "You need non-sparking materials.",
+    "opts": [
+        {
+            "t": "Synthetic sling@@(合成纤维吊索)",
+            "f": "正确。不导电、不产生火花。"
+        },
+        {
+            "t": "Rope sling@@(绳索吊索)",
+            "f": "错误。钢丝绳碰撞会产生火花。"
+        },
+        {
+            "t": "Rubber sling@@(橡胶吊索)",
+            "f": "错误。"
+        },
+        {
+            "t": "Any of the above@@(以上任何一种)",
+            "f": "错误。"
+        }
+    ],
+    "a": 0,
+    "exp": "解析: 在存在爆炸性气体或粉尘的环境中，绝不能使用金属链条或钢丝绳，因为它们碰撞容易产生火花。合成纤维吊索(Synthetic sling)是由尼龙等不良导体材料制成，防静电且不会产生火花。",
+    "src": "• 课文出处: Page 111 & 121。"
+},
+{
+    "u": "Unit 10 Assignment #7",
+    "q": "When using a chain for overhead lifting, what alloy grade or grade is recommended?@@(当使用链条进行高空/顶置起吊时，建议使用什么合金等级？)",
+    "hint": "Overhead lifting requires strictly certified, high-strength grades.",
+    "opts": [
+        {
+            "t": "Either 50 or 90 is recommended@@(建议 50 或 90)",
+            "f": "错误。"
+        },
+        {
+            "t": "Either 80 or 100 is recommended@@(建议 80 或 100)",
+            "f": "正确。业界强制要求。"
+        },
+        {
+            "t": "Either 85 or 95 is recommended@@(建议 85 或 95)",
+            "f": "错误。"
+        },
+        {
+            "t": "Either 40 or 50 is recommended@@(建议 40 或 50)",
+            "f": "错误。级别太低无法用于顶置吊装。"
+        }
+    ],
+    "a": 1,
+    "exp": "解析: 根据 OSHA 和 ASME 规范，只有经过严格强度测试的 80 级 (Grade 80) 或 100 级 (Grade 100) 的合金钢链条才被批准用于顶置吊装(overhead lifting)。",
+    "src": "• 课文出处: Page 121 习题 8。"
+},
+{
+    "u": "Unit 10 Assignment #7",
+    "q": "What types of wear or damage are you looking for during the inspection of hooks?@@(在检查吊钩时，你需要寻找哪些类型的磨损或损坏？)",
+    "hint": "Any physical deformation or defect must be checked.",
+    "opts": [
+        {
+            "t": "Cracks@@(裂纹)",
+            "f": "错误。这只是其中一项。"
+        },
+        {
+            "t": "Severe corrosion@@(严重腐蚀)",
+            "f": "错误。这只是其中一项。"
+        },
+        {
+            "t": "Twisting of hook body@@(吊钩主体扭曲)",
+            "f": "错误。这只是其中一项。"
+        },
+        {
+            "t": "Opening of the throat@@(喉口张开)",
+            "f": "错误。这只是其中一项。"
+        },
+        {
+            "t": "All of the above@@(以上所有)",
+            "f": "正确。"
+        }
+    ],
+    "a": 4,
+    "exp": "解析: 吊钩的目视检查涵盖了各种结构性破坏，包括裂纹、腐蚀、扭曲变形以及吊钩喉部受力过大产生的张开等所有不良状况。",
+    "src": "• 课文出处: Page 114。\n• 原文语句: \"...hooks for cracks, throat spread, deformation, damage, wear, and safety latch\""
+},
+{
+    "u": "Unit 10 Assignment #7",
+    "q": "a) Missing or illegible manufacture identification b) Cracks, nicks or gouges c) Damage from heat d) Unauthorized repairs e) Improper operation and locking of self-locking hooks f) Any twith from plane of unbent hook g) Distortion of wear –any increase in throat opening of 5% not to exceed 1/4inch, or wear exceeding 10% of original dimension Are all things you should check for when inspecting hooks for wear and damage.@@(a) 制造商标识缺失或难以辨认 b) 裂纹、缺口或凿痕 c) 热损坏 d) 未经授权的修理 e) 自锁钩操作和锁定不当 f) 未弯曲钩平面有任何扭曲 g) 磨损变形——喉口张开增加5%但不超过1/4英寸，或磨损超过原始尺寸的10%。这些都是在检查吊钩磨损和损坏时应检查的事项。判断对错。)",
+    "hint": "These represent the definitive rejection criteria for hooks.",
+    "opts": [
+        {
+            "t": "True@@(正确)",
+            "f": "正确。这列表涵盖了法定的详细报废标准。"
+        },
+        {
+            "t": "False@@(错误)",
+            "f": "错误。"
+        }
+    ],
+    "a": 0,
+    "exp": "解析: 题目中列举的内容涵盖了吊钩在日常或年度检查中必须遵循的法定报废标准参数(如喉口尺寸、未经授权的焊接维修等)。",
+    "src": "• 课文出处: Page 112-114 有关缺陷设备的报废与检查综合描述。"
+},
+{
+    "u": "Unit 10 Assignment #7",
+    "q": "List three common shackles used in rigging and hoisting operations@@(列出吊装和起重操作中常用的三种卸扣)",
+    "hint": "Consider the different pin designs for shackles.",
+    "opts": [
+        {
+            "t": "Screw type@@(螺旋型)",
+            "f": "错误。这只是其中一种。"
+        },
+        {
+            "t": "Wide body type@@(宽体型)",
+            "f": "错误。这只是其中一种。"
+        },
+        {
+            "t": "Bolt type@@(螺栓型)",
+            "f": "错误。这只是其中一种。"
+        },
+        {
+            "t": "All of the above@@(以上所有)",
+            "f": "正确。"
+        }
+    ],
+    "a": 3,
+    "exp": "解析: 起重操作中最常使用的三种专业卸扣(shackles)正是题目中列出的：螺旋销型(Screw type)、宽体型(Wide body type)以及螺栓/螺母型(Bolt type)。",
+    "src": "• 课文出处: Page 121 习题 11 及综合吊装常识。"
+}
+];
+
+/* ==========================================================
+   STATE
+========================================================== */
+var SAVE_KEY = 'g2_quiz_v1';
+var EDIT_KEY = 'g2_quiz_edits_v1';
+var timerInterval = null;
+var timeRemaining = 3.5 * 3600;
+var windowSlideDirection = ''; 
+
+var state = { masterList: [], list: [], optionMaps: {}, pointer: 0, records: {}, filter: 'all', source: 'all', search: '', isExam: false, examSubmitted: false, shuffled: false, showChinese: false };
+
+/* ==========================================================
+   THEME & HIGHLIGHT
+========================================================== */
+function toggleTheme() { var dark = document.documentElement.classList.toggle('dark'); localStorage.setItem('g2_theme', dark ? 'dark' : 'light'); document.getElementById('themeBtn').textContent = dark ? '☀️' : '🌙'; }
+function initTheme() { var saved = localStorage.getItem('g2_theme'); var sysDark = window.matchMedia('(prefers-color-scheme: dark)').matches; var useDark = saved ? saved === 'dark' : sysDark; if (useDark) document.documentElement.classList.add('dark'); document.getElementById('themeBtn').textContent = useDark ? '☀️' : '🌙'; }
+function hl(text) { if (!state.search || !text) return text; var kw = state.search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); return text.replace(new RegExp('(' + kw + ')(?![^<]*>)', 'gi'), '<span class="hl">$1</span>'); }
+
+/* ==========================================================
+   INIT & TABS
+========================================================== */
+function init() {
+  initTheme(); initChinese(); if (!quizData || quizData.length === 0) return;
+  try { var em = JSON.parse(localStorage.getItem(EDIT_KEY)); if (em) Object.keys(em).forEach(function(i) { if (quizData[i]) quizData[i].src = em[i]; }); } catch(e) {}
+  state.masterList = quizData.map(function(_, i) { return i; }); loadProgress();
+  if (state.list.length === 0) state.list = state.masterList.slice();
+  document.getElementById('totalNum').textContent = quizData.length;
+  renderSourceTabs(); applyFilter(); document.addEventListener('keydown', handleKey);
+}
+function renderSourceTabs() {
+  var container = document.getElementById('sourceList'); container.innerHTML = ''; var sources = {};
+  quizData.forEach(function(q) { sources[q.u || 'Uncategorized'] = true; });
+  function makeTag(label, value) { var el = document.createElement('div'); el.className = 'source-tag' + (state.source === value ? ' active' : ''); el.textContent = label; el.onclick = function() { setSource(value); }; container.appendChild(el); }
+  makeTag('All', 'all'); Object.keys(sources).sort().forEach(function(s) { makeTag(s, s); });
+}
+function setSource(src) { state.source = src; renderSourceTabs(); applyFilter(); }
+function setFilter(type) { state.filter = type; ['all','wrong','star'].forEach(function(t) { document.getElementById('tab-' + t).classList.toggle('active', t === type); }); applyFilter(); }
+function handleSearch() { state.search = document.getElementById('searchBox').value.toLowerCase(); applyFilter(); }
+function applyFilter() {
+  state.list = state.masterList.filter(function(id) {
+    var q = quizData[id], rec = state.records[id], src = q.u || 'Uncategorized';
+    if (state.source !== 'all' && src !== state.source) return false;
+    if (state.search) { var full = (q.q || '') + (q.exp || '') + (q.src || ''); if (q.opts) full += q.opts.map(function(o){ return o.t; }).join(''); if (!full.toLowerCase().includes(state.search)) return false; }
+    if (state.filter === 'wrong') return rec && rec.status === 'wrong';
+    if (state.filter === 'star') return rec && rec.marked; return true;
+  });
+  state.pointer = 0; windowSlideDirection = ''; 
+  document.querySelector('.content-scroll').scrollTop = 0; // 切换过滤条件时回顶
+  renderSidebar(); renderQuestion();
+}
+function shuffleQuestions() {
+  if (state.masterList.length < 2) return;
+  for (var i = state.masterList.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var tmp = state.masterList[i]; state.masterList[i] = state.masterList[j]; state.masterList[j] = tmp; }
+  state.optionMaps = {};
+  state.masterList.forEach(function(id) {
+    var count = quizData[id].opts.length; var arr = Array.from({length: count}, function(_, i) { return i; });
+    for (var i = count - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp; }
+    state.optionMaps[id] = arr;
+  });
+  state.shuffled = true; applyFilter();
+}
+
+/* ==========================================================
+   RENDER CORE
+========================================================== */
+function renderSidebar() {
+  var grid = document.getElementById('qGrid'); grid.innerHTML = '';
+  state.list.forEach(function(id, idx) {
+    var dot = document.createElement('div'); dot.className = 'q-dot'; dot.textContent = id + 1;
+    var rec = state.records[id];
+    if (rec) {
+      if (rec.marked) dot.classList.add('star');
+      if (state.isExam && !state.examSubmitted) { if (rec.userChoice !== undefined) dot.classList.add('answered'); } 
+      else { if (rec.status === 'correct') dot.classList.add('correct'); if (rec.status === 'wrong') dot.classList.add('wrong'); }
+    }
+    if (idx === state.pointer) dot.classList.add('active');
+    dot.onclick = function() { 
+      state.pointer = idx; windowSlideDirection = ''; 
+      document.querySelector('.content-scroll').scrollTop = 0; // 点击侧边栏题号时回顶
+      renderQuestion(); 
+    }; 
+    grid.appendChild(dot);
+  });
+  var done = Object.keys(state.records).filter(function(k) { return state.records[k].userChoice !== undefined; }).length;
+  document.getElementById('totalStats').textContent = 'Done: ' + done + ' / ' + quizData.length;
+  document.getElementById('miniBar').style.width = (state.list.length ? Math.round((state.pointer + 1) / state.list.length * 100) : 0) + '%';
+}
+
+function renderQuestion() {
+  var card = document.getElementById('questionCard');
+  var empty = document.getElementById('emptyState');
+  var optList = document.getElementById('optList');
+  var fb = document.getElementById('feedbackBox');
+
+  if (state.list.length === 0) { card.style.display = 'none'; empty.style.display = 'block'; return; }
+  card.style.display = 'block'; empty.style.display = 'none';
+
+  if (windowSlideDirection === 'swipe_snap') {
+    card.style.transition = 'none';
+    card.style.transform = 'translateX(0)';
+    card.style.opacity = '1';
+  } else if (windowSlideDirection === 'left') {
+    card.style.transition = 'none'; card.style.transform = 'translateX(60vw)'; card.style.opacity = '0';
+    void card.offsetWidth;
+    card.style.transition = 'transform 0.25s ease-out, opacity 0.25s ease';
+    card.style.transform = 'translateX(0)'; card.style.opacity = '1';
+  } else if (windowSlideDirection === 'right') {
+    card.style.transition = 'none'; card.style.transform = 'translateX(-60vw)'; card.style.opacity = '0';
+    void card.offsetWidth;
+    card.style.transition = 'transform 0.25s ease-out, opacity 0.25s ease';
+    card.style.transform = 'translateX(0)'; card.style.opacity = '1';
+  } else {
+    card.style.transition = 'none'; card.style.transform = 'translateX(0)'; card.style.opacity = '1';
+  }
+  windowSlideDirection = ''; 
+
+  var id = state.list[state.pointer]; var q = quizData[id]; var rec = state.records[id] || {};
+  document.getElementById('currNum').textContent = state.pointer + 1; document.getElementById('totalNum').textContent = state.list.length;
+  document.getElementById('unitBadge').textContent = q.u || 'Question';
+
+  var parts = (q.q || '').split('@@');
+  document.getElementById('qText').innerHTML = hl(parts[0] || '');
+  document.getElementById('qTrans').innerHTML = hl(parts[1] || ''); document.getElementById('qTrans').style.display = state.showChinese ? 'block' : 'none';
+
+  var favBtn = document.getElementById('favBtn'); favBtn.textContent = rec.marked ? '⭐' : '☆'; favBtn.style.color = rec.marked ? '#f59e0b' : 'var(--text-muted)';
+
+  var labels = ['A','B','C','D','E'];
+  var order = (state.shuffled && state.optionMaps[id]) ? state.optionMaps[id] : q.opts.map(function(_, i){ return i; });
+  optList.innerHTML = '';
+  
+  order.forEach(function(origIdx, visIdx) {
+    var opt = q.opts[origIdx]; var optParts = (opt.t || '').split('@@');
+    var extraClass = '';
+    if (rec.userChoice === origIdx && !state.isExam) { extraClass = (origIdx === q.a) ? 'highlight-correct' : 'highlight-wrong'; } 
+    else if (state.isExam && rec.userChoice === origIdx) { extraClass = 'exam-selected'; }
+
+    var transVisible = state.showChinese && optParts[1] ? 'block' : 'none';
+    var btn = document.createElement('div'); btn.className = 'opt-btn ' + extraClass;
+    btn.innerHTML = '<span class="opt-key">' + labels[visIdx] + '</span>' +
+      '<div><div>' + hl(optParts[0]) + '</div><div class="opt-trans" style="display:' + transVisible + ';">' + hl(optParts[1]||'') + '</div></div>';
+    btn.onclick = function() { handleAnswer(id, origIdx); }; optList.appendChild(btn);
+  });
+
+  if (rec.userChoice !== undefined && !state.isExam) { showFeedback(id, rec.userChoice); } 
+  else { fb.style.display = 'none'; fb.innerHTML = ''; }
+  renderSidebar(); saveProgress();
+}
+
+function handleAnswer(id, origIdx) {
+  var q = quizData[id]; var isRight = origIdx === q.a; var oldMarked = state.records[id] ? state.records[id].marked : false;
+  if (state.isExam && !state.examSubmitted) {
+    if (!state.records[id]) state.records[id] = {}; state.records[id].userChoice = origIdx; state.records[id].status = 'answered'; renderQuestion(); return;
+  }
+  state.records[id] = { status: isRight ? 'correct' : 'wrong', userChoice: origIdx, marked: oldMarked }; saveProgress(); renderQuestion(); 
+}
+
+/* ==========================================================
+   FEEDBACK
+========================================================== */
+function showFeedback(id, choiceIdx) {
+  var q = quizData[id];
+  var isRight = choiceIdx === q.a;
+  var fb = document.getElementById('feedbackBox');
+  fb.className = 'feedback ' + (isRight ? 'ok' : 'bad');
+  fb.style.display = 'block';
+
+  var fText = (q.opts[choiceIdx].f || '').replace(/^[✅❌⚠️]+\s*/, '');
+
+  var html = '<span class="fb-title">' + (isRight ? '✅ Correct' : '❌ Incorrect') + '</span>';
+  html += '<div class="fb-msg">' + hl(fText) + '</div>';
+  html += '<hr class="fb-divider">';
+  html += '<div class="fb-section-label">Explanation</div>';
+  html += '<div class="fb-exp">' + hl(q.exp || '(no explanation)') + '</div>';
+
+  if (q.src !== undefined) {
+    html += '<hr class="fb-divider">';
+    html += '<div class="fb-row">';
+    html += '  <span class="fb-section-label">Source</span>';
+    html += '  <button class="edit-btn" onclick="enableEdit(' + id + ')">✏️ Edit</button>';
+    html += '</div>';
+    html += '<div class="fb-src" id="src-display-' + id + '">' + hl(q.src || '') + '</div>';
+    html += '<div id="editor-area-' + id + '" style="display:none;">';
+    html += '  <textarea class="src-textarea" id="src-input-' + id + '">' + (q.src || '') + '</textarea>';
+    html += '  <div class="save-row">';
+    html += '    <button class="primary" onclick="saveEdit(' + id + ', this)">Save</button>';
+    html += '    <button onclick="cancelEdit(' + id + ')">Cancel</button>';
+    html += '  </div>';
+    html += '  <div class="edit-warn">⚠️ Saved to browser. Use "Save updated file" in sidebar to persist.</div>';
+    html += '</div>';
+  }
+
+  fb.innerHTML = html;
+}
+
+function enableEdit(id) { document.getElementById('src-display-' + id).style.display = 'none'; var ea = document.getElementById('editor-area-' + id); ea.style.display = 'block'; var ta = document.getElementById('src-input-' + id); ta.value = quizData[id].src || ''; ta.focus(); }
+function cancelEdit(id) { document.getElementById('src-display-' + id).style.display = 'block'; document.getElementById('editor-area-' + id).style.display = 'none'; }
+function saveEdit(id, btn) {
+  var newSrc = document.getElementById('src-input-' + id).value; quizData[id].src = newSrc;
+  document.getElementById('src-display-' + id).textContent = newSrc; cancelEdit(id);
+  var edits = {}; try { edits = JSON.parse(localStorage.getItem(EDIT_KEY) || '{}'); } catch(e) {}
+  edits[id] = newSrc; localStorage.setItem(EDIT_KEY, JSON.stringify(edits));
+  if (btn) { var orig = btn.textContent; btn.textContent = 'Saved!'; btn.style.background = '#059669'; btn.style.color = 'white'; setTimeout(function() { btn.textContent = orig; btn.style.background = ''; btn.style.color = ''; }, 1200); }
+}
+
+/* ==========================================================
+   INTERACTIONS & UTILS
+========================================================== */
+function nextQ() { 
+  if (state.pointer < state.list.length - 1) { 
+    if (windowSlideDirection !== 'swipe_snap') windowSlideDirection = 'left'; 
+    state.pointer++; 
+    document.querySelector('.content-scroll').scrollTop = 0; // 切下一题时强制回顶
+    renderQuestion(); 
+  } 
+}
+function prevQ() { 
+  if (state.pointer > 0) { 
+    if (windowSlideDirection !== 'swipe_snap') windowSlideDirection = 'right'; 
+    state.pointer--; 
+    document.querySelector('.content-scroll').scrollTop = 0; // 切上一题时强制回顶
+    renderQuestion(); 
+  } 
+}
+function toggleStar() {
+  var id = state.list[state.pointer]; if (id === undefined) return;
+  if (!state.records[id]) state.records[id] = {}; var isNowMarked = !state.records[id].marked; state.records[id].marked = isNowMarked;
+  if (state.filter === 'star' && !isNowMarked) { state.list.splice(state.pointer, 1); if (state.pointer >= state.list.length) state.pointer = Math.max(0, state.list.length - 1); }
+  renderQuestion(); saveProgress(); showToast(isNowMarked ? '⭐ Starred' : 'Removed from Starred');
+}
+function showToast(msg) {
+  var t = document.getElementById('toastMsg'); if (!t) { t = document.createElement('div'); t.id = 'toastMsg'; t.className = 'toast'; document.body.appendChild(t); }
+  t.textContent = msg; t.classList.add('show'); setTimeout(function(){ t.classList.remove('show'); }, 1500);
+}
+function toggleChinese() { state.showChinese = document.getElementById('cnToggle').checked; document.getElementById('cnLabel').textContent = state.showChinese ? 'CN' : 'EN'; localStorage.setItem('g2_cn', state.showChinese ? '1' : '0'); renderQuestion(); }
+function initChinese() { if (localStorage.getItem('g2_cn') === '1') { state.showChinese = true; document.getElementById('cnToggle').checked = true; document.getElementById('cnLabel').textContent = 'CN'; } }
+function saveProgress() { try { localStorage.setItem(SAVE_KEY, JSON.stringify({ records: state.records, pointer: state.pointer, filter: state.filter, source: state.source })); } catch(e) {} }
+function loadProgress() { try { var s = JSON.parse(localStorage.getItem(SAVE_KEY)); if (s) { state.records = s.records||{}; state.pointer = s.pointer||0; state.filter = s.filter||'all'; state.source = s.source||'all'; } } catch(e) {} }
+
+/* ===== 新增的防误触、防拦截双击清除功能 ===== */
+var resetTimer = null;
+function resetProgress() { 
+  var link = document.querySelector('.reset-link');
+  var bBtn = document.querySelector('.result-btn.primary');
+  
+  if (!resetTimer) {
+    showToast("⚠️ Tap again to confirm"); 
+    if (link) { link.textContent = 'Sure to clear?'; link.style.color = '#e05a5a'; }
+    if (bBtn) { bBtn.textContent = 'Sure to Restart?'; bBtn.style.background = '#e05a5a'; bBtn.style.borderColor = '#e05a5a'; }
+    resetTimer = setTimeout(function() {
+      resetTimer = null;
+      if (link) { link.textContent = 'Clear progress'; link.style.color = ''; }
+      if (bBtn) { bBtn.textContent = 'Restart'; bBtn.style.background = ''; bBtn.style.borderColor = ''; }
+    }, 3000);
+    return;
+  }
+  if (resetTimer) { clearTimeout(resetTimer); resetTimer = null; }
+  if (link) { link.textContent = 'Clear progress'; link.style.color = ''; }
+  if (bBtn) { bBtn.textContent = 'Restart'; bBtn.style.background = ''; bBtn.style.borderColor = ''; }
+
+  localStorage.removeItem(SAVE_KEY); 
+  state.records = {}; state.pointer = 0; state.filter = 'all'; state.source = 'all'; 
+  if (state.isExam) toggleExam(); 
+  ['all','wrong','star'].forEach(function(t) { document.getElementById('tab-' + t).classList.toggle('active', t === 'all'); }); 
+  renderSourceTabs(); windowSlideDirection = 'swipe_snap'; applyFilter(); 
+  showToast("✅ Progress cleared!"); 
+}
+/* ======================================= */
+
+function toggleSidebar() { var sb = document.querySelector('.sidebar'); var ov = document.getElementById('sidebarOverlay'); var open = sb.classList.toggle('open'); ov.classList.toggle('show', open); }
+function closeSidebar() { document.querySelector('.sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('show'); }
+
+/* ==========================================================
+   EXAM MODE
+========================================================== */
+function toggleExam() {
+  if (document.getElementById('examToggle').checked) {
+    if (!confirm('Enable exam mode?\n- Answers hidden until submission\n- Timer starts\n- Submit when done')) { document.getElementById('examToggle').checked = false; return; }
+    state.isExam = true; state.examSubmitted = false; document.getElementById('timerBadge').style.display = 'block'; document.getElementById('topSubmitBtn').style.display = 'inline-block'; startTimer();
+  } else {
+    state.isExam = false; state.examSubmitted = false; clearInterval(timerInterval); document.getElementById('timerBadge').style.display = 'none'; document.getElementById('topSubmitBtn').style.display = 'none';
+  }
+  windowSlideDirection = ''; 
+  document.querySelector('.content-scroll').scrollTop = 0; // 切换模式回顶
+  renderQuestion(); saveProgress();
+}
+function startTimer() {
+  clearInterval(timerInterval);
+  timerInterval = setInterval(function() {
+    timeRemaining--; if (timeRemaining <= 0) { clearInterval(timerInterval); submitExam(); return; }
+    var h = Math.floor(timeRemaining / 3600), m = Math.floor((timeRemaining % 3600) / 60), s = timeRemaining % 60;
+    document.getElementById('timerBadge').textContent = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+  }, 1000);
+}
+function submitExam() {
+  state.examSubmitted = true; clearInterval(timerInterval); var correct = 0, wrong = 0;
+  quizData.forEach(function(q, i) { var rec = state.records[i]; if (rec && rec.userChoice !== undefined) { if (rec.userChoice === q.a) { correct++; rec.status = 'correct'; } else { wrong++; rec.status = 'wrong'; } } });
+  document.getElementById('resScore').textContent = Math.round(correct / quizData.length * 100) + '%'; document.getElementById('resTotal').textContent = quizData.length; document.getElementById('resRight').textContent = correct; document.getElementById('resWrong').textContent = wrong;
+  document.getElementById('overlay').style.display = 'flex'; document.getElementById('topSubmitBtn').style.display = 'none'; renderSidebar(); saveProgress();
+}
+function closeResult() { document.getElementById('overlay').style.display = 'none'; state.isExam = false; document.getElementById('examToggle').checked = false; document.getElementById('timerBadge').style.display = 'none'; windowSlideDirection = ''; renderQuestion(); }
+
+/* ==========================================================
+   PHANTOM RENDERER (带有解析满血状态的幻影卡片预加载)
+========================================================== */
+function renderPhantomCard(targetIdx) {
+  if(targetIdx < 0 || targetIdx >= state.list.length) return false;
+  var id = state.list[targetIdx]; var q = quizData[id]; var rec = state.records[id] || {};
+  
+  var html = '<div class="unit-badge">' + (q.u || 'Question') + '</div>';
+  var parts = (q.q || '').split('@@');
+  html += '<div class="q-text">' + hl(parts[0]) + '</div>';
+  if(state.showChinese && parts[1]) { html += '<div class="q-trans" style="display:block;">' + hl(parts[1]) + '</div>'; }
+  
+  html += '<div class="opt-list">';
+  var labels = ['A','B','C','D','E'];
+  var order = (state.shuffled && state.optionMaps[id]) ? state.optionMaps[id] : q.opts.map(function(_, i){ return i; });
+  
+  order.forEach(function(origIdx, visIdx) {
+    var opt = q.opts[origIdx]; var optParts = (opt.t || '').split('@@');
+    var extraClass = '';
+    if (rec.userChoice === origIdx && !state.isExam) { extraClass = (origIdx === q.a) ? 'highlight-correct' : 'highlight-wrong'; } 
+    else if (state.isExam && rec.userChoice === origIdx) { extraClass = 'exam-selected'; }
+    
+    html += '<div class="opt-btn ' + extraClass + '"><span class="opt-key">' + labels[visIdx] + '</span>';
+    html += '<div><div>' + hl(optParts[0]) + '</div>';
+    if(state.showChinese && optParts[1]) { html += '<div class="opt-trans" style="display:block;">' + hl(optParts[1]) + '</div>'; }
+    html += '</div></div>';
+  });
+  html += '</div>';
+  
+  // 🌟【修复点】把解析和错题记录也加进幻影卡片了
+  if (rec.userChoice !== undefined && !state.isExam) {
+    var choiceIdx = rec.userChoice;
+    var isRight = choiceIdx === q.a;
+    var fText = (q.opts[choiceIdx].f || '').replace(/^[✅❌⚠️]+\s*/, '');
+
+    html += '<div class="feedback ' + (isRight ? 'ok' : 'bad') + '" style="display:block;">';
+    html += '<span class="fb-title">' + (isRight ? '✅ Correct' : '❌ Incorrect') + '</span>';
+    html += '<div class="fb-msg">' + hl(fText) + '</div>';
+    html += '<hr class="fb-divider">';
+    html += '<div class="fb-section-label">Explanation</div>';
+    html += '<div class="fb-exp">' + hl(q.exp || '(no explanation)') + '</div>';
+
+    if (q.src !== undefined) {
+      html += '<hr class="fb-divider">';
+      html += '<div class="fb-row">';
+      html += '  <span class="fb-section-label">Source</span>';
+      html += '</div>';
+      html += '<div class="fb-src">' + hl(q.src || '') + '</div>';
+    }
+    html += '</div>';
+  }
+  
+  var pc = document.getElementById('phantomCard');
+  pc.innerHTML = html; pc.style.display = 'block'; return true;
+}
+
+/* ==========================================================
+   TOUCH TRACKING 
+========================================================== */
+var touchStartX = 0, touchStartY = 0;
+var currentDx = 0;
+var longPressTimer = null;
+var isLongPress = false;
+var isDragging = false;
+var isSwiping = false; 
+var phantomLoadedFor = -1;
+
+var scrollArea = document.querySelector('.content-scroll');
+var qCard = document.getElementById('questionCard');
+var pCard = document.getElementById('phantomCard');
+
+scrollArea.addEventListener('touchstart', function(e) {
+  if (e.touches.length > 1) return; 
+  touchStartX = e.touches[0].screenX; touchStartY = e.touches[0].screenY;
+  isLongPress = false; isDragging = true; isSwiping = false; currentDx = 0;
+  qCard.style.transition = 'none'; pCard.style.transition = 'none';
+
+  var tag = e.target.tagName;
+  if (tag === 'BUTTON' || tag === 'INPUT' || tag === 'TEXTAREA' || e.target.closest('.opt-btn') || e.target.closest('.search-box')) return; 
+
+  longPressTimer = setTimeout(function() {
+    if (!isSwiping) { isLongPress = true; toggleStar(); if('vibrate' in navigator) navigator.vibrate(40); }
+  }, 600);
+}, {passive: true});
+
+scrollArea.addEventListener('touchmove', function(e) {
+  if (!isDragging) return;
+  var dx = e.touches[0].screenX - touchStartX;
+  var dy = e.touches[0].screenY - touchStartY;
+
+  if (!isSwiping) {
+    if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 10) { isDragging = false; if (longPressTimer) clearTimeout(longPressTimer); return; } 
+    else if (Math.abs(dx) > 10) { isSwiping = true; if (longPressTimer) clearTimeout(longPressTimer); }
+  }
+
+  if (isSwiping) {
+    currentDx = dx; var screenW = window.innerWidth;
+    
+    if ((state.pointer === 0 && dx > 0) || (state.pointer === state.list.length - 1 && dx < 0)) {
+      dx = dx * 0.25; 
+      qCard.style.transform = 'translateX(' + dx + 'px)'; 
+      pCard.style.display = 'none';
+    } else {
+       var targetIdx = dx < 0 ? state.pointer + 1 : state.pointer - 1;
+       if (phantomLoadedFor !== targetIdx) { if(renderPhantomCard(targetIdx)) phantomLoadedFor = targetIdx; }
+       
+       qCard.style.transform = 'translateX(' + dx + 'px)';
+       qCard.style.opacity = '1'; 
+       
+       if(phantomLoadedFor !== -1) {
+          var pOffset = dx < 0 ? screenW + dx : -screenW + dx;
+          pCard.style.transform = 'translateX(' + pOffset + 'px)';
+          pCard.style.opacity = '1'; 
+       }
+    }
+  }
+}, {passive: true});
+
+scrollArea.addEventListener('touchend', function(e) {
+  if (longPressTimer) clearTimeout(longPressTimer);
+  if (!isDragging) return; isDragging = false;
+
+  if (!isLongPress && isSwiping) {
+    var threshold = window.innerWidth * 0.25; if (threshold < 80) threshold = 80;
+    
+    qCard.style.transition = 'transform 0.25s ease-out';
+    pCard.style.transition = 'transform 0.25s ease-out';
+
+    if (currentDx < -threshold && state.pointer < state.list.length - 1) {
+      qCard.style.transform = 'translateX(-100vw)'; 
+      pCard.style.transform = 'translateX(0)';
+      setTimeout(function() { 
+        windowSlideDirection = 'swipe_snap'; 
+        nextQ(); // 里面已经包含了自动回到顶部的代码
+        resetPhantom(); 
+      }, 250);
+    } else if (currentDx > threshold && state.pointer > 0) {
+      qCard.style.transform = 'translateX(100vw)'; 
+      pCard.style.transform = 'translateX(0)';
+      setTimeout(function() { 
+        windowSlideDirection = 'swipe_snap'; 
+        prevQ(); // 里面已经包含了自动回到顶部的代码
+        resetPhantom(); 
+      }, 250);
+    } else {
+      qCard.style.transform = 'translateX(0)'; 
+      if(phantomLoadedFor !== -1) pCard.style.transform = 'translateX(' + (currentDx < 0 ? window.innerWidth : -window.innerWidth) + 'px)';
+      setTimeout(resetPhantom, 250);
+    }
+  } else if (isSwiping) {
+      qCard.style.transition = 'transform 0.25s ease-out';
+      qCard.style.transform = 'translateX(0)'; 
+      setTimeout(resetPhantom, 250);
+  }
+  isSwiping = false;
+}, {passive: true});
+
+function resetPhantom() {
+  pCard.style.display = 'none'; pCard.style.transition = 'none'; phantomLoadedFor = -1;
+}
+
+/* ==========================================================
+   KEYBOARD SHORTCUTS
+========================================================== */
+function handleKey(e) {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  var k = e.key.toUpperCase();
+  if (k === 'ARROWRIGHT' || k === 'ENTER') { nextQ(); return; }
+  if (k === 'ARROWLEFT') { prevQ(); return; }
+  if (k === 'S') { toggleStar(); return; }
+
+  var id = state.list[state.pointer];
+  if (id === undefined) return;
+  var order = (state.shuffled && state.optionMaps[id]) ? state.optionMaps[id] : quizData[id].opts.map(function(_, i){ return i; });
+  var map = { '1': 0, 'A': 0, '2': 1, 'B': 1, '3': 2, 'C': 2, '4': 3, 'D': 3, '5': 4, 'E': 4 };
+  var visIdx = map[k];
+  if (visIdx !== undefined && visIdx < order.length) {
+    var btns = document.querySelectorAll('.opt-btn');
+    if (btns[visIdx]) btns[visIdx].click();
+  }
+}
+
+window.onload = init;
+</script>
+</body>
+</html>
