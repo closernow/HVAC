@@ -1,0 +1,3846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>G2 Quiz System</title>
+<style>
+/* ===== VARIABLES ===== */
+:root {
+  --bg: #f5f3ee; --surface: #ffffff; --surface2: #fafaf8; --border: #e0ddd6;
+  --text: #1a1a1a; --text-muted: #666; --text-faint: #999; --opt-bg: #fafaf8;
+  --opt-hover: #f0ede6; --exp-bg: #f7f6f1; --sidebar-bg: #ffffff;
+  --dot-bg: #ece9e2; --dot-text: #888; --tag-bg: #ece9e2;
+  --correct-bg: #eaf5ec; --correct-border: #4caf72; --correct-text: #2a7a45;
+  --wrong-bg: #fdecea; --wrong-border: #e05a5a; --wrong-text: #b33;
+  --accent: #3a6ea5; --accent-bg: #e8f0f8; --warn-bg: #fffbeb;
+  --warn-border: #f59e0b; --warn-text: #92400e; --progress-track: #ddd;
+}
+html.dark {
+  --bg: #18181a; --surface: #242428; --surface2: #2a2a2f; --border: #3a3a3f;
+  --text: #f0ede6; --text-muted: #999; --text-faint: #555; --opt-bg: #2a2a2f;
+  --opt-hover: #32323a; --exp-bg: #1f1f24; --sidebar-bg: #1e1e22;
+  --dot-bg: #2e2e34; --dot-text: #888; --tag-bg: #2e2e34;
+  --correct-bg: #1a3326; --correct-border: #4caf72; --correct-text: #6dcc90;
+  --wrong-bg: #3d1e1e; --wrong-border: #e05a5a; --wrong-text: #e08080;
+  --accent: #5b9ad5; --accent-bg: #1e2e42; --warn-bg: #2d2000;
+  --warn-border: #d97706; --warn-text: #fcd34d; --progress-track: #3a3a3f;
+}
+
+/* ===== RESET & LAYOUT ===== */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Georgia, "Times New Roman", serif; background: var(--bg); color: var(--text); height: 100vh; height: 100dvh; overflow: hidden; display: flex; transition: background 0.3s, color 0.3s; }
+.app { display: flex; width: 100%; height: 100%; }
+
+/* ===== SIDEBAR ===== */
+.sidebar { width: 260px; flex-shrink: 0; background: var(--sidebar-bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; transition: background 0.3s, border-color 0.3s; }
+.sidebar-head { padding: 14px; border-bottom: 1px solid var(--border); background: var(--surface2); transition: background 0.3s; }
+.app-title { font-size: 1rem; font-weight: normal; color: var(--accent); margin-bottom: 10px; letter-spacing: 0.01em; }
+.search-box { width: 100%; padding: 7px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem; font-family: Georgia, serif; background: var(--surface); color: var(--text); margin-bottom: 10px; outline: none; transition: border-color 0.2s, background 0.3s; }
+.search-box:focus { border-color: var(--accent); }
+.filter-tabs { display: flex; gap: 5px; margin-bottom: 10px; }
+.filter-tab { flex: 1; text-align: center; padding: 5px 4px; font-size: 0.78rem; font-family: Georgia, serif; cursor: pointer; border-radius: 5px; background: var(--tag-bg); color: var(--text-muted); transition: all 0.2s; border: 1px solid transparent; }
+.filter-tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.source-label { font-size: 0.75rem; color: var(--text-faint); margin-bottom: 5px; }
+.source-scroll { display: flex; flex-wrap: wrap; gap: 5px; max-height: 100px; overflow-y: auto; }
+.source-tag { font-size: 0.72rem; padding: 3px 8px; border-radius: 10px; background: var(--tag-bg); color: var(--text-muted); cursor: pointer; border: 1px solid transparent; white-space: nowrap; }
+.source-tag.active { background: var(--accent-bg); color: var(--accent); border-color: var(--accent); font-weight: bold; }
+.q-list { flex: 1; overflow-y: auto; padding: 10px; }
+.q-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
+.q-dot { aspect-ratio: 1; border-radius: 5px; background: var(--dot-bg); color: var(--dot-text); font-size: 0.78rem; font-family: Georgia, serif; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid transparent; transition: all 0.12s; position: relative; }
+.q-dot.active { border-color: var(--accent); color: var(--accent); background: var(--surface); box-shadow: 0 0 0 2px var(--accent); }
+.q-dot.correct { background: var(--correct-border); color: #fff; border-color: var(--correct-border); }
+.q-dot.wrong { background: var(--wrong-border); color: #fff; border-color: var(--wrong-border); }
+.q-dot.answered { background: var(--accent); color: #fff; border-color: var(--accent); }
+.q-dot.star::after { content: "★"; position: absolute; top: -4px; right: -4px; color: #f59e0b; font-size: 9px; }
+.sidebar-foot { padding: 12px 14px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; font-size: 0.82rem; color: var(--text-muted); background: var(--surface2); }
+.foot-row { display: flex; justify-content: space-between; align-items: center; }
+.reset-link { color: var(--accent); cursor: pointer; font-size: 0.78rem; }
+.foot-btn { width: 100%; padding: 7px; font-size: 0.8rem; font-family: Georgia, serif; border-radius: 6px; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--text); }
+.foot-btn.green { background: #059669; color: #fff; border-color: #059669; }
+
+/* ===== MAIN AREA ===== */
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.toolbar { height: 54px; padding: 0 24px; border-bottom: 1px solid var(--border); background: var(--surface); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.toolbar-left { display: flex; align-items: center; gap: 14px; }
+.q-counter { font-size: 1rem; color: var(--text); }
+.q-counter span { color: var(--accent); }
+.progress-mini { width: 120px; height: 4px; background: var(--progress-track); border-radius: 99px; overflow: hidden; }
+.progress-mini-fill { height: 100%; background: var(--accent); border-radius: 99px; transition: width 0.4s; }
+.toolbar-right { display: flex; align-items: center; gap: 14px; }
+.timer-badge { display: none; background: var(--warn-bg); color: var(--warn-text); padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; border: 1px solid var(--warn-border); }
+.exam-toggle-wrap { display: flex; align-items: center; gap: 7px; font-size: 0.82rem; color: var(--text-muted); cursor: pointer; }
+.toggle-track { position: relative; width: 36px; height: 20px; background: var(--progress-track); border-radius: 99px; transition: background 0.3s; }
+.toggle-track::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; background: #fff; border-radius: 50%; transition: transform 0.3s; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+.toggle-input { display: none; }
+.toggle-input:checked + .toggle-track { background: var(--accent); }
+.toggle-input:checked + .toggle-track::after { transform: translateX(16px); }
+.theme-btn { background: none; border: none; font-size: 1.1rem; cursor: pointer; padding: 0 4px; display: flex; align-items: center; }
+.nav-btn.submit { background: #d97706; color: #fff; border-color: #d97706; display: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-family: Georgia, serif; font-size: 0.82rem; border-width: 1px; border-style: solid;}
+
+/* ===== CONTENT ===== */
+.content-scroll { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 24px; display: flex; justify-content: center; align-items: flex-start; padding-bottom: 40px; }
+.card-wrapper { position: relative; width: 100%; max-width: 820px; }
+.card { width: 100%; padding-bottom: 20px; will-change: transform, opacity; }
+#phantomCard { position: absolute; top: 0; left: 0; z-index: 1; display: none; pointer-events: none; }
+#questionCard { position: relative; z-index: 2; }
+
+.unit-badge { display: inline-block; font-size: 0.75rem; font-weight: bold; font-family: -apple-system, sans-serif; text-transform: uppercase; color: var(--accent); background: var(--accent-bg); padding: 3px 10px; border-radius: 4px; margin-bottom: 14px; border: 1px solid var(--accent); }
+.q-text { font-size: 1.1rem; font-weight: bold; line-height: 1.6; margin-bottom: 4px; color: var(--text); }
+.q-trans { display: none; font-size: 0.88rem; color: var(--text-muted); margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--border); line-height: 1.5; }
+
+.hint-wrap { display: none !important; }
+
+.opt-list { display: flex; flex-direction: column; gap: 10px; margin-top: 18px; }
+.opt-btn { display: flex; align-items: flex-start; gap: 12px; padding: 13px 16px; border: 1px solid var(--border); border-radius: 8px; background: var(--opt-bg); cursor: pointer; font-size: 0.95rem; font-family: Georgia, serif; color: var(--text); text-align: left; transition: background 0.12s, border-color 0.12s; line-height: 1.5; }
+.opt-btn:hover { border-color: var(--accent); background: var(--opt-hover); }
+.opt-key { font-weight: bold; color: var(--text-faint); min-width: 20px; font-size: 0.85rem; padding-top: 1px; }
+.opt-trans { display: none; font-size: 0.82rem; color: var(--text-muted); margin-top: 3px; }
+.opt-btn.highlight-correct { background: var(--correct-bg); border-color: var(--correct-border); }
+.opt-btn.highlight-correct .opt-key { color: var(--correct-text); }
+.opt-btn.highlight-wrong { background: var(--wrong-bg); border-color: var(--wrong-border); }
+.opt-btn.highlight-wrong .opt-key { color: var(--wrong-text); }
+.opt-btn.exam-selected { border-color: var(--accent); background: var(--accent-bg); }
+
+/* ===== FEEDBACK ===== */
+.feedback { display: none; margin-top: 22px; padding: 18px 20px; border-radius: 8px; font-size: 0.9rem; line-height: 1.6; }
+.feedback.ok { background: var(--correct-bg); border: 1px solid var(--correct-border); color: var(--correct-text); }
+.feedback.bad { background: var(--wrong-bg); border: 1px solid var(--wrong-border); color: var(--wrong-text); }
+.fb-title { font-weight: bold; display: block; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px dashed rgba(0,0,0,0.15); }
+.fb-exp { white-space: pre-wrap; line-height: 1.65; margin-top: 5px; color: var(--text); font-size: 0.88rem; }
+.feedback.ok .fb-msg, .feedback.ok .fb-exp, .feedback.ok .fb-section-label { color: var(--correct-text); }
+.feedback.bad .fb-msg, .feedback.bad .fb-exp, .feedback.bad .fb-section-label { color: var(--wrong-text); }
+.feedback.ok .fb-src, .feedback.bad .fb-src { color: var(--text-muted); }
+.fb-msg { margin-bottom: 10px; color: var(--text); font-size: 0.9rem; line-height: 1.5; }
+.fb-section-label { font-weight: bold; font-size: 0.88rem; color: var(--text); margin-bottom: 4px; display: inline-block; }
+.fb-src { white-space: pre-wrap; line-height: 1.8; font-style: italic; font-size: 0.82rem; color: var(--text-muted); padding: 8px 0; margin-top: 5px; }
+.fb-divider { border: none; border-top: 1px dashed var(--border); margin: 10px 0; }
+.fb-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+.edit-btn { font-size: 0.78rem; padding: 2px 8px; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); color: var(--text); cursor: pointer; font-family: Georgia, serif; }
+.edit-btn:hover { background: var(--opt-hover); }
+.src-textarea { width: 100%; height: 120px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; font-family: Georgia, serif; font-size: 0.85rem; line-height: 1.5; background: var(--surface); color: var(--text); resize: vertical; margin-top: 8px; transition: background 0.3s, color 0.3s; }
+.save-row { display: flex; gap: 8px; margin-top: 6px; }
+.save-row button { padding: 4px 14px; border-radius: 5px; cursor: pointer; font-family: Georgia, serif; font-size: 0.82rem; border: 1px solid var(--border); background: var(--surface); color: var(--text); }
+.save-row button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.edit-warn { font-size: 0.75rem; color: var(--warn-text); margin-top: 5px; }
+
+/* ===== BOTTOM NAV ===== */
+.bottom-nav { width: 100%; height: 62px; flex-shrink: 0; background: var(--surface); border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: center; gap: 12px; padding: 0 24px; transition: background 0.3s, border-color 0.3s; }
+.nav-btn { padding: 9px 20px; border-radius: 7px; font-family: Georgia, serif; font-size: 0.88rem; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--text); }
+.nav-btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.toast { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.8); color: white; padding: 12px 24px; border-radius: 8px; z-index: 9999; font-size: 1rem; pointer-events: none; opacity: 0; transition: opacity 0.3s ease; text-align: center; }
+.toast.show { opacity: 1; }
+.empty-state { display: none; text-align: center; padding: 60px 20px; }
+
+/* ===== OVERLAY ===== */
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 200; display: none; align-items: center; justify-content: center; }
+.result-card { background: var(--surface); border-radius: 14px; padding: 32px 28px; text-align: center; width: 90%; max-width: 380px; box-shadow: 0 16px 40px rgba(0,0,0,0.2); }
+.result-score { font-size: 4rem; font-weight: bold; color: var(--accent); margin: 4px 0 16px; line-height: 1; }
+.result-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+.result-stat { background: var(--surface2); border-radius: 8px; padding: 10px; }
+.result-stat-val { font-size: 1.3rem; font-weight: bold; display: block; }
+.result-stat-lbl { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+.result-btns { display: flex; gap: 12px; justify-content: center; }
+.result-btn { padding: 8px 18px; border-radius: 7px; cursor: pointer; font-family: Georgia, serif; font-size: 0.88rem; border: 1px solid var(--border); background: var(--surface); color: var(--text); }
+.result-btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+.hl { background: #fef08a; color: #854d0e; border-bottom: 2px solid #eab308; padding: 0 2px; border-radius: 2px; font-weight: bold; }
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+/* ===== SIDEBAR OVERLAY ===== */
+.hamburger { display: none; background: none; border: none; font-size: 1.3rem; cursor: pointer; padding: 0 4px; color: var(--text); line-height: 1; }
+.sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 50; }
+.sidebar-overlay.show { display: block; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 900px) { .sidebar { width: 220px; } }
+@media (max-width: 650px) {
+  .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 80vw; max-width: 300px; z-index: 60; transform: translateX(-100%); transition: transform 0.28s ease; box-shadow: 4px 0 20px rgba(0,0,0,0.15); }
+  .sidebar.open { transform: translateX(0); }
+  .hamburger { display: block; }
+  .bottom-nav { display: none !important; }
+  .content-scroll { padding: 16px 12px 140px 12px; }
+  .toolbar { padding: 0 10px; height: 50px; }
+  .toolbar-left { gap: 8px; } .toolbar-right { gap: 6px; }
+  .progress-mini { width: 60px; } .q-text { font-size: 1rem; } .opt-btn { font-size: 0.9rem; padding: 11px 13px; }
+  .result-card { width: 92%; padding: 24px 18px; } .result-score { font-size: 3rem; }
+}
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<div class="app">
+
+  <div class="sidebar">
+    <div class="sidebar-head">
+      <div class="app-title">G2 Quiz System</div>
+      <input type="text" class="search-box" id="searchBox" placeholder="Search questions..." oninput="handleSearch()">
+      <div class="filter-tabs">
+        <div class="filter-tab active" id="tab-all" onclick="setFilter('all')">All</div>
+        <div class="filter-tab" id="tab-wrong" onclick="setFilter('wrong')">Wrong</div>
+        <div class="filter-tab" id="tab-star" onclick="setFilter('star')">Starred</div>
+      </div>
+      <div class="source-label">Chapter filter:</div>
+      <div class="source-scroll" id="sourceList"></div>
+    </div>
+    <div class="q-list"><div class="q-grid" id="qGrid"></div></div>
+    <div class="sidebar-foot">
+      <div class="foot-row"><span id="totalStats">Done: 0 / 0</span><span class="reset-link" onclick="resetProgress()">Clear progress</span></div>
+      <button class="foot-btn" onclick="shuffleQuestions()">Shuffle questions &amp; options</button>
+      <button class="foot-btn green" onclick="exportHtml()">Save updated file</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <button class="hamburger" id="hamburger" onclick="toggleSidebar()">&#9776;</button>
+        <div class="q-counter">Q <span id="currNum">1</span> / <span id="totalNum">1</span></div>
+        <div class="progress-mini"><div class="progress-mini-fill" id="miniBar" style="width:0%"></div></div>
+      </div>
+      <div class="toolbar-right">
+        <div class="timer-badge" id="timerBadge">03:30:00</div>
+        <button id="topSubmitBtn" class="nav-btn submit" onclick="submitExam()">Submit</button>
+        <label class="exam-toggle-wrap">
+          <input type="checkbox" class="toggle-input" id="cnToggle" onchange="toggleChinese()">
+          <div class="toggle-track"></div><span id="cnLabel">EN</span>
+        </label>
+        <label class="exam-toggle-wrap">
+          <input type="checkbox" class="toggle-input" id="examToggle" onchange="toggleExam()">
+          <div class="toggle-track"></div><span>Exam</span>
+        </label>
+        <button class="theme-btn" id="favBtn" onclick="toggleStar()" style="font-size:1.3rem;">☆</button>
+        <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">🌙</button>
+      </div>
+    </div>
+
+    <div class="content-scroll">
+      <div class="card-wrapper">
+        <div class="card" id="phantomCard"></div>
+        <div class="card" id="questionCard">
+          <div id="unitBadge" class="unit-badge"></div>
+          <div class="q-text" id="qText"></div>
+          <div class="q-trans" id="qTrans"></div>
+          <div class="hint-wrap" id="hintWrap"></div>
+          <div class="opt-list" id="optList"></div>
+          <div class="feedback" id="feedbackBox"></div>
+          <div class="empty-state" id="emptyState">
+            <h3>No questions in this view</h3><p>Try changing the filter or search term.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-nav" id="bottomNav">
+      <button class="nav-btn" onclick="prevQ()">Prev</button>
+      <button class="nav-btn primary" onclick="nextQ()">Next</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="result-card">
+    <div class="result-title">Exam result</div>
+    <div class="result-score" id="resScore">0</div>
+    <div class="result-grid">
+      <div class="result-stat"><span class="result-stat-val" id="resTotal">0</span><span class="result-stat-lbl">Total</span></div>
+      <div class="result-stat"><span class="result-stat-val" style="color:var(--correct-text)" id="resRight">0</span><span class="result-stat-lbl">Correct</span></div>
+      <div class="result-stat"><span class="result-stat-val" style="color:var(--wrong-text)" id="resWrong">0</span><span class="result-stat-lbl">Wrong</span></div>
+    </div>
+    <div class="result-btns">
+      <button class="result-btn" onclick="closeResult()">Review answers</button>
+      <button class="result-btn primary" onclick="resetProgress()">Restart</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ==========================================================
+   QUIZ DATA (在这里贴上你的所有题目代码)
+========================================================== */
+var quizData = [
+  {
+"u": "1. Draft Principles & Testing",
+"q": "What is a negative consequence of a draft that is too strong?@@(抽力过强的一个负面后果是什么？)",
+"hint": "Draft Extremes",
+"opts": [
+{
+"t": "It increases the amount of heat transfer.@@(它增加了热传递量。)",
+"f": "❌ 错误。过强的抽力会降低热传递。"
+},
+{
+"t": "It reduces the amount of heat transfer.@@(它减少了热传递量。)",
+"f": "✅ 正确。抽力过强会导致热烟气过快通过热交换器，减少了热量传递给介质的时间。"
+},
+{
+"t": "It causes the flame to have a 'lazy' appearance.@@(它导致火焰呈现“无力”外观。)",
+"f": "❌ 错误。这是抽力太弱的表现。"
+},
+{
+"t": "It causes products of combustion to spill into the building.@@(它导致燃烧产物溢出到建筑内。)",
+"f": "❌ 错误。溢流通常是由抽力不足引起的。"
+}
+],
+"a": 1,
+"exp": "解析：当抽力过强时，热烟气流速过快，导致其在热交换器中的停留时间缩短，从而降低了热效率 [cite: 1]。",
+"src": "• 课文出处: Page 11, Draft.\n• 原文语句: \"A draft that is too strong ... reduces the amount of heat transfer.\""
+},
+{
+"u": "1. Draft Principles & Testing",
+"q": "Which factor does NOT affect the theoretical stack draft?@@(哪个因素不影响理论烟囱抽力？)",
+"hint": "Draft Factors",
+"opts": [
+{
+"t": "Stack height@@(烟囱高度)",
+"f": "❌ 错误。高度与抽力成正比。"
+},
+{
+"t": "Outdoor air temperature@@(室外空气温度)",
+"f": "❌ 错误。室外温度降低会增加抽力。"
+},
+{
+"t": "Stack diameter@@(烟囱直径)",
+"f": "✅ 正确。理论上，烟囱的直径对抽力没有影响。"
+},
+{
+"t": "Average stack temperature@@(平均烟囱温度)",
+"f": "❌ 错误。烟囱温度升高会增加抽力。"
+}
+],
+"a": 2,
+"exp": "解析：理论烟囱抽力仅取决于烟囱高度以及内外气体的密度（温）差；烟囱的直径不改变抽力大小 [cite: 1]。",
+"src": "• 课文出处: Page 15, Theoretical stack draft.\n• 原文语句: \"the diameter of the stack has no effect on the draft.\""
+},
+{
+"u": "1. Draft Principles & Testing",
+"q": "What is a primary purpose of a draft hood?@@(防气流罩的主要目的是什么？)",
+"hint": "Draft Hood Purpose",
+"opts": [
+{
+"t": "To increase over-fire draft.@@(增加炉膛抽力。)",
+"f": "❌ 错误。它是用来控制和稳定抽力的。"
+},
+{
+"t": "To prevent flue gases from exiting.@@(阻止烟气排出。)",
+"f": "❌ 错误。"
+},
+{
+"t": "To control over-fire draft and relieve downdrafts.@@(控制炉膛抽力和缓解倒灌。)",
+"f": "✅ 正确。防气流罩通过引入室内空气来隔离烟囱抽力的波动并平衡压力。"
+},
+{
+"t": "To decrease the amount of excess air.@@(减少过剩空气量。)",
+"f": "❌ 错误。"
+}
+],
+"a": 2,
+"exp": "解析：防气流罩的主要功能是维持稳定的炉膛压力，中和倒灌风的影响，并在排气受阻时提供溢流出口以保护燃烧 [cite: 1]。",
+"src": "• 课文出处: Page 12, Draft hood.\n• 原文语句: \"The purpose of a draft hood is: to control the over-fire draft ... to relieve downdrafts ... to allow the products of combustion to spill into the building if the vent is blocked.\""
+},
+{
+"u": "1. Draft Principles & Testing",
+"q": "A draft hood should only be installed on appliances that operate with which type of draft?@@(防气流罩只能安装在以哪种抽力运行的设备上？)",
+"hint": "Draft Hood Application",
+"opts": [
+{
+"t": "Positive over-fire draft@@(正压炉膛抽力)",
+"f": "❌ 错误。绝不能用于正压系统。"
+},
+{
+"t": "Forced over-fire draft@@(强制炉膛抽力)",
+"f": "❌ 错误。"
+},
+{
+"t": "Neutral over-fire draft@@(中性炉膛抽力)",
+"f": "✅ 正确。防气流罩设计用于在燃烧室出口处维持大气压力（中性）。"
+},
+{
+"t": "Induced over-fire draft@@(诱导炉膛抽力)",
+"f": "❌ 错误。"
+}
+],
+"a": 2,
+"exp": "解析：防气流罩只能用于自然排气的 I 类设备，这类设备的炉膛出口压力通常调定为中性 [cite: 1]。",
+"src": "• 课文出处: Page 13, Draft hood.\n• 原文语句: \"A draft hood is installed only on appliances with a neutral over-fire draft.\""
+},
+{
+"u": "1. Draft Principles & Testing",
+"q": "What happens if the neutral pressure point is incorrectly set?@@(如果中性压力点设置不正确会发生什么？)",
+"hint": "Neutral Pressure Point",
+"opts": [
+{
+"t": "It will improve heating efficiency.@@(它将提高加热效率。)",
+"f": "❌ 错误。"
+},
+{
+"t": "It will affect the proper venting of flue products.@@(它将影响烟气产物的正常排放。)",
+"f": "✅ 正确。中性压力点是排气系统平衡的核心。"
+},
+{
+"t": "It will eliminate the need for dilution air.@@(它将消除对稀释空气的需求。)",
+"f": "❌ 错误。"
+},
+{
+"t": "It will decrease the dew point.@@(它将降低露点。)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析：中性压力点是燃烧产物转换进入排气系统的关键点。错误的设置会导致排气不畅或过量稀释 [cite: 1]。",
+"src": "• 课文出处: Page 14, Neutral pressure point.\n• 原文语句: \"If this setting is incorrect, it will affect the proper venting of flue products.\""
+},
+{
+"u": "1. Draft Principles & Testing",
+"q": "At what temperature does flue gas condensation typically occur?@@(烟气冷凝通常在什么温度发生？)",
+"hint": "Flue Condensation",
+"opts": [
+{
+"t": "60°F (15°C)@@(60°F / 15°C)",
+"f": "❌ 错误。"
+},
+{
+"t": "127°F (53°C)@@(127°F / 53°C)",
+"f": "✅ 正确。这是天然气燃烧废气的标准露点温度。"
+},
+{
+"t": "212°F (100°C)@@(212°F / 100°C)",
+"f": "❌ 错误。这是水的沸点。"
+},
+{
+"t": "350°F (177°C)@@(350°F / 177°C)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析：当排气温度降至约 127°F（露点）时，废气中的水蒸气会凝结成酸性液体，可能腐蚀排气系统 [cite: 1]。",
+"src": "• 课文出处: Page 16, Vent gas temperature.\n• 原文语句: \"flue gas condensation occurs at approximately 127 F (53 C). This is called the dew point.\""
+},
+{
+"u": "1. Draft Principles & Testing",
+"q": "What is the total air supply required per 1000 Btu/h input for a draft-hood appliance?@@(带防气流罩设备每 1000 Btu/h 输入所需的总空气供应量是多少？)",
+"hint": "Air Supply Ratios",
+"opts": [
+{
+"t": "10 cubic feet@@(10 立方英尺)",
+"f": "❌ 错误。这仅够理论燃烧空气。"
+},
+{
+"t": "15 cubic feet@@(15 立方英尺)",
+"f": "❌ 错误。这是燃烧空气加过剩空气。"
+},
+{
+"t": "30 cubic feet@@(30 立方英尺)",
+"f": "✅ 正确。分配比例为 10（燃烧）+ 5（过剩）+ 15（稀释）。"
+},
+{
+"t": "45 cubic feet@@(45 立方英尺)",
+"f": "❌ 错误。"
+}
+],
+"a": 2,
+"exp": "解析：为了确保燃烧完全并获得稳定的抽力，规范建议每 1000 Btu 输入提供 30 立方英尺的总空气量 [cite: 2]。",
+"src": "• 课文出处: Page 146, Appliance Draft Control.\n• 原文语句: \"The combustion air and excess air requirements make a combined ratio of 15:1. The dilution air required for flue gas is also at a ratio of 15:1.\""
+},
+{
+"u": "1. Draft Principles & Testing",
+"q": "What is the primary role of dilution air in a venting system?@@(稀释空气在排气系统中的主要作用是什么？)",
+"hint": "Dilution Air",
+"opts": [
+{
+"t": "To increase the temperature of vent gases.@@(增加排气温度。)",
+"f": "❌ 错误。它是用来降温的。"
+},
+{
+"t": "To cool vent gases and control draft influence on the combustion chamber.@@(冷却排气并控制抽力对燃烧室的影响。)",
+"f": "✅ 正确。稀释空气可以降低排气密度并平衡抽力。"
+},
+{
+"t": "To provide primary air for the burner.@@(为燃烧器提供一次空气。)",
+"f": "❌ 错误。"
+},
+{
+"t": "To decrease the dew point of flue gases.@@(降低烟气的露点。)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析：稀释空气通过引入室内冷空气来降低废气温度，防止抽力波动直接干扰燃烧过程 [cite: 2]。",
+"src": "• 课文出处: Page 146, Appliance Draft Control.\n• 原文语句: \"The dilution air required for flue gas ... cools vent gases and controls draft influence on combustion chamber.\""
+},
+{
+"u": "1. Draft Principles & Testing",
+"q": "Where should a draft test normally be performed on an appliance with a draft hood?@@(带防气流罩的设备通常应在何处进行抽力测试？)",
+"hint": "Draft Test Location",
+"opts": [
+{
+"t": "Inside the combustion chamber.@@(燃烧室内。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Upstream of the draft hood.@@(防气流罩的上游。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Downstream of the draft hood in the stack.@@(排气管内防气流罩的下游。)",
+"f": "✅ 正确。测试点应位于稀释空气混合后的排气管中。"
+},
+{
+"t": "At the vent termination outdoors.@@(室外排气末端。)",
+"f": "❌ 错误。"
+}
+],
+"a": 2,
+"exp": "解析：为了测量排气系统的实际工作抽力，必须在防气流罩出口（即烟道管）位置进行测量 [cite: 1]。",
+"src": "• 课文出处: Page 12, Draft hood.\n• 原文语句: \"The draft test is done downstream of the draft hood in the stack.\""
+},
+{
+"u": "1. Draft Principles & Testing",
+"q": "What is the typical range for a normal draft reading?@@(正常的抽力读数范围通常是多少？)",
+"hint": "Normal Draft",
+"opts": [
+{
+"t": "0.0 to +0.02\" w.c.@@(0.0 到 +0.02\" 水柱)",
+"f": "❌ 错误。这是正压。"
+},
+{
+"t": "-0.02\" to -0.04\" w.c.@@(-0.02\" 到 -0.04\" 水柱)",
+"f": "✅ 正确。这是自然排气设备的标准运行压力范围。"
+},
+{
+"t": "-0.10\" to -0.20\" w.c.@@(-0.10\" 到 -0.20\" 水柱)",
+"f": "❌ 错误。这属于极强抽力。"
+},
+{
+"t": "-1.0\" to -2.0\" w.c.@@(-1.0\" 到 -2.0\" 水柱)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析：正常的自然抽力应处于微弱的负压状态，通常在 -0.02\" 到 -0.04\" 水柱之间 [cite: 1]。",
+"src": "• 课文出处: Page 11, Draft.\n• 原文语句: \"normal draft ... -0.02 to -0.04 inch w.c.\""
+},
+{
+"u": "1. Draft Principles & Testing",
+"q": "For a converted appliance, what is the minimum required distance for the draft hood outlet above the highest flue passage?@@(对于改装设备，防气流罩出口距离最高烟道口的最小要求距离是多少？)",
+"hint": "Converted Appliances",
+"opts": [
+{
+"t": "6 in (150 mm)@@(6 英寸 / 150 毫米)",
+"f": "❌ 错误。"
+},
+{
+"t": "12 in (300 mm)@@(12 英寸 / 300 毫米)",
+"f": "✅ 正确。规范要求至少 12 英寸的垂直上升段。"
+},
+{
+"t": "18 in (450 mm)@@(18 英寸 / 450 毫米)",
+"f": "❌ 错误。"
+},
+{
+"t": "24 in (600 mm)@@(24 英寸 / 600 毫米)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析：改装（Converted）设备需要足够的垂直上升距离来建立稳定的自然抽力 [cite: 1]。",
+"src": "• 课文出处: Page 14, Neutral pressure point.\n• 原文语句: \"the draft hood outlet shall be at least 12 in (300 mm) above the highest flue passage.\""
+},
+{
+"u": "2. Backdraft, Spillage & Depressurization",
+"q": "What is the number one cause of spillage in a venting system?@@(排气系统发生废气溢流的头号原因是什么？)",
+"hint": "Spillage Cause",
+"opts": [
+{
+"t": "An obstructed chimney or vent.@@(烟囱或排气管受阻。)",
+"f": "❌ 错误。虽然受阻会导致溢流，但在整体统计中并非头号原因。"
+},
+{
+"t": "Building depressurization (lack of make-up air).@@(建筑负压 / 缺乏补充空气。)",
+"f": "✅ 正确。由于现代建筑气密性好，缺乏补充空气导致的建筑负压是引发溢流的首要原因。"
+},
+{
+"t": "Excessive draft from a tall stack.@@(高烟囱产生的过强抽力。)",
+"f": "❌ 错误。这只会降低热效率，不会导致溢流。"
+},
+{
+"t": "Incorrect burner adjustment.@@(燃烧器调整不当。)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析:建筑负压（Depressurization）是导致自然抽力设备无法将废气排出的最常见原因，这通常是因为室内缺乏足够的补充空气（make-up air）来平衡排风设备消耗的空气。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 2.\n• 原文语句: \"#1 Spillage Cause: Building depressurization (lack of make-up air)\""
+},
+{
+"u": "2. Backdraft, Spillage & Depressurization",
+"q": "What primarily causes a backdraft in residential applications?@@(在住宅应用中，导致气流倒灌的主要原因是什么？)",
+"hint": "Backdraft Cause",
+"opts": [
+{
+"t": "Positive air pressure from an open window.@@(开窗产生的正气压。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Negative air pressure from mechanical systems like dryers, fans, and range hoods.@@(如干衣机、排风扇、抽油烟机等机械系统产生的负气压。)",
+"f": "✅ 正确。这些排风设备会抽出室内空气，形成强大的负压，从而将室外空气顺着排气管倒吸进来。"
+},
+{
+"t": "A decrease in outdoor temperature.@@(室外温度下降。)",
+"f": "❌ 错误。室外温度下降通常会增加向外的自然抽力。"
+},
+{
+"t": "Condensation in the flue.@@(烟道内的冷凝。)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析:室内的排气系统（如厨房排风扇、烘干机）在运行时会大量排出空气。如果没有相应的室外空气补充进来，就会在室内形成负气压，最终导致排气管发生气流倒流（倒灌）。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 2.\n• 原文语句: \"#1 Backdraft Cause: Negative air pressure from mechanical systems (dryers, fans, range hoods)\""
+},
+{
+"u": "2. Backdraft, Spillage & Depressurization",
+"q": "What is the specific spillage threshold limit for building depressurization?@@(建筑负压导致废气溢流的具体临界阈值是多少？)",
+"hint": "Spillage Threshold",
+"opts": [
+{
+"t": "-0.01\" w.c.@@(-0.01\" 水柱)",
+"f": "❌ 错误。"
+},
+{
+"t": "-0.02\" w.c. (-5 Pa)@@(-0.02\" 水柱 / -5 帕)",
+"f": "✅ 正确。当负压等于或比这个数值更负时，极易发生溢流。"
+},
+{
+"t": "-0.04\" w.c. (-10 Pa)@@(-0.04\" 水柱 / -10 帕)",
+"f": "❌ 错误。-0.04 是正常抽力的上限范围，但溢流的临界值是 -0.02。"
+},
+{
+"t": "+0.02\" w.c. (+5 Pa)@@(+0.02\" 水柱 / +5 帕)",
+"f": "❌ 错误。这是正压。"
+}
+],
+"a": 1,
+"exp": "解析:对于带有防气流罩的自然排气设备，当建筑内的负压达到或超过 -0.02\" w.c. (-5 Pa) 时，向外的自然抽力就会被克服，导致废气反向排入室内。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 2.\n• 原文语句: \"Spillage Threshold: -0.02\" w.c. (-5 Pa) — more negative = spill\""
+},
+{
+"u": "2. Backdraft, Spillage & Depressurization",
+"q": "Which statement correctly describes a 'Cold Backdraft'?@@(以下哪项正确描述了“冷倒灌”？)",
+"hint": "Cold Backdraft",
+"opts": [
+{
+"t": "The burner fires during reversed flow, causing dangerous spillage.@@(燃烧器在气流反向时点火运行，造成危险的溢流。)",
+"f": "❌ 错误。这是“热倒灌（Hot Backdraft）”的描述。"
+},
+{
+"t": "The vent pipe is completely blocked by ice.@@(排气管完全被冰堵塞。)",
+"f": "❌ 错误。"
+},
+{
+"t": "The burner is OFF, and cold air falls down the vent. This is not a malfunction.@@(燃烧器关闭时，冷空气顺排气管下落。这不属于设备故障。)",
+"f": "✅ 正确。停机状态下的冷空气下沉是正常物理现象。"
+},
+{
+"t": "It occurs only when the indoor temperature drops below freezing.@@(仅在室内温度降至冰点以下时发生。)",
+"f": "❌ 错误。"
+}
+],
+"a": 2,
+"exp": "解析:冷倒灌发生在设备未运行（Burner OFF）时，由于烟囱内的气体冷却变重而向下流动。这是一种常见的自然现象，并不视为系统故障。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 2.\n• 原文语句: \"Cold Backdraft: Burner OFF, cold air falls down vent — not a malfunction\""
+},
+{
+"u": "2. Backdraft, Spillage & Depressurization",
+"q": "Why is a 'Hot Backdraft' considered highly dangerous?@@(为什么“热倒灌”被认为是非常危险的？)",
+"hint": "Hot Backdraft",
+"opts": [
+{
+"t": "Because it cools the heat exchanger too rapidly.@@(因为它冷却热交换器的速度太快。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Because the burner fires during reversed flow, leading to the spillage of hot, toxic gases.@@(因为燃烧器在气流倒流时点火运行，导致高温有毒废气溢流。)",
+"f": "✅ 正确。燃烧时排气失败会将一氧化碳等致命气体直接推入室内。"
+},
+{
+"t": "Because it causes the vent pipe to melt.@@(因为它会导致排气管熔化。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Because it indicates a cracked heat exchanger.@@(因为它表明热交换器破裂。)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析:当排气管处于气流倒灌状态（向下吹），而此时燃烧器恰好启动（Burner FIRES），原本应该排向室外的高温燃烧废气会被强行吹入室内空间，引发严重的一氧化碳中毒风险。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 2.\n• 原文语句: \"Hot Backdraft: Burner FIRES during reversed flow — dangerous spillage of hot gases\""
+},
+{
+"u": "2. Backdraft, Spillage & Depressurization",
+"q": "Where exactly should you hold the lit taper when performing a smoke taper test?@@(执行烟带测试时，点燃的烟带应该准确地放在什么位置？)",
+"hint": "Smoke Taper Test Location",
+"opts": [
+{
+"t": "Inside the primary air shutter.@@(在一次空气百叶窗内部。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Just above the vent termination on the roof.@@(在屋顶排气末端的正上方。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Downstream of the draft hood in the stack.@@(排气管内防气流罩的下游。)",
+"f": "❌ 错误。这是测量具体抽力数值（Draft Test）的位置，不是测溢流的位置。"
+},
+{
+"t": "Just under the rim of the draft hood relief opening.@@(防气流罩溢流口边缘的正下方。)",
+"f": "✅ 正确。这是最能直观观察是否有气体溢出的位置。"
+}
+],
+"a": 3,
+"exp": "解析:烟带测试（Smoke Taper Test）用于定性检查废气是否顺利排入烟道。正确的做法是将发烟物放在防气流罩下端边缘处，观察烟雾是被吸入排气系统还是被吹开。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 2.\n• 原文语句: \"Smoke Taper Test: Hold lit taper just under rim of draft hood relief opening\""
+},
+{
+"u": "2. Backdraft, Spillage & Depressurization",
+"q": "During a smoke taper test, what does it mean if the smoke is blown away from the draft hood?@@(在烟带测试期间，如果烟雾被吹离防气流罩，这意味着什么？)",
+"hint": "Interpreting Smoke Test",
+"opts": [
+{
+"t": "A normal draft has been established.@@(已建立正常的抽力。)",
+"f": "❌ 错误。正常抽力会将烟雾吸入排气管内。"
+},
+{
+"t": "Spillage is occurring.@@(正在发生溢流。)",
+"f": "✅ 正确。排气管内部压力大于室内，将气体顶出。"
+},
+{
+"t": "The burner is operating at peak efficiency.@@(燃烧器正在以最高效率运行。)",
+"f": "❌ 错误。"
+},
+{
+"t": "The make-up air is sufficient.@@(补充空气充足。)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析:如果防气流罩边缘的烟雾不仅没有被吸进系统，反而向外飘散或被吹开（blown away），这就明确表明燃烧废气正在从排气系统泄漏到室内，即发生了溢流（Spillage）。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 2.\n• 原文语句: \"Smoke Blown Away: = SPILLAGE occurring\""
+},
+{
+"u": "2. Backdraft, Spillage & Depressurization",
+"q": "If continuous spillage is observed at the draft hood, what does this typically indicate about the venting system?@@(如果在防气流罩处观察到持续溢流，这通常表明排气系统出了什么问题？)",
+"hint": "Spillage at Draft Hood",
+"opts": [
+{
+"t": "The venting system is drawing too much air.@@(排气系统吸入了过多的空气。)",
+"f": "❌ 错误。"
+},
+{
+"t": "The venting system is obstructed.@@(排气系统受阻。)",
+"f": "✅ 正确。排气通道不畅会导致废气无路可走，只能从罩口溢出。"
+},
+{
+"t": "The vent pipe diameter is too large.@@(排气管直径过大。)",
+"f": "❌ 错误。"
+},
+{
+"t": "The stack temperature is too high.@@(烟囱温度过高。)",
+"f": "❌ 错误。烟囱温度高通常会增加抽力，减少溢流可能。"
+}
+],
+"a": 1,
+"exp": "解析:当排气管发生堵塞（例如鸟巢、积雪或结构坍塌），燃烧废气无法通向室外，就会在防气流罩处大量、持续地溢出。这也是防气流罩被设计出来的安全泄压功能之一。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 2.\n• 原文语句: \"Spillage at Draft Hood: Venting system is obstructed\""
+},
+{
+"u": "2. Backdraft, Spillage & Depressurization",
+"q": "Why are two openings (upper and lower) typically required for combustion air in an enclosure?@@(为什么在一个封闭空间内通常需要上下两个燃烧空气开口？)",
+"hint": "Combustion Air Openings",
+"opts": [
+{
+"t": "To prevent heat buildup from affecting the draft control operation.@@(为了防止热量积聚影响抽力控制的运行。)",
+"f": "✅ 正确。利用热空气上升、冷空气下沉的原理形成空气对流，排走热量。"
+},
+{
+"t": "To supply primary and secondary air separately.@@(为了分别供应一次空气和二次空气。)",
+"f": "❌ 错误。"
+},
+{
+"t": "To allow for both a forced draft and an induced draft.@@(为了同时允许强制抽力和诱导抽力。)",
+"f": "❌ 错误。"
+},
+{
+"t": "To ensure the dew point of the flue gases remains high.@@(为了确保烟气的露点保持在较高水平。)",
+"f": "❌ 错误。"
+}
+],
+"a": 0,
+"exp": "解析:当燃气设备安装在狭小的封闭空间内时，除了需要下部开口引入冷空气供燃烧外，还必须在靠近天花板处设置上部开口。这是为了让设备散发的热量能够排出，防止空间内温度过高，从而避免高温破坏防气流罩等热敏抽力控制装置的正常工作。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 2.\n• 原文语句: \"Combustion Air (2 openings): Upper + lower prevent heat buildup affecting draft control operation\""
+},
+{
+"u": "3. Vent Types & Materials",
+"q": "What type of appliances are Type B double-wall vents designed for?@@(Type B 双壁排气管设计用于哪种类型的设备？)",
+"hint": "Type B Application",
+"opts": [
+{
+"t": "Appliances producing positive pressure.@@(产生正压的设备。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Draft-hood appliances or appliances certified for Type B.@@(带防气流罩的设备或经认证可使用 Type B 的设备。)",
+"f": "✅ 正确。Type B 是专为这类自然抽力设备设计的双壁管。"
+},
+{
+"t": "Category IV condensing appliances.@@(IV 类冷凝设备。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Only unvented space heaters.@@(仅限无排气管的空间加热器。)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析:Type B 排气管是双壁金属管，专门用于带有防气流罩（draft-hood）的自然排气设备，或者明确标注可以使用 Type B 排气系统的设备。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 3.\n• 原文语句: \"Type B: Double-wall, for draft-hood appliances or appliances certified for Type B\""
+},
+{
+"u": "3. Vent Types & Materials",
+"q": "What is a major limitation of Type B vents regarding pressure?@@(关于压力，Type B 排气管的一个主要限制是什么？)",
+"hint": "Type B Limitation",
+"opts": [
+{
+"t": "It cannot handle positive pressure and must NEVER be used on Category III.@@(它无法承受正压，严禁用于 Category III 设备。)",
+"f": "✅ 正确。Type B 的接缝不是完全密封的，遇到正压会泄漏废气。"
+},
+{
+"t": "It requires a draft inducer to handle negative pressure.@@(它需要一个诱导抽风机来处理负压。)",
+"f": "❌ 错误。"
+},
+{
+"t": "It can only handle positive pressure up to 5 Pa.@@(它只能承受高达 5 Pa 的正压。)",
+"f": "❌ 错误。"
+},
+{
+"t": "It is exclusively used for positive pressure Category III appliances.@@(它专门用于正压的 Category III 设备。)",
+"f": "❌ 错误。"
+}
+],
+"a": 0,
+"exp": "解析:Type B 排气管最大的安全限制是不能承受正压。因此，绝对不允许（NEVER）安装在产生正压但不冷凝的 Category III 设备上。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 3.\n• 原文语句: \"Type B Limitation: Cannot handle positive pressure — NEVER on Category III\""
+},
+{
+"u": "3. Vent Types & Materials",
+"q": "Which vent type is the ONLY permitted common vent type in multi-storey installations?@@(在多层建筑安装中，唯一允许使用的公共排气管类型是什么？)",
+"hint": "Type B Multi-Storey",
+"opts": [
+{
+"t": "Type L@@(Type L)",
+"f": "❌ 错误。"
+},
+{
+"t": "Type C@@(Type C)",
+"f": "❌ 错误。Type C 是单壁管，严禁用于穿越楼层的公共排气。"
+},
+{
+"t": "Type B@@(Type B)",
+"f": "✅ 正确。Type B 是多层建筑公共排气的唯一合法标准。"
+},
+{
+"t": "Type BH@@(Type BH)",
+"f": "❌ 错误。"
+}
+],
+"a": 2,
+"exp": "解析:当排气系统穿越多个楼层（Multi-Storey）并作为多台设备的公共排气主干管时，规范严格要求只能使用 Type B 排气管。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 3.\n• 原文语句: \"Type B Multi-Storey: Only permitted common vent type in multi-storey\""
+},
+{
+"u": "3. Vent Types & Materials",
+"q": "Type BW vents are exclusively designed for which of the following?@@(Type BW 排气管专为以下哪项设计？)",
+"hint": "Type BW",
+"opts": [
+{
+"t": "Direct-vent boilers ONLY.@@(仅限直接排气式锅炉。)",
+"f": "❌ 错误。"
+},
+{
+"t": "High-efficiency water heaters ONLY.@@(仅限高效热水器。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Recessed/concealed wall furnaces ONLY.@@(仅限嵌入式/隐藏式壁炉。)",
+"f": "✅ 正确。BW 中的 W 代表 Wall furnace。"
+},
+{
+"t": "Appliances in unheated spaces ONLY.@@(仅限无供暖空间内的设备。)",
+"f": "❌ 错误。"
+}
+],
+"a": 2,
+"exp": "解析:Type BW 是一种特殊形状（通常是椭圆截面）的双壁排气管，它唯一被批准的用途就是安装在墙体内部的嵌入式壁炉（wall furnaces）。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 3.\n• 原文语句: \"Type BW: Recessed/concealed wall furnaces ONLY\""
+},
+{
+"u": "3. Vent Types & Materials",
+"q": "What is the maximum temperature rating for a Type BH Class IIA (PVC) vent?@@(Type BH Class IIA (PVC) 排气管的最高额定温度是多少？)",
+"hint": "Type BH IIA (PVC)",
+"opts": [
+{
+"t": "60°C (140°F)@@(60°C / 140°F)",
+"f": "❌ 错误。"
+},
+{
+"t": "90°C (195°F)@@(90°C / 195°F)",
+"f": "✅ 正确。这是 PVC 材质在排气系统中的耐温极限。"
+},
+{
+"t": "110°C (230°F)@@(110°C / 230°F)",
+"f": "❌ 错误。"
+},
+{
+"t": "135°C (275°F)@@(135°C / 275°F)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析:用于高效设备的塑料排气管中，Class IIA（PVC 材质）的最高承受温度限制为 90°C (195°F)。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 3.\n• 原文语句: \"Type BH IIA (PVC): Max 90°C (195°F)\""
+},
+{
+"u": "3. Vent Types & Materials",
+"q": "What is the maximum temperature rating for a Type BH Class IIB/IIC (CPVC/PP) vent?@@(Type BH Class IIB/IIC (CPVC/PP) 排气管的最高额定温度是多少？)",
+"hint": "Type BH IIB/IIC (CPVC/PP)",
+"opts": [
+{
+"t": "90°C (195°F)@@(90°C / 195°F)",
+"f": "❌ 错误。这是 PVC 的耐温标准。"
+},
+{
+"t": "110°C (230°F)@@(110°C / 230°F)",
+"f": "✅ 正确。CPVC 和 PP 材质的耐温性能更好。"
+},
+{
+"t": "149°C (300°F)@@(149°C / 300°F)",
+"f": "❌ 错误。"
+},
+{
+"t": "288°C (550°F)@@(288°C / 550°F)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析:Class IIB (CPVC 材质) 和 Class IIC (PP 聚丙烯材质) 的排气管能够承受比 PVC 更高的温度，其极限值为 110°C (230°F)。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 3.\n• 原文语句: \"Type BH IIB/IIC (CPVC/PP): Max 110°C (230°F)\""
+},
+{
+"u": "3. Vent Types & Materials",
+"q": "When a vent passes through an unheated space, what materials MUST be used according to the rules?@@(当排气管穿过无供暖空间时，根据规定必须使用什么材料？)",
+"hint": "Unheated Space",
+"opts": [
+{
+"t": "Single-wall galvanized pipe.@@(单壁镀锌管。)",
+"f": "❌ 错误。严禁使用单壁管。"
+},
+{
+"t": "Type BH PVC piping.@@(Type BH PVC 管道。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Must use Type B or Type L — single-wall is prohibited.@@(必须使用 Type B 或 Type L — 严禁使用单壁管。)",
+"f": "✅ 正确。必须使用双壁管来防止低温导致废气冷凝。"
+},
+{
+"t": "Corrugated flexible metal liner.@@(波纹柔性金属内衬。)",
+"f": "❌ 错误。"
+}
+],
+"a": 2,
+"exp": "解析:无供暖空间（如寒冷的阁楼或车库）会导致废气迅速冷却。为了防止冷凝水生成并保持抽力，规范强制要求穿过此空间的排气管必须是 Type B 或 Type L（带隔热层的双壁管），绝对禁止使用单壁管。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 3.\n• 原文语句: \"Unheated Space: Must use Type B or Type L — single-wall prohibited\""
+},
+{
+"u": "3. Vent Types & Materials",
+"q": "What are the permitted venting options for a wall furnace?@@(壁炉（wall furnace）允许的排气选项有哪些？)",
+"hint": "Wall Furnace Options",
+"opts": [
+{
+"t": "Type B, Type BW, or direct vent.@@(Type B、Type BW 或直接排气系统。)",
+"f": "✅ 正确。这是壁炉排气系统的三种合法选项。"
+},
+{
+"t": "Type C or Type L only.@@(仅限 Type C 或 Type L。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Single-wall or Type BH only.@@(仅限单壁管或 Type BH。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Masonry chimney exclusively.@@(仅限砖石烟囱。)",
+"f": "❌ 错误。"
+}
+],
+"a": 0,
+"exp": "解析:根据规范，壁炉的排气配置有三种合法选择：使用常规的 Type B 双壁管、专门设计的 Type BW 墙体排气管，或者是自成体系的 Direct vent（直接排气）。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 3.\n• 原文语句: \"Wall Furnace Options: Type B, Type BW, or direct vent\""
+},
+{
+"u": "3. Vent Types & Materials",
+"q": "Where is it STRICTLY PROHIBITED to install a single-wall vent connector?@@(在什么位置严格禁止安装单壁排气连接管？)",
+"hint": "Single-Wall NOT Between",
+"opts": [
+{
+"t": "Between the draft control device and the main chimney.@@(在抽力控制装置和主烟囱之间。)",
+"f": "❌ 错误。此位置可以使用单壁连接管。"
+},
+{
+"t": "Between the flue collar and the draft control device.@@(在排气领口与抽力控制装置之间。)",
+"f": "✅ 正确。设备排气口到防气流罩之间的区域受热和受压最大，禁止使用单壁管。"
+},
+{
+"t": "In any residential basement.@@(在任何住宅地下室中。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Downstream of a draft hood.@@(在防气流罩的下游。)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析:燃气设备自身的排气领口（flue collar）与它所配备的抽力控制装置（draft control device）之间，绝对不能插入单壁排气管（Single-Wall）。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 3.\n• 原文语句: \"Single-Wall NOT Between: Flue collar and draft control device\""
+},
+{
+"u": "3. Vent Types & Materials",
+"q": "How must a Type C vent be secured at the draft control device?@@(Type C 排气管在抽力控制装置处必须如何固定？)",
+"hint": "Type C Secured By",
+"opts": [
+{
+"t": "With high-temperature silicone sealant only.@@(仅使用高温硅胶密封剂。)",
+"f": "❌ 错误。"
+},
+{
+"t": "With sheet metal screws at the draft control device.@@(在抽力控制装置处使用金属板螺钉固定。)",
+"f": "✅ 正确。必须使用机械紧固件以防止脱落。"
+},
+{
+"t": "It does not need to be secured, gravity is sufficient.@@(不需要固定，重力就足够了。)",
+"f": "❌ 错误。"
+},
+{
+"t": "With aluminum foil tape.@@(使用铝箔胶带。)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析:Type C（单壁排气管）在连接到设备的抽力控制装置时，不能仅靠插接，必须使用金属板螺钉（Sheet metal screws）进行牢固的机械锁定。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 3.\n• 原文语句: \"Type C Secured By: Sheet metal screws at the draft control device\""
+},
+{
+"u": "3. Vent Types & Materials",
+"q": "What is the minimum required clearance between a metal chimney and attic insulation?@@(金属烟囱与阁楼保温隔热材料之间的最小要求间距是多少？)",
+"hint": "Attic Insulation",
+"opts": [
+{
+"t": "Min 1\" (25 mm) clearance.@@(最小 1 英寸 / 25 毫米间距。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Min 2\" (50 mm) clearance.@@(最小 2 英寸 / 50 毫米间距。)",
+"f": "✅ 正确。防止高温引燃可燃的保温材料。"
+},
+{
+"t": "Min 6\" (150 mm) clearance.@@(最小 6 英寸 / 150 毫米间距。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Min 9\" (225 mm) clearance.@@(最小 9 英寸 / 225 毫米间距。)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析:当金属烟囱穿越阁楼时，周围的保温隔热材料（Attic Insulation）必须与烟囱外壁保持至少 2 英寸（50 mm）的安全净距。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 3.\n• 原文语句: \"Attic Insulation: Min 2\" (50 mm) clearance from metal chimney\""
+},
+{
+"u": "3. Vent Types & Materials",
+"q": "For an appliance with NO draft hood, what is the minimum gauge material allowed for the vent connector?@@(对于没有防气流罩的设备，排气连接管允许的最小厚度规格是多少？)",
+"hint": "Connector Material",
+"opts": [
+{
+"t": "Min No. 30 GSG galvanized@@(最小 30 号镀锌钢)",
+"f": "❌ 错误。30 号太薄了。"
+},
+{
+"t": "Min No. 28 GSG galvanized@@(最小 28 号镀锌钢)",
+"f": "✅ 正确。这是没有防气流罩设备的连接管最低材质要求。"
+},
+{
+"t": "Min No. 24 GSG galvanized@@(最小 24 号镀锌钢)",
+"f": "❌ 错误。"
+},
+{
+"t": "Min No. 16 GSG galvanized@@(最小 16 号镀锌钢)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析:当燃气设备没有配备防气流罩（no draft hood）时，其单壁排气连接管的材料厚度最低要求必须达到 No. 28 GSG 的镀锌钢板（Galvanized steel）。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 3.\n• 原文语句: \"Connector Material (no draft hood): Min No. 28 GSG galvanized\""
+},
+{
+"u": "3. Vent Types & Materials",
+"q": "What chemical reaction produces severe corrosion (hydrochloric acid) in a venting system?@@(什么化学反应会在排气系统中产生严重的腐蚀（盐酸）？)",
+"hint": "Corrosion Warning",
+"opts": [
+{
+"t": "Carbon dioxide + heat = carbonic acid@@(二氧化碳 + 热量 = 碳酸)",
+"f": "❌ 错误。"
+},
+{
+"t": "Methane + oxygen + cold air = nitric acid@@(甲烷 + 氧气 + 冷空气 = 硝酸)",
+"f": "❌ 错误。"
+},
+{
+"t": "Chlorinated hydrocarbons (pool rooms, laundry) + heat + water = hydrochloric acid@@(氯化烃（泳池机房、洗衣房）+ 热量 + 水 = 盐酸)",
+"f": "✅ 正确。这是燃气技师必须警惕的经典腐蚀源。"
+},
+{
+"t": "Propane + excess air = sulfuric acid@@(丙烷 + 过剩空气 = 硫酸)",
+"f": "❌ 错误。"
+}
+],
+"a": 2,
+"exp": "解析:在洗衣房（漂白剂）或室内泳池（氯气）环境中，空气中弥漫的氯化烃（Chlorinated hydrocarbons）被吸入燃气设备后，在高温（heat）和燃烧产生的水蒸气（water）共同作用下，会生成强腐蚀性的盐酸（hydrochloric acid），迅速毁坏热交换器和排气管。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 3.\n• 原文语句: \"Corrosion Warning: Chlorinated hydrocarbons (pool rooms, laundry) + heat + water = hydrochloric acid\""
+},
+{
+"u": "4. Clearances & Connector Rules",
+"q": "What is the minimum required clearance to combustibles for a Type B vent?@@(Type B 排气管到可燃物的最小要求间距是多少？)",
+"hint": "Type B Clearance",
+"opts": [
+{
+"t": "1 inch@@(1 英寸)",
+"f": "✅ 正确。Type B 双壁管隔热性能较好，只需 1 英寸的安全间距。"
+},
+{
+"t": "2 inches@@(2 英寸)",
+"f": "❌ 错误。"
+},
+{
+"t": "6 inches@@(6 英寸)",
+"f": "❌ 错误。"
+},
+{
+"t": "9 inches@@(9 英寸)",
+"f": "❌ 错误。"
+}
+],
+"a": 0,
+"exp": "解析:规范允许 Type B 排气管与可燃物之间保持最小 1 英寸的距离。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 4.\n• 原文语句: \"Type B Vent: 1\" to combustibles\""
+},
+{
+"u": "4. Clearances & Connector Rules",
+"q": "What is the minimum clearance to combustibles for a single-wall vent connected to a gas water heater?@@(连接到燃气热水器的单壁排气管，到可燃物的最小间距是多少？)",
+"hint": "Single-Wall WH Clearance",
+"opts": [
+{
+"t": "1 inch@@(1 英寸)",
+"f": "❌ 错误。"
+},
+{
+"t": "2 inches@@(2 英寸)",
+"f": "❌ 错误。"
+},
+{
+"t": "6 inches@@(6 英寸)",
+"f": "✅ 正确。单壁管连接燃气热水器需要 6 英寸的防火间距。"
+},
+{
+"t": "9 inches@@(9 英寸)",
+"f": "❌ 错误。"
+}
+],
+"a": 2,
+"exp": "解析:单壁排气管缺乏隔热层，在连接普通燃气热水器（Gas WH）时，必须与可燃物保持至少 6 英寸的距离。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 4.\n• 原文语句: \"Single-Wall to Gas WH: 6\" to combustibles\""
+},
+{
+"u": "4. Clearances & Connector Rules",
+"q": "According to Table 8.6, what clearance is required for a Type C vent connected to a boiler?@@(根据表 8.6，连接到锅炉的 Type C 排气管需要多大的间距？)",
+"hint": "Type C to Boiler",
+"opts": [
+{
+"t": "1\" (25 mm)@@(1 英寸 / 25 毫米)",
+"f": "❌ 错误。"
+},
+{
+"t": "6\" (150 mm)@@(6 英寸 / 150 毫米)",
+"f": "✅ 正确。Type C 排气管连接锅炉的间距为 6 英寸。"
+},
+{
+"t": "9\" (225 mm)@@(9 英寸 / 225 毫米)",
+"f": "❌ 错误。"
+},
+{
+"t": "18\" (450 mm)@@(18 英寸 / 450 毫米)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析:Type C 即单壁管。根据规范 Table 8.6，Type C 排气管在连接锅炉时，到可燃物的安全距离必须是 6 英寸（150 mm）。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 4.\n• 原文语句: \"Type C to Boiler: 6\" (150 mm) — Table 8.6\""
+},
+{
+"u": "4. Clearances & Connector Rules",
+"q": "What is the required clearance to combustibles for a single-wall vent connected to a converted forced-air (FA) furnace?@@(连接到改装强制送风炉的单壁排气管，到可燃物的要求间距是多少？)",
+"hint": "Converted FA Furnace",
+"opts": [
+{
+"t": "1 inch@@(1 英寸)",
+"f": "❌ 错误。"
+},
+{
+"t": "6 inches@@(6 英寸)",
+"f": "❌ 错误。"
+},
+{
+"t": "9 inches@@(9 英寸)",
+"f": "✅ 正确。改装设备的排气管间距要求更为严格。"
+},
+{
+"t": "18 inches@@(18 英寸)",
+"f": "❌ 错误。"
+}
+],
+"a": 2,
+"exp": "解析:由于强制送风炉（FA Furnace）在进行改装（Converted）后，其排气温度特性可能会提高，因此单壁管的间距要求提升至 9 英寸。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 4.\n• 原文语句: \"Single-Wall to Converted FA Furnace: 9\"\""
+},
+{
+"u": "4. Clearances & Connector Rules",
+"q": "What is the minimum clearance to combustibles for a single-wall vent connected to a converted atmospheric boiler?@@(连接到改装大气式锅炉的单壁排气管，到可燃物的最小间距是多少？)",
+"hint": "Converted Atmo Boiler",
+"opts": [
+{
+"t": "1 inch@@(1 英寸)",
+"f": "❌ 错误。"
+},
+{
+"t": "6 inches@@(6 英寸)",
+"f": "❌ 错误。"
+},
+{
+"t": "9 inches@@(9 英寸)",
+"f": "✅ 正确。改装的大气式锅炉同样需要 9 英寸间距。"
+},
+{
+"t": "18 inches@@(18 英寸)",
+"f": "❌ 错误。"
+}
+],
+"a": 2,
+"exp": "解析:与改装送风炉相同，大气式锅炉（Atmospheric Boiler）经过改装后，与其连接的单壁排气管必须保持 9 英寸的防火间距。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 4.\n• 原文语句: \"Single-Wall to Converted Atmo Boiler: 9\"\""
+},
+{
+"u": "4. Clearances & Connector Rules",
+"q": "What is the required clearance for a single-wall vent connected to a conversion burner equipped with a draft hood?@@(连接到配备防气流罩的改装燃烧器的单壁排气管，要求间距是多少？)",
+"hint": "Conversion Burner w/ Draft Hood",
+"opts": [
+{
+"t": "6 inches@@(6 英寸)",
+"f": "❌ 错误。"
+},
+{
+"t": "9 inches@@(9 英寸)",
+"f": "✅ 正确。只要是改装燃烧器，单壁管要求均为 9 英寸。"
+},
+{
+"t": "12 inches@@(12 英寸)",
+"f": "❌ 错误。"
+},
+{
+"t": "18 inches@@(18 英寸)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析:任何使用了改装燃烧器（Conversion Burner）的设备，即便配备了防气流罩，其单壁排气连接管的安全间距也必须达到 9 英寸。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 4.\n• 原文语句: \"Single-Wall to Conversion Burner (w/ draft hood): 9\"\""
+},
+{
+"u": "4. Clearances & Connector Rules",
+"q": "For a boiler with a conversion burner, what is the required clearance for a single-wall vent located upstream of the draft hood?@@(对于带有改装燃烧器的锅炉，位于防气流罩上游的单壁排气管要求间距是多少？)",
+"hint": "Boiler w/ Conversion Burner",
+"opts": [
+{
+"t": "6 inches@@(6 英寸)",
+"f": "❌ 错误。"
+},
+{
+"t": "9 inches@@(9 英寸)",
+"f": "✅ 正确。防气流罩上游的单壁管需要 9 英寸间距。"
+},
+{
+"t": "12 inches@@(12 英寸)",
+"f": "❌ 错误。"
+},
+{
+"t": "18 inches@@(18 英寸)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析:在锅炉安装改装燃烧器的情况下，位于防气流罩上游（最靠近燃烧区且承受最高温的部分）的单壁排气管，依然必须保持 9 英寸的净距。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 4.\n• 原文语句: \"Single-Wall to Boiler w/ Conversion Burner (upstream draft hood): 9\"\""
+},
+{
+"u": "4. Clearances & Connector Rules",
+"q": "Under what condition is a single-wall vent allowed to pass through a floor or ceiling?@@(在什么条件下，允许单壁排气管穿过地板或天花板？)",
+"hint": "Floor/Ceiling Penetrations",
+"opts": [
+{
+"t": "When a fire stop spacer is properly installed.@@(当正确安装防火隔离垫块时。)",
+"f": "❌ 错误。单壁管绝不允许穿过这些结构。"
+},
+{
+"t": "When the vent is wrapped in insulation.@@(当排气管被保温材料包裹时。)",
+"f": "❌ 错误。"
+},
+{
+"t": "NEVER passes through — must use Type B or Type L.@@(严禁穿过 — 必须使用 Type B 或 Type L。)",
+"f": "✅ 正确。单壁排气管绝对禁止穿过地板或天花板。"
+},
+{
+"t": "Only if the clearance is increased to 18 inches.@@(仅当间距增加到 18 英寸时。)",
+"f": "❌ 错误。"
+}
+],
+"a": 2,
+"exp": "解析:规范严格规定单壁排气管绝不允许（NEVER）穿过地板或天花板等隐蔽结构。穿过楼层时必须转换为具有隔热性能的 Type B 或 Type L 双壁排气管。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 4.\n• 原文语句: \"Single-Wall Floor/Ceiling: NEVER passes through — use Type B/L (Cl. 8.18.23)\""
+},
+{
+"u": "4. Clearances & Connector Rules",
+"q": "What are the two main purposes of a fire stop spacer?@@(防火隔离垫块的两个主要目的是什么？)",
+"hint": "Fire Stop Spacer Function",
+"opts": [
+{
+"t": "Secures the vent on the roof and prevents rain entry.@@(固定屋顶排气管并防止雨水进入。)",
+"f": "❌ 错误。防火垫块不用于屋顶。"
+},
+{
+"t": "Contains fire and maintains clearances at floor/ceiling penetrations.@@(在地板/天花板穿透处阻挡火势并保持间距。)",
+"f": "✅ 正确。它起到阻火和定位双壁管的作用。"
+},
+{
+"t": "Reduces draft and controls over-fire pressure.@@(减少抽力并控制炉膛压力。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Prevents flue gas condensation and insulates the vent.@@(防止烟气冷凝并绝缘排气管。)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析:防火隔离垫块（Fire Stop Spacer）专门用于排气管穿过地板或天花板的孔洞处。它的核心作用一是封闭缝隙防止火势在楼层间蔓延（Contains fire），二是确保排气管与木结构保持规定的安全间距。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 4.\n• 原文语句: \"Fire Stop Spacer: Contains fire + maintains clearances at floor/ceiling penetrations (not roof)\""
+},
+{
+"u": "4. Clearances & Connector Rules",
+"q": "How must clearances be determined for special venting systems?@@(特殊排气系统的间距必须如何确定？)",
+"hint": "Special Venting Rules",
+"opts": [
+{
+"t": "Always maintain a minimum of 1 inch to combustibles.@@(始终与可燃物保持至少 1 英寸的距离。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Follow the clearances strictly outlined in Table 8.6.@@(严格遵循表 8.6 中概述的间距。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Clearances are per the manufacturer — always follow the listing.@@(间距按制造商要求确定 — 始终遵循产品认证说明。)",
+"f": "✅ 正确。特殊系统的间距由其专属认证决定。"
+},
+{
+"t": "Maintain a clearance equal to the vent diameter.@@(保持与排气管直径相等的间距。)",
+"f": "❌ 错误。"
+}
+],
+"a": 2,
+"exp": "解析:对于特殊排气系统（Special Venting），不能直接套用通用表格的间距要求，而必须始终遵循制造商（manufacturer）在其产品认证说明（listing）和安装手册中规定的特定间距。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 4.\n• 原文语句: \"Special Venting: Clearances per manufacturer — always follow listing\""
+},
+{
+"u": "5. Vent Terminations & Heights",
+"q": "What is the minimum termination height for a vent above a flat roof?@@(平屋顶上排气管的最小终端高度是多少？)",
+"hint": "Vent Above Flat Roof",
+"opts": [
+{
+"t": "Min 1 ft (300 mm)@@(最小 1 英尺 / 300 毫米)",
+"f": "❌ 错误。"
+},
+{
+"t": "Min 2 ft (600 mm)@@(最小 2 英尺 / 600 毫米)",
+"f": "✅ 正确。排气管（Vent）在平屋顶上的最小高度是 2 英尺。"
+},
+{
+"t": "Min 3 ft (0.9 m)@@(最小 3 英尺 / 0.9 米)",
+"f": "❌ 错误。这是烟囱（Chimney）的要求。"
+},
+{
+"t": "Min 8 ft (2.4 m)@@(最小 8 英尺 / 2.4 米)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析:规范要求普通的排气管（Vent）在穿过平屋顶后，至少需要高出屋面 2 英尺（600 mm）。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 5.\n• 原文语句: \"Vent Above Flat Roof: Min 2 ft (600 mm)\""
+},
+{
+"u": "5. Vent Terminations & Heights",
+"q": "What is the minimum termination height for a chimney above a flat roof?@@(平屋顶上烟囱的最小终端高度是多少？)",
+"hint": "Chimney Above Flat Roof",
+"opts": [
+{
+"t": "Min 2 ft (600 mm)@@(最小 2 英尺 / 600 毫米)",
+"f": "❌ 错误。这是排气管（Vent）的高度。"
+},
+{
+"t": "Min 3 ft (0.9 m)@@(最小 3 英尺 / 0.9 米)",
+"f": "✅ 正确。烟囱（Chimney）的要求比排气管高，必须达到 3 英尺。"
+},
+{
+"t": "Min 5 ft (1.5 m)@@(最小 5 英尺 / 1.5 米)",
+"f": "❌ 错误。"
+},
+{
+"t": "Min 8 ft (2.4 m)@@(最小 8 英尺 / 2.4 米)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析:这是一个经典的考试陷阱。平屋顶上的“排气管（Vent）”是 2 英尺，而“烟囱（Chimney）”必须至少高出 3 英尺（0.9 米），千万不要混淆。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 5.\n• 原文语句: \"Chimney Above Flat Roof: Min 3 ft (0.9 m) — don't confuse with vent\""
+},
+{
+"u": "5. Vent Terminations & Heights",
+"q": "What is the minimum vent termination height above the penetration point for a steep 12/12 pitched roof?@@(对于 12/12 陡峭坡屋顶，排气管穿透点上方的最小终端高度是多少？)",
+"hint": "12/12 Pitched Roof",
+"opts": [
+{
+"t": "Min 2 ft@@(最小 2 英尺)",
+"f": "❌ 错误。"
+},
+{
+"t": "Min 3 ft@@(最小 3 英尺)",
+"f": "❌ 错误。"
+},
+{
+"t": "Min 5 ft@@(最小 5 英尺)",
+"f": "❌ 错误。"
+},
+{
+"t": "Min 8 ft@@(最小 8 英尺)",
+"f": "✅ 正确。坡度极大的屋顶需要极高的排气管来防止风压影响。"
+}
+],
+"a": 3,
+"exp": "解析:当屋顶坡度达到 12/12（非常陡峭）时，风穿过屋脊产生的湍流会极大影响抽力，因此排气管必须高出穿透点至少 8 英尺。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 5.\n• 原文语句: \"12/12 Pitched Roof: Min 8 ft above penetration\""
+},
+{
+"u": "5. Vent Terminations & Heights",
+"q": "If there is an obstruction (like a parapet) within 10 ft of a vent, what is the height requirement for the vent?@@(如果排气管 10 英尺范围内有障碍物（如女儿墙），排气管的高度要求是什么？)",
+"hint": "Obstruction Within 10 ft",
+"opts": [
+{
+"t": "It must be level with the obstruction.@@(必须与障碍物齐平。)",
+"f": "❌ 错误。"
+},
+{
+"t": "It must be 2 ft above the obstruction.@@(必须高出障碍物 2 英尺。)",
+"f": "✅ 正确。为了防止障碍物引起的涡流导致废气倒灌。"
+},
+{
+"t": "It must be 3 ft above the obstruction.@@(必须高出障碍物 3 英尺。)",
+"f": "❌ 错误。"
+},
+{
+"t": "It must be relocated.@@(必须重新定位。)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析:如果排气管终端的 10 英尺水平范围内存在任何障碍物（例如护墙、屋脊），排气管的高度必须至少高出该障碍物最高点 2 英尺。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 5.\n• 原文语句: \"Obstruction Within 10 ft: 2 ft above the obstruction (e.g., parapet)\""
+},
+{
+"u": "5. Vent Terminations & Heights",
+"q": "What is the minimum required chimney height measured from the highest draft hood outlet?@@(从最高的防气流罩出口算起，烟囱的最小要求高度是多少？)",
+"hint": "Above Highest Draft Hood Outlet",
+"opts": [
+{
+"t": "Min 3 ft (0.9 m)@@(最小 3 英尺 / 0.9 米)",
+"f": "❌ 错误。"
+},
+{
+"t": "Min 5 ft (1.5 m)@@(最小 5 英尺 / 1.5 米)",
+"f": "✅ 正确。需要这个上升高度来建立足够的自然抽力。"
+},
+{
+"t": "Min 8 ft (2.4 m)@@(最小 8 英尺 / 2.4 米)",
+"f": "❌ 错误。"
+},
+{
+"t": "Min 12 ft (3.6 m)@@(最小 12 英尺 / 3.6 米)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析:为了确保产生足够的上升热气流（烟囱效应），从系统中位置最高的防气流罩出口到烟囱顶部，必须保证至少有 5 英尺（1.5 米）的垂直高度。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 5.\n• 原文语句: \"Above Highest Draft Hood Outlet: Min 5 ft (1.5 m) chimney height\""
+},
+{
+"u": "5. Vent Terminations & Heights",
+"q": "What is the minimum vent height for a wall furnace, measured from the bottom of the furnace?@@(壁炉排气管的最小高度是多少（从壁炉底部算起）？)",
+"hint": "Wall Furnace Vent Height",
+"opts": [
+{
+"t": "Min 5 ft (1.5 m)@@(最小 5 英尺 / 1.5 米)",
+"f": "❌ 错误。"
+},
+{
+"t": "Min 8 ft (2.4 m)@@(最小 8 英尺 / 2.4 米)",
+"f": "❌ 错误。"
+},
+{
+"t": "Min 12 ft (3.6 m)@@(最小 12 英尺 / 3.6 米)",
+"f": "✅ 正确。壁炉必须有足够的垂直排气管，且除非认证，否则不允许有横向管段。"
+},
+{
+"t": "Min 15 ft (4.5 m)@@(最小 15 英尺 / 4.5 米)",
+"f": "❌ 错误。"
+}
+],
+"a": 2,
+"exp": "解析:壁炉（Wall Furnace）的排气管总高度（从设备最底部开始测量）必须至少达到 12 英尺（3.6 米）。另外，除非有特别的厂家认证，否则不允许安装横向管段（laterals）。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 5.\n• 原文语句: \"Wall Furnace Vent Height: Min 12 ft (3.6 m) above bottom — no laterals unless certified\""
+},
+{
+"u": "5. Vent Terminations & Heights",
+"q": "What is the minimum height clearance for a vent terminating over a public sidewalk or driveway?@@(在公共人行道或车道上方，排气终端的最小高度间距是多少？)",
+"hint": "Over Public Sidewalk",
+"opts": [
+{
+"t": "Min 3 ft (0.9 m)@@(最小 3 英尺 / 0.9 米)",
+"f": "❌ 错误。"
+},
+{
+"t": "Min 5 ft (1.5 m)@@(最小 5 英尺 / 1.5 米)",
+"f": "❌ 错误。"
+},
+{
+"t": "Min 7 ft (2.1 m)@@(最小 7 英尺 / 2.1 米)",
+"f": "✅ 正确。防止烫伤行人或被车辆撞击。"
+},
+{
+"t": "Min 10 ft (3.0 m)@@(最小 10 英尺 / 3.0 米)",
+"f": "❌ 错误。"
+}
+],
+"a": 2,
+"exp": "解析:任何排气管如果其终端位于公共人行道或车道正上方，其距离地面的高度必须至少为 7 英尺（2.1 米），以保护行人免受热废气伤害并提供足够的通行净空。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 5.\n• 原文语句: \"Over Public Sidewalk/Driveway: Min 7 ft (2.1 m)\""
+},
+{
+"u": "5. Vent Terminations & Heights",
+"q": "What is the minimum required distance for a sidewall vent to terminate above grade (ground level)?@@(侧墙排气管终端距离地面（grade）的最小要求高度是多少？)",
+"hint": "Sidewall Vent Above Grade",
+"opts": [
+{
+"t": "Min 6\" (150 mm)@@(最小 6 英寸 / 150 毫米)",
+"f": "❌ 错误。"
+},
+{
+"t": "Min 12\" (300 mm)@@(最小 12 英寸 / 300 毫米)",
+"f": "✅ 正确。这是为了防止积雪和碎片堵塞排气口。"
+},
+{
+"t": "Min 24\" (600 mm)@@(最小 24 英寸 / 600 毫米)",
+"f": "❌ 错误。"
+},
+{
+"t": "Min 36\" (900 mm)@@(最小 36 英寸 / 900 毫米)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析:侧墙水平排气的终端（Sidewall Vent）必须至少高出室外地面 12 英寸（300 mm），这主要考虑到冬季积雪以及地面落叶等杂物可能堵塞排气管的安全隐患。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 5.\n• 原文语句: \"Sidewall Vent Above Grade: Min 12\" (300 mm)\""
+},
+{
+"u": "5. Vent Terminations & Heights",
+"q": "For a power-vented water heater, what is the minimum termination height above grade?@@(对于动力排气式热水器，其终端距离地面的最小高度是多少？)",
+"hint": "Power-Vented WH",
+"opts": [
+{
+"t": "Min 6\"@@(最小 6 英寸)",
+"f": "❌ 错误。"
+},
+{
+"t": "Min 12\"@@(最小 12 英寸)",
+"f": "✅ 正确。与普通侧墙排气管一样，至少 12 英寸以防积雪堵塞。"
+},
+{
+"t": "Min 18\"@@(最小 18 英寸)",
+"f": "❌ 错误。"
+},
+{
+"t": "Min 36\"@@(最小 36 英寸)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析:动力排气式热水器（Power-Vented WH）通常采用侧墙水平排气，其终端与地面的最小距离规定同样为 12 英寸，防止风雪堵塞。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 5.\n• 原文语句: \"Power-Vented WH Above Grade: Min 12\"\""
+},
+{
+"u": "5. Vent Terminations & Heights",
+"q": "What is the minimum clearance from a water heater flue (≤50 MBH) to any building opening?@@(输入功率小于等于 50 MBH 的热水器排气口，距离任何建筑开口的最小间距是多少？)",
+"hint": "WH Flue to Building Opening",
+"opts": [
+{
+"t": "6\" (150 mm)@@(6 英寸 / 150 毫米)",
+"f": "❌ 错误。"
+},
+{
+"t": "12\" (300 mm) or 1 ft@@(12 英寸 / 300 毫米 或 1 英尺)",
+"f": "✅ 正确。低输入功率设备允许距离开口较近。"
+},
+{
+"t": "3 ft (0.9 m)@@(3 英尺 / 0.9 米)",
+"f": "❌ 错误。这是更高功率设备或特定系统的要求。"
+},
+{
+"t": "4 ft (1.2 m)@@(4 英尺 / 1.2 米)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析:对于小型热水器（输入功率不大于 50,000 Btu/h，即 ≤50 MBH），其排气口与窗户、门等建筑开口的最小距离要求是 12 英寸（1 英尺）。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 5.\n• 原文语句: \"WH Flue to Building Opening (≤50 MBH): 12\" (300 mm) / 1 ft\""
+},
+{
+"u": "5. Vent Terminations & Heights",
+"q": "What is the minimum required distance for a propane direct-vent termination to a non-mechanical building opening?@@(丙烷直接排气系统终端距离非机械建筑开口的最小要求距离是多少？)",
+"hint": "Propane Direct-Vent",
+"opts": [
+{
+"t": "Min 1 ft@@(最小 1 英尺)",
+"f": "❌ 错误。"
+},
+{
+"t": "Min 3 ft@@(最小 3 英尺)",
+"f": "✅ 正确。丙烷气体的特性要求其直接排气口必须距离非机械开口更远。"
+},
+{
+"t": "Min 6 ft@@(最小 6 英尺)",
+"f": "❌ 错误。"
+},
+{
+"t": "Min 10 ft@@(最小 10 英尺)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析:丙烷（Propane）是一种特殊的燃料，对于丙烷直接排气系统（Direct-Vent），其排气终端必须与任何非机械通风的建筑开口（如可开启的窗户）保持至少 3 英尺的距离。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 5.\n• 原文语句: \"Propane Direct-Vent to Non-Mechanical Opening: Min 3 ft\""
+},
+{
+"u": "5. Vent Terminations & Heights",
+"q": "What are the specific requirements for terminating a vent under a veranda, porch, or deck?@@(在游廊、门廊或甲板下方设置排气终端的具体要求是什么？)",
+"hint": "Under Veranda/Porch/Deck",
+"opts": [
+{
+"t": "Requires 1 fully open side + 6\" clearance to underside.@@(需要 1 个全开侧面 + 距底部 6 英寸间距。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Requires 2 fully open sides + 12\" clearance to underside.@@(需要 2 个全开侧面 + 距底部 12 英寸间距。)",
+"f": "✅ 正确。这是确保废气能够迅速消散、不被困在下方的强制要求。"
+},
+{
+"t": "Requires 3 fully open sides + 24\" clearance to underside.@@(需要 3 个全开侧面 + 距底部 24 英寸间距。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Vents are NEVER permitted under a veranda, porch, or deck.@@(绝不允许在游廊、门廊或甲板下排气。)",
+"f": "❌ 错误。在满足通风和间距条件时是允许的。"
+}
+],
+"a": 1,
+"exp": "解析:排气管可以终止于甲板或门廊下方，但必须满足两个严苛条件：下方空间必须至少有两个侧面是完全开放的（以利于风吹散废气），且排气口与甲板底面之间必须至少有 12 英寸的垂直距离。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 5.\n• 原文语句: \"Under Veranda/Porch/Deck: Requires 2 fully open sides + 12\" clearance to underside\""
+},
+{
+"u": "5. Vent Terminations & Heights",
+"q": "If a vent is within 10 ft of an adjoining building that is higher, how must the vent be installed?@@(如果排气管在 10 英尺范围内有一座更高的相邻建筑，必须如何安装排气管？)",
+"hint": "Adjoining Building",
+"opts": [
+{
+"t": "It must be capped and relocated.@@(必须封堵并重新定位。)",
+"f": "❌ 错误。"
+},
+{
+"t": "It must terminate 2 ft below the roofline of the adjoining building.@@(必须在相邻建筑屋顶线下方 2 英尺处终止。)",
+"f": "❌ 错误。"
+},
+{
+"t": "It must extend above the adjoining building.@@(它必须向上延伸超过相邻建筑的高度。)",
+"f": "✅ 正确。为防止相邻高楼引起的风压倒灌，排气管必须比旁边的高楼更高。"
+},
+{
+"t": "It requires a power venter.@@(它需要安装动力排风机。)",
+"f": "❌ 错误。"
+}
+],
+"a": 2,
+"exp": "解析:这是一个防风效的硬性规定。如果排气管 10 英尺内有一座更高的建筑，这栋建筑会阻挡风并产生下沉气流。排气管必须向上延伸，高出该相邻建筑（例如，如果旁边建筑高 4 英尺，你的排气管可能要加高到 4英尺6英寸以上）。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 5.\n• 原文语句: \"Adjoining Building (within 10 ft, higher): Vent extends above — e.g., 4'6\" when adjacent is 4 ft higher\""
+},
+{
+"u": "6. Vent Sizing & Common Venting",
+"q": "Which tables in Annex C should be used for sizing a single Category I appliance using a Type B vent system?@@(在 Annex C 中，为使用 Type B 排气系统的单台 I 类设备确定尺寸时应使用哪些表格？)",
+"hint": "Tables C1–C4",
+"opts": [
+{
+"t": "Tables C1 and C2@@(表 C1 和 C2)",
+"f": "✅ 正确。C1 和 C2 用于单台设备，而 C3 和 C4 用于两台或多台设备。"
+},
+{
+"t": "Tables C3 and C4@@(表 C3 和 C4)",
+"f": "❌ 错误。这些用于两台或多台（2+）设备的系统。"
+},
+{
+"t": "Tables C5 and C6@@(表 C5 和 C6)",
+"f": "❌ 错误。这些用于砖石烟囱（masonry chimney）。"
+},
+{
+"t": "Tables C9 and C10@@(表 C9 和 C10)",
+"f": "❌ 错误。这些用于带有金属内衬的砖石烟囱。"
+}
+],
+"a": 0,
+"exp": "解析：Annex C 的表格是按系统类型划分的。C1-C4 针对 Type B 排气系统，其中前两个表（C1/C2）用于单台设备，后两个（C3/C4）用于多台设备组合。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 6 / Page 84.\n• 原文语句: \"Tables C1–C4: Type B vent systems (C3/C4 = 2+ appliances)\""
+},
+{
+"u": "6. Vent Sizing & Common Venting",
+"q": "When sizing a common vent for three appliances venting into a tile-lined masonry chimney, which tables are applicable?@@(当为三台排入带瓷砖内衬砖石烟囱的设备确定公共排气管尺寸时，应使用哪些表格？)",
+"hint": "Tables C5–C8",
+"opts": [
+{
+"t": "Tables C5 and C6@@(表 C5 和 C6)",
+"f": "❌ 错误。这些用于排入砖石烟囱的单台设备。"
+},
+{
+"t": "Tables C7 and C8@@(表 C7 和 C8)",
+"f": "✅ 正确。C7 和 C8 专门用于两台或多台设备排入砖石烟囱的情况。"
+},
+{
+"t": "Tables C1 and C2@@(表 C1 和 C2)",
+"f": "❌ 错误。"
+},
+{
+"t": "Tables C11 and C12@@(表 C11 和 C12)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析：对于砖石烟囱（masonry chimney），多台设备（2+ appliances）共用时必须查阅表 C7 或 C8。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 6 / Page 84.\n• 原文语句: \"Tables C5–C8: Tile-lined masonry chimney (C7/C8 = 2+ appliances)\""
+},
+{
+"u": "6. Vent Sizing & Common Venting",
+"q": "Which Annex C tables cover the use of a corrugated metallic liner installed in a masonry chimney?@@(Annex C 中的哪些表格涵盖了在砖石烟囱中安装波纹金属内衬的情况？)",
+"hint": "Tables C9–C12",
+"opts": [
+{
+"t": "Tables C1 through C4@@(表 C1 至 C4)",
+"f": "❌ 错误。"
+},
+{
+"t": "Tables C5 through C8@@(表 C5 至 C8)",
+"f": "❌ 错误。"
+},
+{
+"t": "Tables C9 through C12@@(表 C9 至 C12)",
+"f": "✅ 正确。这四张表专门针对在砖石烟囱中加装金属内衬的系统。"
+},
+{
+"t": "None of the above@@(以上都不是)",
+"f": "❌ 错误。"
+}
+],
+"a": 2,
+"exp": "解析：当旧的砖石烟囱内部加装了柔性或波纹金属内衬（Corrugated metallic liner）时，必须使用 C9 到 C12 系列表格进行尺寸计算。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 6 / Page 84.\n• 原文语句: \"Tables C9–C12: Corrugated metallic liner in masonry\""
+},
+{
+"u": "6. Vent Sizing & Common Venting",
+"q": "According to Clause 8.16.1, how should a water heater with a draft hood be connected to a common vent also serving a fan-assisted furnace?@@(根据 Clause 8.16.1，带防气流罩的热水器应如何连接到同时也服务于风机辅助炉的公共排气管上？)",
+"hint": "Smallest Connector = Highest",
+"opts": [
+{
+"t": "The water heater connector must enter below the furnace connector.@@(热水器连接管必须从炉子连接管下方接入。)",
+"f": "❌ 错误。这会导致热水器的弱抽力被炉子的强排气压制。"
+},
+{
+"t": "The water heater connector must enter at the same level as the furnace.@@(热水器连接管必须与炉子在同一高度接入。)",
+"f": "❌ 错误。"
+},
+{
+"t": "The water heater (smallest connector) must enter the common vent ABOVE the furnace.@@(热水器（较小连接管）必须在炉子上方接入公共排气管。)",
+"f": "✅ 正确。抽力最弱/管径最小的设备应在最高点接入，以利于排气。"
+},
+{
+"t": "The furnace must enter the common vent at the highest possible point.@@(炉子必须在尽可能高的位置接入公共排气管。)",
+"f": "❌ 错误。"
+}
+],
+"a": 2,
+"exp": "解析：规范 Cl. 8.16.1 规定，当不同类型的设备共用排气管时，具有防气流罩（通常管径较小）的设备应在最高点接入。这是为了防止风机辅助设备（fan-assisted）产生的压力阻碍自然抽力设备的废气排出。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 6 / Page 95.\n• 原文语句: \"Smallest Connector = Highest: WH (draft hood) enters common vent ABOVE furnace (fan-assisted) — Cl. 8.16.1\""
+},
+{
+"u": "6. Vent Sizing & Common Venting",
+"q": "According to the '3 Elbows Rule', what adjustment must be made to the table capacity if a vent connector has three 90° elbows?@@(根据“3 弯头规则”，如果排气连接管有三个 90° 弯头，必须对表格容量进行什么调整？)",
+"hint": "3 Elbows Rule",
+"opts": [
+{
+"t": "No reduction is required.@@(不需要减少容量。)",
+"f": "❌ 错误。超过两个弯头就需要折减。"
+},
+{
+"t": "Reduce the table capacity by 10%.@@(将表格容量减少 10%。)",
+"f": "✅ 正确。每增加一个 90° 弯头（超过两个后）会增加阻力，需折减 10%。"
+},
+{
+"t": "Reduce the table capacity by 20%.@@(将表格容量减少 20%。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Increase the vent diameter by 1 inch.@@(将排气管直径增加 1 英寸。)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析：排气表格通常假设系统只有两个 90° 弯头。如果使用了三个（即多于两个），则该段管路的排气容量必须折减 10%。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 6 / Page 91.\n• 原文语句: \"3 Elbows Rule: More than two 90° elbows → 10% reduction\""
+},
+{
+"u": "6. Vent Sizing & Common Venting",
+"q": "What capacity reduction is required when using a horizontal manifold to connect multiple appliances?@@(当使用水平多路汇合管（manifold）连接多台设备时，需要进行多大的容量折减？)",
+"hint": "Horizontal Manifold",
+"opts": [
+{
+"t": "5% reduction@@(5% 折减)",
+"f": "❌ 错误。"
+},
+{
+"t": "10% reduction@@(10% 折减)",
+"f": "✅ 正确。水平汇合管增加了摩擦阻力和湍流。"
+},
+{
+"t": "15% reduction@@(15% 折减)",
+"f": "❌ 错误。"
+},
+{
+"t": "20% reduction@@(20% 折减)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析：使用水平汇合管（Horizontal Manifold）会降低排气效率，因此在计算其承载的 Btu 容量时，必须在查表值基础上扣除 10%。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 6 / Page 92.\n• 原文语句: \"Horizontal Manifold: 10% reduction\""
+},
+{
+"u": "6. Vent Sizing & Common Venting",
+"q": "When a common vent system includes an offset, what are the two primary requirements/restrictions?@@(当公共排气系统包含偏移（offset）时，哪两个是主要的要求或限制？)",
+"hint": "Common Vent Offset",
+"opts": [
+{
+"t": "10% reduction and max 3 ft lateral.@@(10% 折减且最大 3 英尺水平位移。)",
+"f": "❌ 错误。"
+},
+{
+"t": "20% reduction and max 1.5 ft per inch of vent diameter.@@(20% 折减且每英寸管径对应最大 1.5 英尺位移。)",
+"f": "✅ 正确。偏移对抽力影响很大，折减比例最高。"
+},
+{
+"t": "No reduction but max 5 ft lateral.@@(不折减但最大 5 英尺水平位移。)",
+"f": "❌ 错误。"
+},
+{
+"t": "50% reduction regardless of diameter.@@(无论直径大小，折减 50%。)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析：公共排气管的偏移（Offset）会严重削弱抽力。规范要求容量折减 20%，且偏移的水平长度不能超过每英寸管径 1.5 英尺的比例。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 6 / Page 92.\n• 原文语句: \"Common Vent Offset: 20% reduction + max 1.5 ft/inch of diameter\""
+},
+{
+"u": "6. Vent Sizing & Common Venting",
+"q": "What is the maximum allowed lateral length for a common vent?@@(公共排气管允许的最大水平（侧向）长度是多少？)",
+"hint": "Max Lateral Common Vent",
+"opts": [
+{
+"t": "3 ft (1 m)@@(3 英尺 / 1 米)",
+"f": "❌ 错误。"
+},
+{
+"t": "6 ft (1.8 m)@@(6 英尺 / 1.8 米)",
+"f": "✅ 正确。这是公共排气管段水平位移的硬性限制。"
+},
+{
+"t": "12 ft (3.6 m)@@(12 英尺 / 3.6 米)",
+"f": "❌ 错误。"
+},
+{
+"t": "There is no limit if the vent is sloped properly.@@(如果坡度正确，则没有限制。)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析：公共排气管（Common Vent）的水平侧向偏移（Lateral）距离绝对不能超过 6 英尺。超过这个长度会严重影响热废气的上升动力。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 6 / Page 95.\n• 原文语句: \"Max Lateral Common Vent: 6 ft\""
+},
+{
+"u": "6. Vent Sizing & Common Venting",
+"q": "At what specific location is a vent reduction permitted to be installed?@@(允许在哪个特定位置安装排气管变径（缩小尺寸）？)",
+"hint": "Vent Reduction Location",
+"opts": [
+{
+"t": "Anywhere in the horizontal connector.@@(水平连接管的任何地方。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Directly at the vent termination.@@(直接在排气终端处。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Downstream of the draft regulator, at the breaching.@@(在抽力调节器的下游，即烟道接口处。)",
+"f": "✅ 正确。这能确保在废气进入主排气管前完成变径。"
+},
+{
+"t": "Upstream of the draft hood.@@(在防气流罩的上游。)",
+"f": "❌ 错误。"
+}
+],
+"a": 2,
+"exp": "解析：排气管的尺寸缩小（Reduction）不能随意设置。如果必须变径，必须安装在抽力调节器（Draft regulator）的下游位置，通常是在进入烟囱或主排气管的接口（Breaching）处。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 6 / Page 85.\n• 原文语句: \"Vent Reduction Location: Downstream of draft regulator — at the breaching\""
+},
+{
+"u": "6. Vent Sizing & Common Venting",
+"q": "Under what condition can a 4-inch fan-assisted appliance collar be reduced to a 3-inch vent?@@(在什么条件下，4 英寸的风机辅助设备接口可以缩小为 3 英寸的排气管？)",
+"hint": "Fan-Assisted 4\" Collar",
+"opts": [
+{
+"t": "It can always be reduced one size.@@(始终可以缩小一个尺寸。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Only if the sizing tables explicitly permit the reduction.@@(仅当尺寸表明确允许该缩减时。)",
+"f": "✅ 正确。必须查表确认 3 英寸管径能承载该 Btu 输入和高度。"
+},
+{
+"t": "Only if a draft hood is added to the system.@@(仅当系统中增加了防气流罩时。)",
+"f": "❌ 错误。"
+},
+{
+"t": "It is never permitted to reduce a 4-inch collar.@@(绝不允许缩小 4 英寸接口。)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析：虽然风机辅助设备有动力，但将 4 英寸接口缩小到 3 英寸必须非常谨慎，只有当计算所得的表格容量确认 3 英寸管道可行时才允许操作。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 6 / Page 85.\n• 原文语句: \"Fan-Assisted 4\" Collar: May reduce to 3\" only if tables permit\""
+},
+{
+"u": "6. Vent Sizing & Common Venting",
+"q": "What are the two primary risks associated with using an oversized masonry chimney for a modern appliance?@@(现代设备使用尺寸过大的砖石烟囱主要面临哪两个风险？)",
+"hint": "Oversized Chimney",
+"opts": [
+{
+"t": "Excessive heat and fire hazard.@@(过热和火灾危险。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Condensation and poor draft.@@(冷凝和抽力不良。)",
+"f": "✅ 正确。由于空间大、气体冷却快，废气无法有效上升且会凝结成酸性水。"
+},
+{
+"t": "High noise levels and vibration.@@(高噪音和振动。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Burner overheating and flashbacks.@@(燃烧器过热和回火。)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析：如果烟囱尺寸过大，废气流速变慢且容易迅速冷却。这会导致抽力不足（无法排出废气）以及严重的冷凝问题（冷凝水会破坏砖石结构）。解决方法是加装 B-vent 或金属内衬。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 6 / Page 42.\n• 原文语句: \"Oversized Chimney: Use B-vent or corrugated liner — oversized = condensation + poor draft\""
+},
+{
+"u": "6. Vent Sizing & Common Venting",
+"q": "What is the primary scope of appliances covered under B149.1 Annex C?@@(B149.1 Annex C 涵盖的设备主要范围是什么？)",
+"hint": "B149 Annex C Scope",
+"opts": [
+{
+"t": "Category III positive-pressure appliances.@@(III 类正压设备。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Category I fan-assisted and appliances that are spillage-susceptible under depressurization.@@(I 类风机辅助设备以及在负压下容易发生溢流的设备。)",
+"f": "✅ 正确。Annex C 专门为这类复杂的自然/动力辅助混合系统提供计算依据。"
+},
+{
+"t": "Category IV high-efficiency condensing units only.@@(仅限 IV 类高效冷凝机组。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Industrial incinerators with forced draft.@@(带强制抽力的工业焚烧炉。)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析：规范 Annex C 的计算表格主要针对 Category I 设备，特别是包含风机辅助（fan-assisted）类型，以及在建筑负压下极易发生倒灌溢流的系统。",
+"src": "• 课文出处: Unit 22 Final Exam Study Guide, Section 6 / Page 82.\n• 原文语句: \"B149 Annex C Scope: Cat I fan-assisted + spillage-susceptible under depressurization\""
+},
+{
+"u": "7. Categories, Controls & Special Installs",
+"q": "Which of the following describes a Category I appliance?@@(以下哪项描述了 I 类（Category I）设备？)",
+"hint": "Appliance Categories",
+"opts": [
+{
+"t": "An appliance with more than 85% efficiency and positive pressure.@@(效率超过 85% 且为正压的设备。)",
+"f": "❌ 错误。这是 IV 类设备的特征。"
+},
+{
+"t": "An appliance with less than 85% efficiency that operates with a non-positive vent pressure.@@(效率低于 85% 且在非正压下运行的设备。)",
+"f": "✅ 正确。通常指带有防气流罩的中效设备。"
+},
+{
+"t": "An appliance that produces flue gas condensation.@@(会产生烟气冷凝的设备。)",
+"f": "❌ 错误。I 类设备是非冷凝的。"
+},
+{
+"t": "An appliance that always operates with positive vent pressure.@@(始终在正压下运行的设备。)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析：I 类设备通常是指效率低于 85% 的自然排气设备，运行时排气管内为大气压或负压（非正压）。",
+"src": "• 课文出处: Page 11, Vented appliance categories.\n• 原文语句: \"Category I: an appliance that operates with a non-positive vent pressure and a flue gas temperature at least 140°F (60°C) above its dew point.\""
+},
+{
+"u": "7. Categories, Controls & Special Installs",
+"q": "What are the characteristics of a Category III appliance?@@(III 类（Category III）设备的特点是什么？)",
+"hint": "Appliance Categories",
+"opts": [
+{
+"t": "Negative vent pressure and non-condensing.@@(负压排气且非冷凝。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Positive vent pressure and non-condensing.@@(正压排气且非冷凝。)",
+"f": "✅ 正确。III 类设备使用强制或诱导抽力，但不产生冷凝水。"
+},
+{
+"t": "Positive vent pressure and condensing.@@(正压排气且冷凝。)",
+"f": "❌ 错误。这是 IV 类设备。"
+},
+{
+"t": "Atmospheric pressure and condensing.@@(大气压且冷凝。)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析：III 类设备产生的排气压力为正压（由风机产生），但其效率不足以使烟气发生冷凝。",
+"src": "• 课文出处: Page 11, Vented appliance categories.\n• 原文语句: \"Category III: an appliance that operates with a positive vent pressure and a flue gas temperature at least 140°F (60°C) above its dew point.\""
+},
+{
+"u": "7. Categories, Controls & Special Installs",
+"q": "How is a Category IV appliance defined?@@(IV 类（Category IV）设备是如何定义的？)",
+"hint": "Appliance Categories",
+"opts": [
+{
+"t": "Efficiency less than 80% and non-positive pressure.@@(效率低于 80% 且非正压。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Condensing and operates with positive vent pressure.@@(冷凝且在正压下运行。)",
+"f": "✅ 正确。这是高效率（通常 >90%）冷凝炉的特征。"
+},
+{
+"t": "Non-condensing and operates with positive vent pressure.@@(非冷凝且在正压下运行。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Only operates with a natural draft.@@(仅在自然抽力下运行。)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析：IV 类设备是目前最高效的燃气设备，其排气会冷凝并需要风机产生的正压将废气排出。",
+"src": "• 课文出处: Page 11, Vented appliance categories.\n• 原文语句: \"Category IV: an appliance that operates with a positive vent pressure and a flue gas temperature less than 140°F (60°C) above its dew point.\""
+},
+{
+"u": "7. Categories, Controls & Special Installs",
+"q": "Can a Category IV appliance and a standard water heater share a common chimney?@@(IV 类设备和标准热水器可以共用一个烟囱吗？)",
+"hint": "Common Venting Restrictions",
+"opts": [
+{
+"t": "Yes, if the chimney is lined.@@(可以，如果烟囱有内衬的话。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Yes, provided the water heater enters the chimney above the Category IV vent.@@(可以，只要热水器从 IV 类设备上方接入烟囱。)",
+"f": "❌ 错误。"
+},
+{
+"t": "NEVER.@@(绝对不可以。)",
+"f": "✅ 正确。正压设备和自然抽力设备绝不能共用烟道，否则正压会把废气压入热水器。"
+},
+{
+"t": "Only in multi-storey buildings.@@(仅限多层建筑。)",
+"f": "❌ 错误。"
+}
+],
+"a": 2,
+"exp": "解析：Category IV 设备产生的正压会干扰 Category I 设备（如自然排气热水器）的排气，导致回流倒灌，极度危险。",
+"src": "• 课文出处: Unit 22 Study Guide, Section 7.\n• 原文语句: \"Cat IV + WH Common Chimney: NEVER\""
+},
+{
+"u": "7. Categories, Controls & Special Installs",
+"q": "Is it permissible to vent a propane appliance and an oil-fired appliance into the same chimney?@@(是否允许将丙烷设备和燃油设备排入同一个烟囱？)",
+"hint": "Propane + Oil",
+"opts": [
+{
+"t": "Yes, if they are on the same floor.@@(可以，如果它们在同一层。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Yes, if the chimney has a metallic liner.@@(可以，如果烟囱有金属内衬。)",
+"f": "❌ 错误。"
+},
+{
+"t": "PROHIBITED.@@(禁止。)",
+"f": "✅ 正确。通常情况下，禁止这两种燃料共用烟囱。"
+},
+{
+"t": "Only in commercial applications.@@(仅限商业应用。)",
+"f": "❌ 错误。"
+}
+],
+"a": 2,
+"exp": "解析：根据规范，气体燃料（如丙烷）和燃油（Oil）通常不允许共用同一个烟囱系统。",
+"src": "• 课文出处: Unit 22 Study Guide, Section 7.\n• 原文语句: \"Propane + Oil Same Chimney: PROHIBITED\""
+},
+{
+"u": "7. Categories, Controls & Special Installs",
+"q": "A direct-vent appliance can fall into which category?@@(直接排气式设备可以属于哪一类？)",
+"hint": "Direct-Vent",
+"opts": [
+{
+"t": "Only Category IV.@@(仅限 IV 类。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Category I or Category IV.@@(I 类或 IV 类。)",
+"f": "✅ 正确。直接排气可以是中效（I类）也可以是高效冷凝（IV类）。"
+},
+{
+"t": "Only Category III.@@(仅限 III 类。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Any category except Category I.@@(除了 I 类以外的任何类别。)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析：直接排气（Direct-Vent）描述的是其进气和排气的物理形式，它可以属于不同的设备效率类别。",
+"src": "• 课文出处: Unit 22 Study Guide, Section 7.\n• 原文语句: \"Direct-Vent: Can be Category I or IV\""
+},
+{
+"u": "7. Categories, Controls & Special Installs",
+"q": "Which appliance is a single-acting barometric damper typically used for?@@(单向作用的压力平衡阀（barometric damper）通常用于哪种设备？)",
+"hint": "Single-Acting Barometric",
+"opts": [
+{
+"t": "Natural gas furnaces.@@(天然气暖炉。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Steam boilers (one-way only).@@(蒸汽锅炉（仅限单向）。)",
+"f": "✅ 正确。单向阀主要用于稳定烟囱抽力而不允许反向气流。"
+},
+{
+"t": "High-efficiency condensing boilers.@@(高效冷凝锅炉。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Direct-vent wall furnaces.@@(直接排气壁炉。)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析：单向压力平衡阀仅向内摆动以引入冷空气稀释废气，多见于燃油设备或特定的蒸汽锅炉系统。",
+"src": "• 课文出处: Unit 22 Study Guide, Section 7 / Page 13.\n• 原文语句: \"Single-Acting Barometric: Steam boiler (one-way only)\""
+},
+{
+"u": "7. Categories, Controls & Special Installs",
+"q": "A double-acting barometric damper is required for which type of equipment?@@(哪种类型的设备需要双向作用的压力平衡阀？)",
+"hint": "Double-Acting Barometric",
+"opts": [
+{
+"t": "Residential water heaters.@@(住宅热水器。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Incinerators or fan-assisted burners.@@(焚烧炉或风机辅助燃烧器。)",
+"f": "✅ 正确。双向阀可以向内或向外摆动以缓解过大的抽力或正压。"
+},
+{
+"t": "Only Category IV appliances.@@(仅限 IV 类设备。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Direct-vent propane stoves.@@(直接排气丙烷炉。)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析：对于风机辅助设备（fan-assisted）或焚烧炉，需要双向调节以保持恒定的排气压力。",
+"src": "• 课文出处: Unit 22 Study Guide, Section 7 / Page 13.\n• 原文语句: \"Double-Acting Barometric: Incinerator, fan-assisted burner\""
+},
+{
+"u": "7. Categories, Controls & Special Installs",
+"q": "At what flue gas temperature should a standard draft hood NOT be used?@@(当烟气温度超过多少时，不应使用标准的防气流罩？)",
+"hint": "Draft Hood Temp Limit",
+"opts": [
+{
+"t": "Above 127°F (53°C)@@(超过 127°F / 53°C)",
+"f": "❌ 错误。这是露点温度。"
+},
+{
+"t": "Above 400°F (204°C)@@(超过 400°F / 204°C)",
+"f": "❌ 错误。"
+},
+{
+"t": "Above 550°F (288°C)@@(超过 550°F / 288°C)",
+"f": "✅ 正确。极高温烟气会损坏普通防气流罩或引发火灾。"
+},
+{
+"t": "Above 1000°F (538°C)@@(超过 1000°F / 538°C)",
+"f": "❌ 错误。"
+}
+],
+"a": 2,
+"exp": "解析：标准的防气流罩设计耐温有限。如果设备排气温度高于 550°F，必须使用压力平衡阀（barometric damper）替代。",
+"src": "• 课文出处: Page 12, Draft hood.\n• 原文语句: \"A draft hood shall not be used: if the temperature of the flue gas exceeds 550°F (288°C).\""
+},
+{
+"u": "7. Categories, Controls & Special Installs",
+"q": "Is it permissible to alter or modify a draft hood during installation?@@(在安装过程中是否允许改动或修整防气流罩？)",
+"hint": "Draft Hood Alteration",
+"opts": [
+{
+"t": "Yes, to make it fit into a tight space.@@(可以，为了让它塞进狭窄空间。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Yes, if the gas inspector approves it.@@(可以，如果燃气检查员批准。)",
+"f": "❌ 错误。"
+},
+{
+"t": "NEVER — it must be installed as provided.@@(绝对不可以 — 必须按原样安装。)",
+"f": "✅ 正确。防气流罩是经认证的组件，严禁私自改装。"
+},
+{
+"t": "Only if the vent size is increased.@@(仅当排气管径增加时。)",
+"f": "❌ 错误。"
+}
+],
+"a": 2,
+"exp": "解析：防气流罩必须保持其出厂时的形状和构造，任何物理改动都可能破坏其抽力平衡设计。",
+"src": "• 课文出处: Page 12, Draft hood.\n• 原文语句: \"Draft Hood Alteration: NEVER — install as provided\""
+},
+{
+"u": "7. Categories, Controls & Special Installs",
+"q": "Where should an automatic vent damper be installed in relation to the draft hood?@@(自动排气阻尼器（vent damper）应安装在防气流罩的什么位置？)",
+"hint": "Auto Vent Damper",
+"opts": [
+{
+"t": "Upstream of the draft hood.@@(防气流罩的上游。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Downstream of the draft hood relief opening.@@(在防气流罩溢流口的下游。)",
+"f": "✅ 正确。且必须与燃烧器电气联锁。"
+},
+{
+"t": "Inside the primary air inlet.@@(在一次进气口内部。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Directly on the gas valve.@@(直接安装在燃气阀上。)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析：自动阻尼器必须安装在防气流罩之后（下游），以确保在燃烧器不工作时关闭烟道减少热损失，且必须通过电气联锁确保燃烧前阻尼器已完全开启。",
+"src": "• 课文出处: Page 17, Automatic vent dampers.\n• 原文语句: \"Automatic vent dampers must be installed downstream of the draft hood relief opening and electronically interlocked with the burner.\""
+},
+{
+"u": "7. Categories, Controls & Special Installs",
+"q": "Are manual flue dampers permitted in residential gas appliances?@@(住宅燃气设备中是否允许使用手动烟道阻尼器？)",
+"hint": "Manual Flue Damper",
+"opts": [
+{
+"t": "Yes, on gas fireplaces.@@(可以，用于燃气壁炉。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Yes, if they are locked in the open position.@@(可以，如果它们被锁定在开启位置。)",
+"f": "❌ 错误。"
+},
+{
+"t": "NOT permitted in residential applications.@@(住宅应用中不允许。)",
+"f": "✅ 正确。手动阻尼器极易因忘记开启而导致致命的一氧化碳中毒。"
+},
+{
+"t": "Only on Category IV boilers.@@(仅限 IV 类锅炉。)",
+"f": "❌ 错误。"
+}
+],
+"a": 2,
+"exp": "解析：为了安全，手动操作的烟道阻尼器在住宅燃气系统中是严禁使用的。",
+"src": "• 课文出处: Page 17, Manual dampers.\n• 原文语句: \"Manual Flue Damper: NOT permitted in residential\""
+},
+{
+"u": "7. Categories, Controls & Special Installs",
+"q": "What is the requirement for a power venter installed in a building other than a single or two-family dwelling?@@(在非单户或双户住宅建筑中安装动力排风机（power venter）的要求是什么？)",
+"hint": "Power Venter",
+"opts": [
+{
+"t": "It must be at least 1 HP.@@(必须至少 1 马力。)",
+"f": "❌ 错误。"
+},
+{
+"t": "It must be certified for the specific application.@@(必须针对特定用途经过认证。)",
+"f": "✅ 正确。在大型建筑中，动力排风系统必须经过特殊认证。"
+},
+{
+"t": "It can be custom-made on site.@@(可以现场定制。)",
+"f": "❌ 错误。"
+},
+{
+"t": "It is never allowed in non-residential buildings.@@(非住宅建筑绝不允许。)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析：在多户住宅或商业建筑中，任何动力排气装置（Power Venter）都必须使用经认证的产品并符合规范要求。",
+"src": "• 课文出处: Page 13, Mechanical draft.\n• 原文语句: \"Power Venter (non-1/2-fam dwelling): Only if certified\""
+},
+{
+"u": "7. Categories, Controls & Special Installs",
+"q": "What is required when installing a water heater that vents into an outside masonry chimney?@@(当安装排入室外砖石烟囱的热水器时，需要做什么？)",
+"hint": "Outside Chimney WH",
+"opts": [
+{
+"t": "Nothing, the chimney is sufficient.@@(不需要，烟囱本身就够了。)",
+"f": "❌ 错误。"
+},
+{
+"t": "It must be lined and insulated with vermiculite.@@(必须加装内衬并用蛭石进行绝缘。)",
+"f": "✅ 正确。防止室外寒冷导致排气不畅和严重冷凝。"
+},
+{
+"t": "It must be connected using single-wall pipe only.@@(必须仅使用单壁管连接。)",
+"f": "❌ 错误。"
+},
+{
+"t": "The vent must be terminated below the roofline.@@(排气管必须终止在屋檐线以下。)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析：室外烟囱（Outside Chimney）暴露在冷空气中。为了防止由于降温过快引起的冷凝水破坏和抽力丧失，必须加装金属内衬并在空隙中填充蛭石（vermiculite）等保温材料。",
+"src": "• 课文出处: Page 42, Masonry Chimneys.\n• 原文语句: \"Outside Chimney WH: Line + insulate with vermiculite\""
+},
+{
+"u": "Quick Reference — Key Numbers to Memorize",
+"q": "What is the minimum required height for a vent above a flat roof?@@(平屋顶上排气管的最小要求高度是多少？)",
+"hint": "Vent Height / Flat Roof",
+"opts": [
+{
+"t": "1 ft (300 mm)@@(1 英尺 / 300 毫米)",
+"f": "❌ 错误。"
+},
+{
+"t": "2 ft (600 mm)@@(2 英尺 / 600 毫米)",
+"f": "✅ 正确。这是平屋顶上排气管终端的标准最小高度。"
+},
+{
+"t": "3 ft (0.9 m)@@(3 英尺 / 0.9 米)",
+"f": "❌ 错误。这是烟囱（Chimney）的要求。"
+},
+{
+"t": "8 ft (2.4 m)@@(8 英尺 / 2.4 米)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析:规范规定普通排气管（Vent）在平屋顶上的终端高度至少为 2 英尺。",
+"src": "• 课文出处: Page 47, Vent terminations.\n• 原文语句: \"A vent shall terminate at least 2 ft (600 mm) above the highest point where it passes through a flat roof...\""
+},
+{
+"u": "Quick Reference — Key Numbers to Memorize",
+"q": "What is the minimum required height for a chimney above a flat roof?@@(平屋顶上烟囱的最小要求高度是多少？)",
+"hint": "Chimney Height / Flat Roof",
+"opts": [
+{
+"t": "2 ft (600 mm)@@(2 英尺 / 600 毫米)",
+"f": "❌ 错误。这是排气管（Vent）的要求。"
+},
+{
+"t": "3 ft (0.9 m)@@(3 英尺 / 0.9 米)",
+"f": "✅ 正确。烟囱的终端高度要求通常比普通排气管高 1 英尺。"
+},
+{
+"t": "5 ft (1.5 m)@@(5 英尺 / 1.5 米)",
+"f": "❌ 错误。"
+},
+{
+"t": "8 ft (2.4 m)@@(8 英尺 / 2.4 米)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析:在考试中必须区分 Vent（2 ft）和 Chimney（3 ft）在平屋顶上的高度差异。",
+"src": "• 课文出处: Page 44, Chimney terminations.\n• 原文语句: \"A chimney shall terminate at least 3 ft (900 mm) above the highest point where it passes through a flat roof...\""
+},
+{
+"u": "Quick Reference — Key Numbers to Memorize",
+"q": "What is the minimum height for a vent termination above a 12/12 pitched roof?@@(在 12/12 坡度的屋顶上，排气管终端的最小高度是多少？)",
+"hint": "12/12 Pitched Roof",
+"opts": [
+{
+"t": "2 ft@@(2 英尺)",
+"f": "❌ 错误。"
+},
+{
+"t": "5 ft@@(5 英尺)",
+"f": "❌ 错误。"
+},
+{
+"t": "8 ft@@(8 英尺)",
+"f": "✅ 正确。对于非常陡峭的 12/12 坡度屋顶，最小高度为 8 英尺。"
+},
+{
+"t": "12 ft@@(12 英尺)",
+"f": "❌ 错误。"
+}
+],
+"a": 2,
+"exp": "解析:根据 Table 2.5，屋顶坡度越陡，要求的排气高度越高，12/12 坡度对应 8 英尺高度。",
+"src": "• 课文出处: Page 48, Table 2.5.\n• 原文语句: \"Roof Pitch: 12/12, Minimum Height: 8.0 ft.\""
+},
+{
+"u": "Quick Reference — Key Numbers to Memorize",
+"q": "What is the minimum required height for a chimney above the highest draft hood outlet in a system?@@(系统内烟囱距离最高防气流罩出口的最小上升高度是多少？)",
+"hint": "Minimum Rise",
+"opts": [
+{
+"t": "2 ft (600 mm)@@(2 英尺 / 600 毫米)",
+"f": "❌ 错误。"
+},
+{
+"t": "3 ft (0.9 m)@@(3 英尺 / 0.9 米)",
+"f": "❌ 错误。"
+},
+{
+"t": "5 ft (1.5 m)@@(5 英尺 / 1.5 米)",
+"f": "✅ 正确。这 5 英尺的最小上升高度是建立稳定自然抽力的关键。"
+},
+{
+"t": "12 ft (3.6 m)@@(12 英尺 / 3.6 米)",
+"f": "❌ 错误。"
+}
+],
+"a": 2,
+"exp": "解析:为确保足够的抽力，烟囱总高度必须至少高出最上层设备防气流罩出口 5 英尺。",
+"src": "• 课文出处: Page 47, Chimney construction.\n• 原文语句: \"a chimney shall have a minimum height of 5 ft (1.5 m) above the highest draft hood outlet.\""
+},
+{
+"u": "Quick Reference — Key Numbers to Memorize",
+"q": "A wall furnace vent must extend to a height of at least how many feet above the bottom of the furnace?@@(壁炉排气管必须延伸到距离壁炉底部至少多少英尺的高度？)",
+"hint": "Wall Furnace Height",
+"opts": [
+{
+"t": "5 ft (1.5 m)@@(5 英尺 / 1.5 米)",
+"f": "❌ 错误。"
+},
+{
+"t": "8 ft (2.4 m)@@(8 英尺 / 2.4 米)",
+"f": "❌ 错误。"
+},
+{
+"t": "12 ft (3.6 m)@@(12 英尺 / 3.6 米)",
+"f": "✅ 正确。且除非经过特别认证，否则不应有横向管段。"
+},
+{
+"t": "15 ft (4.5 m)@@(15 英尺 / 4.5 米)",
+"f": "❌ 错误。"
+}
+],
+"a": 2,
+"exp": "解析:壁炉（Wall Furnace）的排气系统对垂直高度有严格要求，必须保证从底部起算 12 英尺的高度。",
+"src": "• 课文出处: Page 51, Wall furnace vents.\n• 原文语句: \"A vent for a wall furnace ... shall extend ... to a height of not less than 12 ft (3.6 m) above the bottom of the furnace.\""
+},
+{
+"u": "Quick Reference — Key Numbers to Memorize",
+"q": "What is the minimum height clearance for a vent terminating over a paved public sidewalk or driveway?@@(在铺设的人行道或车道上方，排气终端的最小高度是多少？)",
+"hint": "Public Sidewalk Clearance",
+"opts": [
+{
+"t": "3 ft (0.9 m)@@(3 英尺 / 0.9 米)",
+"f": "❌ 错误。"
+},
+{
+"t": "5 ft (1.5 m)@@(5 英尺 / 1.5 米)",
+"f": "❌ 错误。"
+},
+{
+"t": "7 ft (2.1 m)@@(7 英尺 / 2.1 米)",
+"f": "✅ 正确。这是为了确保行人和车辆通行的安全。"
+},
+{
+"t": "10 ft (3.0 m)@@(10 英尺 / 3.0 米)",
+"f": "❌ 错误。"
+}
+],
+"a": 2,
+"exp": "解析:如果排气口位于公共通行的道路上方，必须保持至少 7 英尺的净空高度以防止危险。",
+"src": "• 课文出处: Page 50, Vent terminations.\n• 原文语句: \"A vent shall not terminate ... less than 7 ft (2.1 m) above a paved sidewalk or a paved driveway...\""
+},
+{
+"u": "Quick Reference — Key Numbers to Memorize",
+"q": "What is the minimum distance a sidewall vent must terminate above the finished grade?@@(侧墙排气终端距离最终地面（grade）的最小距离是多少？)",
+"hint": "Sidewall Vent Above Grade",
+"opts": [
+{
+"t": "6 in (150 mm)@@(6 英寸 / 150 毫米)",
+"f": "❌ 错误。"
+},
+{
+"t": "12 in (300 mm)@@(12 英寸 / 300 毫米)",
+"f": "✅ 正确。主要目的是留出积雪和杂物的空间。"
+},
+{
+"t": "24 in (600 mm)@@(24 英寸 / 600 毫米)",
+"f": "❌ 错误。"
+},
+{
+"t": "3 ft (0.9 m)@@(3 英尺 / 0.9 米)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析:侧墙排气口必须高于地面至少 12 英寸，以防止冬季积雪封堵排气管。",
+"src": "• 课文出处: Page 50, Vent terminations.\n• 原文语句: \"A vent shall terminate ... not less than 12 in (300 mm) above grade.\""
+},
+{
+"u": "Quick Reference — Key Numbers to Memorize",
+"q": "For a water heater with an input ≤50,000 Btuh, what is the minimum clearance from the flue to a building opening?@@(输入功率不超过 50 MBH 的热水器排气口，距离建筑开口的最小间距是多少？)",
+"hint": "Low-Input WH Clearance",
+"opts": [
+{
+"t": "6 in (150 mm)@@(6 英寸 / 150 毫米)",
+"f": "❌ 错误。"
+},
+{
+"t": "12 in (300 mm) or 1 ft@@(12 英寸 / 300 毫米 或 1 英尺)",
+"f": "✅ 正确。对于此类低功率设备，1 英尺的间距即可。"
+},
+{
+"t": "3 ft (0.9 m)@@(3 英尺 / 0.9 米)",
+"f": "❌ 错误。"
+},
+{
+"t": "6 ft (1.8 m)@@(6 英尺 / 1.8 米)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析:小型热水器（≤50 MBH）的排气口距离窗户或门等开口的最小安全间距为 12 英寸。",
+"src": "• 课文出处: Page 50, Vent terminations.\n• 原文语句: \"not less than 12 in (300 mm) ... input up to and including 50 000 Btuh...\""
+},
+{
+"u": "Quick Reference — Key Numbers to Memorize",
+"q": "What is the minimum clearance from a propane direct-vent termination to a building opening?@@(丙烷直接排气系统终端距离建筑开口的最小间距是多少？)",
+"hint": "Propane Direct-Vent",
+"opts": [
+{
+"t": "1 ft (300 mm)@@(1 英尺 / 300 毫米)",
+"f": "❌ 错误。"
+},
+{
+"t": "3 ft (0.9 m)@@(3 英尺 / 0.9 米)",
+"f": "✅ 正确。丙烷系统由于气体特性要求更严格的间距。"
+},
+{
+"t": "6 ft (1.8 m)@@(6 英尺 / 1.8 米)",
+"f": "❌ 错误。"
+},
+{
+"t": "10 ft (3.0 m)@@(10 英尺 / 3.0 米)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析:丙烷直接排气系统的终端到建筑开口（非机械）的最小距离规定为 3 英尺。",
+"src": "• 课文出处: Page 50, Vent terminations.\n• 原文语句: \"for propane... not less than 3 ft (900 mm)...\""
+},
+{
+"u": "Quick Reference — Key Numbers to Memorize",
+"q": "What is the minimum clearance to combustibles for a Type B double-wall vent?@@(Type B 双壁排气管距离可燃物的最小间距是多少？)",
+"hint": "Type B Clearance",
+"opts": [
+{
+"t": "1 inch (25 mm)@@(1 英寸 / 25 毫米)",
+"f": "✅ 正确。双壁管由于有空气隔热层，只需要 1 英寸的间距。"
+},
+{
+"t": "2 inches (50 mm)@@(2 英寸 / 50 毫米)",
+"f": "❌ 错误。"
+},
+{
+"t": "6 inches (150 mm)@@(6 英寸 / 150 毫米)",
+"f": "❌ 错误。"
+},
+{
+"t": "9 inches (225 mm)@@(9 英寸 / 225 毫米)",
+"f": "❌ 错误。"
+}
+],
+"a": 0,
+"exp": "解析:Type B 是双壁排气管，与可燃材料的最小净距为 1 英寸。",
+"src": "• 课文出处: Page 25, Characteristics of vents.\n• 原文语句: \"Type B vent ... 1 in (25 mm)\""
+},
+{
+"u": "Quick Reference — Key Numbers to Memorize",
+"q": "What is the clearance to combustibles for a single-wall vent connector used on a gas water heater?@@(燃气热水器使用的单壁排气连接管到可燃物的间距是多少？)",
+"hint": "Single-Wall Clearance",
+"opts": [
+{
+"t": "1 inch (25 mm)@@(1 英寸 / 25 毫米)",
+"f": "❌ 错误。"
+},
+{
+"t": "6 inches (150 mm)@@(6 英寸 / 150 毫米)",
+"f": "✅ 正确。单壁管的热量传导更快，需要更大的间距。"
+},
+{
+"t": "9 inches (225 mm)@@(9 英寸 / 225 毫米)",
+"f": "❌ 错误。"
+},
+{
+"t": "18 inches (450 mm)@@(18 英寸 / 450 毫米)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析:单壁排气管连接普通燃气热水器（Gas WH）时，必须保持 6 英寸的防火间距。",
+"src": "• 课文出处: Page 31, Table 2.2.\n• 原文语句: \"Single-wall vent connector ... 6 in (150 mm)\""
+},
+{
+"u": "Quick Reference — Key Numbers to Memorize",
+"q": "What is the required clearance to combustibles for a single-wall vent connected to a converted furnace or boiler?@@(连接到改装暖炉或锅炉的单壁排气管，到可燃物的要求间距是多少？)",
+"hint": "Converted Appliance Clearance",
+"opts": [
+{
+"t": "1 inch (25 mm)@@(1 英寸 / 25 毫米)",
+"f": "❌ 错误。"
+},
+{
+"t": "6 inches (150 mm)@@(6 英寸 / 150 毫米)",
+"f": "❌ 错误。"
+},
+{
+"t": "9 inches (225 mm)@@(9 英寸 / 225 毫米)",
+"f": "✅ 正确。改装设备通常要求更保守的安全距离。"
+},
+{
+"t": "12 inches (300 mm)@@(12 英寸 / 300 毫米)",
+"f": "❌ 错误。"
+}
+],
+"a": 2,
+"exp": "解析:改装（Converted）设备（如改装后的 FA 暖炉或锅炉）使用单壁管时，必须保持 9 英寸的间距。",
+"src": "• 课文出处: Page 31, Table 2.2.\n• 原文语句: \"Single-wall vent connector ... 9 in (225 mm) [for converted appliances]\""
+},
+{
+"u": "Quick Reference — Key Numbers to Memorize",
+"q": "What is the minimum clearance for a Type C vent (single-wall) connected to a boiler?@@(连接到锅炉的 Type C 排气管（单壁管）的最小间距是多少？)",
+"hint": "Type C to Boiler",
+"opts": [
+{
+"t": "1\" (25 mm)@@(1 英寸 / 25 毫米)",
+"f": "❌ 错误。"
+},
+{
+"t": "6\" (150 mm)@@(6 英寸 / 150 毫米)",
+"f": "✅ 正确。根据 Table 8.6，锅炉的 Type C 连接管间距为 6 英寸。"
+},
+{
+"t": "9\" (225 mm)@@(9 英寸 / 225 毫米)",
+"f": "❌ 错误。"
+},
+{
+"t": "18\" (450 mm)@@(18 英寸 / 450 毫米)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析:Type C 即单壁管，连接至锅炉时需遵循 6 英寸间距规定。",
+"src": "• 课文出处: Page 31, Table 2.2.\n• 原文语句: \"Single-wall (Type C) ... 6 in (150 mm)\""
+},
+{
+"u": "Quick Reference — Key Numbers to Memorize",
+"q": "What is the minimum required clearance between a metal chimney and attic insulation?@@(金属烟囱与阁楼隔热保温层之间的最小间距是多少？)",
+"hint": "Attic Insulation",
+"opts": [
+{
+"t": "1 inch (25 mm)@@(1 英寸 / 25 毫米)",
+"f": "❌ 错误。"
+},
+{
+"t": "2 inches (50 mm)@@(2 英寸 / 50 毫米)",
+"f": "✅ 正确。这是关键的防火安全距离。"
+},
+{
+"t": "6 inches (150 mm)@@(6 英寸 / 150 毫米)",
+"f": "❌ 错误。"
+},
+{
+"t": "12 inches (300 mm)@@(12 英寸 / 300 毫米)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析:金属烟囱穿过阁楼时，必须与所有隔热保温材料保持至少 2 英寸的净距。",
+"src": "• 课文出处: Page 44, Chimneys.\n• 原文语句: \"The clearance between the metal chimney and attic insulation shall be at least 2 in (50 mm).\""
+},
+{
+"u": "Quick Reference — Key Numbers to Memorize",
+"q": "At what temperature does flue gas condensation (the dew point) typically occur for natural gas?@@(天然气烟气冷凝（露点）通常在什么温度发生？)",
+"hint": "Dew Point",
+"opts": [
+{
+"t": "100°F (38°C)@@(100°F / 38°C)",
+"f": "❌ 错误。"
+},
+{
+"t": "127°F (53°C)@@(127°F / 53°C)",
+"f": "✅ 正确。当烟气降温至此水平，水分开始凝结。"
+},
+{
+"t": "212°F (100°C)@@(212°F / 100°C)",
+"f": "❌ 错误。"
+},
+{
+"t": "550°F (288°C)@@(550°F / 288°C)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析:天然气燃烧产生的废气露点大约在 127°F，低于此温度会出现冷凝现象。",
+"src": "• 课文出处: Page 16, Vent gas temperature.\n• 原文语句: \"flue gas condensation occurs at approximately 127 F (53 C). This is called the dew point.\""
+},
+{
+"u": "Quick Reference — Key Numbers to Memorize",
+"q": "What is the maximum flue gas temperature allowed for an appliance using a standard draft hood?@@(使用标准防气流罩的设备，允许的最高烟气温度是多少？)",
+"hint": "Draft Hood Temp Limit",
+"opts": [
+{
+"t": "127°F (53°C)@@(127°F / 53°C)",
+"f": "❌ 错误。"
+},
+{
+"t": "400°F (204°C)@@(400°F / 204°C)",
+"f": "❌ 错误。"
+},
+{
+"t": "550°F (288°C)@@(550°F / 288°C)",
+"f": "✅ 正确。超过此温度必须使用压力平衡阀（barometric damper）。"
+},
+{
+"t": "1000°F (538°C)@@(1000°F / 538°C)",
+"f": "❌ 错误。"
+}
+],
+"a": 2,
+"exp": "解析:如果烟气温度超过 550°F，则不允许使用防气流罩。",
+"src": "• 课文出处: Page 12, Draft hood.\n• 原文语句: \"flue gas exceeds 550 F (288 C).\""
+},
+{
+"u": "Quick Reference — Key Numbers to Memorize",
+"q": "What is the maximum temperature rating for Type BH Class IIA (PVC) vent material?@@(Type BH Class IIA (PVC) 排气材料的最高额定温度是多少？)",
+"hint": "PVC Vent Temperature",
+"opts": [
+{
+"t": "60°C (140°F)@@(60°C / 140°F)",
+"f": "❌ 错误。"
+},
+{
+"t": "90°C (195°F)@@(90°C / 195°F)",
+"f": "✅ 正确。这是 PVC 材质的最高工作限温。"
+},
+{
+"t": "110°C (230°F)@@(110°C / 230°F)",
+"f": "❌ 错误。这是 CPVC 的限温。"
+},
+{
+"t": "149°C (300°F)@@(149°C / 300°F)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析:Class IIA 塑料排气管（PVC）的最高工作温度为 90°C。",
+"src": "• 课文出处: Page 26, Plastic vents.\n• 原文语句: \"Class IIA - up to 90°C (195°F)\""
+},
+{
+"u": "Quick Reference — Key Numbers to Memorize",
+"q": "What is the maximum temperature rating for Type BH Class IIB/IIC (CPVC/PP) vents?@@(Type BH Class IIB/IIC (CPVC/PP) 排气管的最高额定温度是多少？)",
+"hint": "CPVC/PP Vent Temperature",
+"opts": [
+{
+"t": "90°C (195°F)@@(90°C / 195°F)",
+"f": "❌ 错误。"
+},
+{
+"t": "110°C (230°F)@@(110°C / 230°F)",
+"f": "✅ 正确。CPVC 和聚丙烯能承受比 PVC 更高的温度。"
+},
+{
+"t": "149°C (300°F)@@(149°C / 300°F)",
+"f": "❌ 错误。"
+},
+{
+"t": "288°C (550°F)@@(288°C / 550°F)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析:Class IIB (CPVC) 和 Class IIC (PP) 的最高工作温度为 110°C。",
+"src": "• 课文出处: Page 26, Plastic vents.\n• 原文语句: \"Class IIB/IIC - up to 110°C (230°F)\""
+},
+{
+"u": "Quick Reference — Key Numbers to Memorize",
+"q": "For every 1000 Btu of fuel input, how much total air (in cubic feet) is typically required for air supply?@@(每 1000 Btu 的燃料输入，通常需要多少总空气量（立方英尺）？)",
+"hint": "Air Supply Calculation",
+"opts": [
+{
+"t": "10 ft³@@(10 立方英尺)",
+"f": "❌ 错误。这只是理论燃烧空气。"
+},
+{
+"t": "15 ft³@@(15 立方英尺)",
+"f": "❌ 错误。"
+},
+{
+"t": "30 ft³@@(30 立方英尺)",
+"f": "✅ 正确。由 10（燃烧）+ 5（过剩）+ 15（稀释）组成。"
+},
+{
+"t": "50 ft³@@(50 立方英尺)",
+"f": "❌ 错误。"
+}
+],
+"a": 2,
+"exp": "解析:计算空气需求时，标准比率为每 1000 Btu 输入配 30 立方英尺空气。",
+"src": "• 课文出处: Page 146, Appliance draft control.\n• 原文语句: \"The combustion air and excess air ... 15:1. The dilution air ... 15:1. [Total 30:1]\""
+},
+{
+"u": "Quick Reference — Key Numbers to Memorize",
+"q": "What is the typical range for a normal draft reading in a natural draft appliance?@@(自然抽力设备的正常抽力读数范围是多少？)",
+"hint": "Normal Draft Range",
+"opts": [
+{
+"t": "0.0 to +0.02\" w.c.@@(0.0 到 +0.02\" 水柱)",
+"f": "❌ 错误。"
+},
+{
+"t": "-0.02\" to -0.04\" w.c.@@(-0.02\" 到 -0.04\" 水柱)",
+"f": "✅ 正确。这是设备正常排气时的理想负压范围。"
+},
+{
+"t": "-0.10\" to -0.20\" w.c.@@(-0.10\" 到 -0.20\" 水柱)",
+"f": "❌ 错误。"
+},
+{
+"t": "-1.0\" to -2.0\" w.c.@@(-1.0\" 到 -2.0\" 水柱)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析:正常自然抽力应保持在微弱的负压状态，即 -0.02 到 -0.04 英寸水柱。",
+"src": "• 课文出处: Page 11, Draft.\n• 原文语句: \"normal draft ... -0.02 to -0.04 inch w.c.\""
+},
+{
+"u": "Quick Reference — Key Numbers to Memorize",
+"q": "At what building negative pressure threshold is spillage likely to occur for natural draft appliances?@@(多大的建筑负压会导致自然抽力设备发生废气溢流？)",
+"hint": "Spillage Threshold",
+"opts": [
+{
+"t": "-0.01\" w.c.@@(-0.01\" 水柱)",
+"f": "❌ 错误。"
+},
+{
+"t": "-0.02\" w.c. (-5 Pa)@@(-0.02\" 水柱 / -5 帕)",
+"f": "✅ 正确。当负压达到此数值，抽力就会被抵消并发生倒流。"
+},
+{
+"t": "-0.04\" w.c.@@(-0.04\" 水柱)",
+"f": "❌ 错误。"
+},
+{
+"t": "+0.02\" w.c.@@(+0.02\" 水柱)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析:建筑负压超过 -0.02 英寸水柱是引发溢流（spillage）的临界点。",
+"src": "• 课文出处: Page 11, Draft.\n• 原文语句: \"negative pressure of more than 0.02 inch w.c. (5 Pa) can cause ... spillage\""
+},
+{
+"u": "Quick Reference — Key Numbers to Memorize",
+"q": "How much capacity reduction is required if a vent connector has three 90° elbows?@@(如果排气连接管有三个 90° 弯头，容量需要减少多少？)",
+"hint": "3 Elbows Rule",
+"opts": [
+{
+"t": "5%@@(5%)",
+"f": "❌ 错误。"
+},
+{
+"t": "10%@@(10%)",
+"f": "✅ 正确。每增加一个 90° 弯头（超过两个后）折减 10%。"
+},
+{
+"t": "15%@@(15%)",
+"f": "❌ 错误。"
+},
+{
+"t": "20%@@(20%)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析:当连接管弯头数量超过两个，查表所得容量必须折减 10%。同样的规则适用于水平汇合管（horizontal manifold）。",
+"src": "• 课文出处: Page 91, Vent sizing tables.\n• 原文语句: \"three 90° elbows ... reduce the capacity by 10%.\""
+},
+{
+"u": "Quick Reference — Key Numbers to Memorize",
+"q": "What is the capacity reduction and maximum lateral distance for an offset in a common vent?@@(公共排气管偏移（offset）的容量折减和最大水平距离限制是多少？)",
+"hint": "Common Vent Offset",
+"opts": [
+{
+"t": "10% reduction and 1 ft per inch diameter.@@(10% 折减且每英寸管径 1 英尺。)",
+"f": "❌ 错误。"
+},
+{
+"t": "20% reduction and 1.5 ft per inch diameter.@@(20% 折减且每英寸管径 1.5 英尺。)",
+"f": "✅ 正确。偏移对抽力影响巨大，需要大幅折减。"
+},
+{
+"t": "50% reduction and 2 ft per inch diameter.@@(50% 折减且每英寸管径 2 英尺。)",
+"f": "❌ 错误。"
+},
+{
+"t": "No reduction but max 6 ft total.@@(不折减但总长度限 6 英尺。)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析:公共排气管段的偏移需折减 20% 容量，且偏移长度限制在管径的 1.5 倍（英尺对英寸）。",
+"src": "• 课文出处: Page 92, Common vent offset.\n• 原文语句: \"Common vent offset ... 20% reduction ... lateral shall not exceed 1.5 ft for each inch of vent diameter.\""
+},
+{
+"u": "Quick Reference — Key Numbers to Memorize",
+"q": "What is the absolute maximum horizontal lateral length allowed for a common vent?@@(公共排气管允许的最大水平侧向长度是多少？)",
+"hint": "Max Lateral Length",
+"opts": [
+{
+"t": "3 ft (1 m)@@(3 英尺 / 1 米)",
+"f": "❌ 错误。"
+},
+{
+"t": "6 ft (2 m)@@(6 英尺 / 2 米)",
+"f": "✅ 正确。这是公共排气管水平段长度的法定上限。"
+},
+{
+"t": "12 ft (3.6 m)@@(12 英尺 / 3.6 米)",
+"f": "❌ 错误。"
+},
+{
+"t": "Depends on the vent diameter.@@(取决于排气管直径。)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析:公共排气管（Common Vent）的水平侧向偏移（Lateral）距离绝对不能超过 6 英尺。",
+"src": "• 课文出处: Page 95, Common venting.\n• 原文语句: \"lateral length of the common vent ... shall not exceed 6 ft (2 m).\""
+},
+{
+"u": "Quick Reference — Key Numbers to Memorize",
+"q": "Which Annex C tables are designated for sizing Type B vent systems?@@(Annex C 中哪些表是专门用于 Type B 排气系统的？)",
+"hint": "Annex C Tables",
+"opts": [
+{
+"t": "Tables C1 to C4@@(表 C1 到 C4)",
+"f": "✅ 正确。这些表格涵盖单台及多台设备使用 B-vent 的情况。"
+},
+{
+"t": "Tables C5 to C8@@(表 C5 到 C8)",
+"f": "❌ 错误。这些用于砖石烟囱。"
+},
+{
+"t": "Tables C9 to C12@@(表 C9 到 C12)",
+"f": "❌ 错误。这些用于加装金属内衬的系统。"
+},
+{
+"t": "All tables apply to Type B.@@(所有表都适用于 Type B。)",
+"f": "❌ 错误。"
+}
+],
+"a": 0,
+"exp": "解析:查表时必须选对系统类型。C1-C4 属于 Type B（B-vent）系统专用表。",
+"src": "• 课文出处: Page 84, Vent sizing.\n• 原文语句: \"Tables C1 to C4 [apply to] Type B vent systems.\""
+},
+{
+"u": "Quick Reference — Key Numbers to Memorize",
+"q": "Which Annex C tables apply to appliances venting into a tile-lined masonry chimney?@@(哪些 Annex C 表格适用于排入带瓷砖内衬砖石烟囱的设备？)",
+"hint": "Annex C Tables",
+"opts": [
+{
+"t": "Tables C1 to C4@@(表 C1 到 C4)",
+"f": "❌ 错误。"
+},
+{
+"t": "Tables C5 to C8@@(表 C5 到 C8)",
+"f": "✅ 正确。这四张表专门用于未加装金属内衬的砖石烟囱。"
+},
+{
+"t": "Tables C9 to C12@@(表 C9 到 C12)",
+"f": "❌ 错误。"
+},
+{
+"t": "Table 8.6@@(表 8.6)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析:排入砖石烟囱（Tile-lined masonry chimney）的系统应使用 C5-C8 表格进行尺寸计算。",
+"src": "• 课文出处: Page 84, Vent sizing.\n• 原文语句: \"Tables C5 to C8 [apply to] Tile-lined masonry chimneys.\""
+},
+{
+"u": "Quick Reference — Key Numbers to Memorize",
+"q": "Which tables cover the use of a corrugated metallic liner installed inside a masonry chimney?@@(哪些表格涵盖了在砖石烟囱内安装波纹金属内衬的情况？)",
+"hint": "Annex C Tables",
+"opts": [
+{
+"t": "Tables C1 to C4@@(表 C1 到 C4)",
+"f": "❌ 错误。"
+},
+{
+"t": "Tables C5 to C8@@(表 C5 到 C8)",
+"f": "❌ 错误。"
+},
+{
+"t": "Tables C9 to C12@@(表 C9 到 C12)",
+"f": "✅ 正确。这些是现代改造项目中最常用的尺寸表。"
+},
+{
+"t": "None of the above@@(以上都不是)",
+"f": "❌ 错误。"
+}
+],
+"a": 2,
+"exp": "解析:加装金属内衬（Corrugated metallic liner）的旧烟囱系统尺寸计算必须使用 C9-C12 表格。",
+"src": "• 课文出处: Page 84, Vent sizing.\n• 原文语句: \"Tables C9 to C12 [apply to] Corrugated metallic liners.\""
+},
+{
+"u": "Quick Reference — Key Numbers to Memorize",
+"q": "What is the minimum required gauge for a vent connector of an appliance with NO draft hood?@@(没有防气流罩的设备，其排气连接管的最小要求厚度规格是多少？)",
+"hint": "Connector Gauge",
+"opts": [
+{
+"t": "No. 30 GSG galvanized@@(30 号镀锌钢)",
+"f": "❌ 错误。"
+},
+{
+"t": "No. 28 GSG galvanized@@(28 号镀锌钢)",
+"f": "✅ 正确。没有防气流罩的设备通常排气更热，需要更厚的材质。"
+},
+{
+"t": "No. 26 GSG galvanized@@(26 号镀锌钢)",
+"f": "❌ 错误。"
+},
+{
+"t": "No. 24 GSG galvanized@@(24 号镀锌钢)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析:规范 Table 2.1 规定，对于不带防气流罩的设备，其金属排气连接管的最小规格为 No. 28 GSG。",
+"src": "• 课文出处: Page 31, Table 2.1.\n• 原文语句: \"Min. Material ... (no draft hood) ... No. 28 GSG galvanized.\""
+},
+{
+"u": "Quick Reference — Key Numbers to Memorize",
+"q": "How is a Category I appliance defined in terms of efficiency and pressure?@@(从效率和压力角度，如何定义 I 类（Category I）设备？)",
+"hint": "Category I Definition",
+"opts": [
+{
+"t": "Efficiency >85% and positive pressure.@@(效率 >85% 且为正压。)",
+"f": "❌ 错误。"
+},
+{
+"t": "<85% efficiency and non-positive pressure.@@(效率 <85% 且非正压。)",
+"f": "✅ 正确。通常指自然排气的中效设备。"
+},
+{
+"t": "Condensing and negative pressure.@@(冷凝且负压。)",
+"f": "❌ 错误。"
+},
+{
+"t": "High-efficiency only.@@(仅限高效。)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析:I 类设备在非正压（大气压或负压）下运行，且效率低于 85%（非冷凝）。",
+"src": "• 课文出处: Page 11, Appliance categories.\n• 原文语句: \"Category I: operates with a non-positive vent pressure ... efficiency less than 85%.\""
+},
+{
+"u": "Quick Reference — Key Numbers to Memorize",
+"q": "What are the primary characteristics of a Category IV appliance?@@(IV 类（Category IV）设备的主要特征是什么？)",
+"hint": "Category IV Definition",
+"opts": [
+{
+"t": "Non-condensing and positive pressure.@@(非冷凝且正压。)",
+"f": "❌ 错误。这是 III 类。"
+},
+{
+"t": "Condensing and positive pressure.@@(冷凝且正压。)",
+"f": "✅ 正确。这是现代高效冷凝暖炉的典型特征。"
+},
+{
+"t": "Non-condensing and negative pressure.@@(非冷凝且负压。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Natural draft and condensing.@@(自然抽力且冷凝。)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析:IV 类设备是冷凝型的，并且利用风机产生正压将废气排出室外。",
+"src": "• 课文出处: Page 11, Appliance categories.\n• 原文语句: \"Category IV: operates with a positive vent pressure ... condensing.\""
+},
+{
+"u": "Classic Traps & Exam Tips",
+"q": "What is a common trap regarding the height of vents and chimneys above a flat roof?@@(关于平屋顶上排气管和烟囱的高度，常见的陷阱是什么？)",
+"hint": "Classic Traps - Heights",
+"opts": [
+{
+"t": "Both must be a minimum of 3 ft.@@(两者都必须至少为 3 英尺。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Vent must be min 2 ft, while Chimney must be min 3 ft.@@(排气管至少 2 英尺，而烟囱至少 3 英尺。)",
+"f": "✅ 正确。这是考试中最经典的数字陷阱，必须区分 Vent 和 Chimney。"
+},
+{
+"t": "Vent must be min 3 ft, while Chimney must be min 2 ft.@@(排气管至少 3 英尺，而烟囱至少 2 英尺。)",
+"f": "❌ 错误。记反了。"
+},
+{
+"t": "Both must be a minimum of 8 ft.@@(两者都必须至少为 8 英尺。)",
+"f": "❌ 错误。这是 12/12 坡屋顶的要求。"
+}
+],
+"a": 1,
+"exp": "解析：在平屋顶终端高度要求中，普通排气管（Vent）是 2 英尺，而烟囱（Chimney）是 3 英尺。考试经常混淆这两个术语。",
+"src": "• 课文出处: Unit 22 Study Guide - Classic Traps.\n• 原文语句: \"(1) Vent vs chimney height above flat roof (2 ft vs 3 ft).\""
+},
+{
+"u": "Classic Traps & Exam Tips",
+"q": "When connecting multiple appliances to a common vent, which appliance connector should enter at the highest point?@@(当多台设备连接到公共排气管时，哪台设备的连接管应在最高点接入？)",
+"hint": "Classic Traps - Common Venting",
+"opts": [
+{
+"t": "The one with the largest diameter.@@(管径最大的那个。)",
+"f": "❌ 错误。"
+},
+{
+"t": "The fan-assisted furnace.@@(风机辅助的暖炉。)",
+"f": "❌ 错误。"
+},
+{
+"t": "The smallest connector (typically the water heater).@@(最小的连接管（通常是热水器）。)",
+"f": "✅ 正确。抽力最弱或管径最小的连接管必须在最高处接入，以防被大设备压制。"
+},
+{
+"t": "It does not matter as long as they are within 6 ft.@@(只要在 6 英尺内，怎么接都行。)",
+"f": "❌ 错误。"
+}
+],
+"a": 2,
+"exp": "解析：根据“Smallest connector enters HIGHEST”原则，带防气流罩的热水器通常管径较小，应在风机辅助暖炉的上方接入公共排气管。",
+"src": "• 课文出处: Unit 22 Study Guide - Classic Traps.\n• 原文语句: \"(2) Smallest connector enters HIGHEST on common vents.\""
+},
+{
+"u": "Classic Traps & Exam Tips",
+"q": "Why is it prohibited to use a Type B vent on a Category III appliance?@@(为什么禁止在 III 类设备上使用 Type B 排气管？)",
+"hint": "Classic Traps - Type B Limits",
+"opts": [
+{
+"t": "Type B vent is only for oil-fired appliances.@@(Type B 仅用于燃油设备。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Category III produces positive pressure which Type B cannot handle.@@(III 类设备产生正压，而 Type B 无法承受。)",
+"f": "✅ 正确。Type B 设计用于中性或负压系统，正压会导致其接缝处废气泄漏。"
+},
+{
+"t": "Category III flue gases are too cold for Type B.@@(III 类烟气对 Type B 来说太冷了。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Type B vent is too expensive for Category III.@@(Type B 对于 III 类设备来说太贵了。)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析：Type B 是非密封的双壁管，只能用于负压或中性压力的 I 类设备。Category III 设备产生正压，必须使用专用的密封排气系统。",
+"src": "• 课文出处: Unit 22 Study Guide - Classic Traps.\n• 原文语句: \"(3) Type B cannot handle positive pressure — never on Category III.\""
+},
+{
+"u": "Classic Traps & Exam Tips",
+"q": "Can a high-efficiency Category IV furnace and a natural draft water heater share the same masonry chimney?@@(高效 IV 类暖炉和自然抽力热水器可以共用同一个砖石烟囱吗？)",
+"hint": "Classic Traps - Shared Chimney",
+"opts": [
+{
+"t": "Yes, if the chimney is oversized.@@(可以，如果烟囱尺寸够大。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Yes, but only in single-family dwellings.@@(可以，但仅限单户住宅。)",
+"f": "❌ 错误。"
+},
+{
+"t": "NEVER — this is a prohibited configuration.@@(绝对不可以 — 这是被禁止的配置。)",
+"f": "✅ 正确。正压的 IV 类设备会将废气压回自然抽力的热水器，造成室内一氧化碳中毒。"
+},
+{
+"t": "Only if a power venter is installed on the water heater.@@(只有在热水器上安装了动力排风机时才可以。)",
+"f": "❌ 错误。"
+}
+],
+"a": 2,
+"exp": "解析：严禁将正压排气的 IV 类设备与任何自然抽力（spillage-susceptible）设备排入同一个烟道或烟囱。",
+"src": "• 课文出处: Unit 22 Study Guide - Classic Traps.\n• 原文语句: \"(4) Cat IV + water heater shared chimney = NEVER.\""
+},
+{
+"u": "Classic Traps & Exam Tips",
+"q": "Under what over-fire draft condition should a draft hood be utilized?@@(在什么样的炉膛抽力条件下应该使用防气流罩？)",
+"hint": "Classic Traps - Draft Hood",
+"opts": [
+{
+"t": "Positive over-fire draft.@@(正压炉膛抽力。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Induced or forced draft.@@(诱导或强制抽力。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Neutral over-fire draft ONLY.@@(仅限中性炉膛抽力。)",
+"f": "✅ 正确。防气流罩只能在炉膛出口为中性压力时工作。"
+},
+{
+"t": "Any negative over-fire draft.@@(任何负压炉膛抽力。)",
+"f": "❌ 错误。"
+}
+],
+"a": 2,
+"exp": "解析：防气流罩通过引入空气来维持炉膛出口的压力平衡，它只适用于中性炉膛抽力系统。",
+"src": "• 课文出处: Unit 22 Study Guide - Classic Traps.\n• 原文语句: \"(5) Draft hood = neutral over-fire only — not positive, induced, or forced.\""
+},
+{
+"u": "Classic Traps & Exam Tips",
+"q": "When answering exam questions about clearances, what is the first thing you should identify?@@(在回答关于间距的考试题目时，你首先应该确认什么？)",
+"hint": "Exam Tips - Clearances",
+"opts": [
+{
+"t": "The height of the building.@@(建筑的高度。)",
+"f": "❌ 错误。"
+},
+{
+"t": "The vent type, appliance type, and whether it is converted.@@(排气管类型、设备类型，以及它是否经过改装。)",
+"f": "✅ 正确。这些因素共同决定了适用的安全间距（如 1\", 6\", 或 9\"）。"
+},
+{
+"t": "The color of the vent pipe.@@(排气管的颜色。)",
+"f": "❌ 错误。"
+},
+{
+"t": "The outdoor air temperature.@@(室外空气温度。)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析：间距要求（Clearance）取决于排气管材质（Type B, C, L等）、设备功能以及是否为改装设备（Converted）。",
+"src": "• 课文出处: Unit 22 Study Guide - Exam Tips.\n• 原文语句: \"When you see a clearance question, ask yourself: what is the vent type, what is the appliance type, and is it converted?\""
+},
+{
+"u": "Classic Traps & Exam Tips",
+"q": "What is the recommended strategy for choosing the correct Annex C table for vent sizing?@@(选择正确的 Annex C 尺寸表进行排气管计算的推荐策略是什么？)",
+"hint": "Exam Tips - Sizing",
+"opts": [
+{
+"t": "Use Table C1 for everything.@@(所有东西都用表 C1。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Identify the vent system type first.@@(首先确认排气系统的类型。)",
+"f": "✅ 正确。必须先确定是 Type B、砖石烟囱还是带内衬的烟囱，才能选对表。"
+},
+{
+"t": "Select the table with the largest capacities.@@(选择容量最大的表。)",
+"f": "❌ 错误。"
+},
+{
+"t": "Choose based on the fuel pressure.@@(根据燃料压力选择。)",
+"f": "❌ 错误。"
+}
+],
+"a": 1,
+"exp": "解析：Annex C 的表格是按系统类别（Type B vent, Masonry, Lined Masonry）严格划分的，选错表会导致整个计算错误。",
+"src": "• 课文出处: Unit 22 Study Guide - Exam Tips.\n• 原文语句: \"For sizing questions, identify the vent system first to pick the correct Annex C table.\""
+}
+];
+
+/* ==========================================================
+   STATE
+========================================================== */
+var SAVE_KEY = 'g2_quiz_v1';
+var EDIT_KEY = 'g2_quiz_edits_v1';
+var timerInterval = null;
+var timeRemaining = 3.5 * 3600;
+var windowSlideDirection = ''; 
+
+var state = { masterList: [], list: [], optionMaps: {}, pointer: 0, records: {}, filter: 'all', source: 'all', search: '', isExam: false, examSubmitted: false, shuffled: false, showChinese: false };
+
+/* ==========================================================
+   THEME & HIGHLIGHT
+========================================================== */
+function toggleTheme() { var dark = document.documentElement.classList.toggle('dark'); localStorage.setItem('g2_theme', dark ? 'dark' : 'light'); document.getElementById('themeBtn').textContent = dark ? '☀️' : '🌙'; }
+function initTheme() { var saved = localStorage.getItem('g2_theme'); var sysDark = window.matchMedia('(prefers-color-scheme: dark)').matches; var useDark = saved ? saved === 'dark' : sysDark; if (useDark) document.documentElement.classList.add('dark'); document.getElementById('themeBtn').textContent = useDark ? '☀️' : '🌙'; }
+function hl(text) { if (!state.search || !text) return text; var kw = state.search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); return text.replace(new RegExp('(' + kw + ')(?![^<]*>)', 'gi'), '<span class="hl">$1</span>'); }
+
+/* ==========================================================
+   INIT & TABS
+========================================================== */
+function init() {
+  initTheme(); initChinese(); if (!quizData || quizData.length === 0) return;
+  try { var em = JSON.parse(localStorage.getItem(EDIT_KEY)); if (em) Object.keys(em).forEach(function(i) { if (quizData[i]) quizData[i].src = em[i]; }); } catch(e) {}
+  state.masterList = quizData.map(function(_, i) { return i; }); loadProgress();
+  if (state.list.length === 0) state.list = state.masterList.slice();
+  document.getElementById('totalNum').textContent = quizData.length;
+  renderSourceTabs(); applyFilter(); document.addEventListener('keydown', handleKey);
+}
+function renderSourceTabs() {
+  var container = document.getElementById('sourceList'); container.innerHTML = ''; var sources = {};
+  quizData.forEach(function(q) { sources[q.u || 'Uncategorized'] = true; });
+  function makeTag(label, value) { var el = document.createElement('div'); el.className = 'source-tag' + (state.source === value ? ' active' : ''); el.textContent = label; el.onclick = function() { setSource(value); }; container.appendChild(el); }
+  makeTag('All', 'all'); Object.keys(sources).sort().forEach(function(s) { makeTag(s, s); });
+}
+function setSource(src) { state.source = src; renderSourceTabs(); applyFilter(); }
+function setFilter(type) { state.filter = type; ['all','wrong','star'].forEach(function(t) { document.getElementById('tab-' + t).classList.toggle('active', t === type); }); applyFilter(); }
+function handleSearch() { state.search = document.getElementById('searchBox').value.toLowerCase(); applyFilter(); }
+function applyFilter() {
+  state.list = state.masterList.filter(function(id) {
+    var q = quizData[id], rec = state.records[id], src = q.u || 'Uncategorized';
+    if (state.source !== 'all' && src !== state.source) return false;
+    if (state.search) { var full = (q.q || '') + (q.exp || '') + (q.src || ''); if (q.opts) full += q.opts.map(function(o){ return o.t; }).join(''); if (!full.toLowerCase().includes(state.search)) return false; }
+    if (state.filter === 'wrong') return rec && rec.status === 'wrong';
+    if (state.filter === 'star') return rec && rec.marked; return true;
+  });
+  state.pointer = 0; windowSlideDirection = ''; 
+  document.querySelector('.content-scroll').scrollTop = 0; // 切换过滤条件时回顶
+  renderSidebar(); renderQuestion();
+}
+function shuffleQuestions() {
+  if (state.masterList.length < 2) return;
+  for (var i = state.masterList.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var tmp = state.masterList[i]; state.masterList[i] = state.masterList[j]; state.masterList[j] = tmp; }
+  state.optionMaps = {};
+  state.masterList.forEach(function(id) {
+    var count = quizData[id].opts.length; var arr = Array.from({length: count}, function(_, i) { return i; });
+    for (var i = count - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp; }
+    state.optionMaps[id] = arr;
+  });
+  state.shuffled = true; applyFilter();
+}
+
+/* ==========================================================
+   RENDER CORE
+========================================================== */
+function renderSidebar() {
+  var grid = document.getElementById('qGrid'); grid.innerHTML = '';
+  state.list.forEach(function(id, idx) {
+    var dot = document.createElement('div'); dot.className = 'q-dot'; dot.textContent = id + 1;
+    var rec = state.records[id];
+    if (rec) {
+      if (rec.marked) dot.classList.add('star');
+      if (state.isExam && !state.examSubmitted) { if (rec.userChoice !== undefined) dot.classList.add('answered'); } 
+      else { if (rec.status === 'correct') dot.classList.add('correct'); if (rec.status === 'wrong') dot.classList.add('wrong'); }
+    }
+    if (idx === state.pointer) dot.classList.add('active');
+    dot.onclick = function() { 
+      state.pointer = idx; windowSlideDirection = ''; 
+      document.querySelector('.content-scroll').scrollTop = 0; // 点击侧边栏题号时回顶
+      renderQuestion(); 
+    }; 
+    grid.appendChild(dot);
+  });
+  var done = Object.keys(state.records).filter(function(k) { return state.records[k].userChoice !== undefined; }).length;
+  document.getElementById('totalStats').textContent = 'Done: ' + done + ' / ' + quizData.length;
+  document.getElementById('miniBar').style.width = (state.list.length ? Math.round((state.pointer + 1) / state.list.length * 100) : 0) + '%';
+}
+
+function renderQuestion() {
+  var card = document.getElementById('questionCard');
+  var empty = document.getElementById('emptyState');
+  var optList = document.getElementById('optList');
+  var fb = document.getElementById('feedbackBox');
+
+  if (state.list.length === 0) { card.style.display = 'none'; empty.style.display = 'block'; return; }
+  card.style.display = 'block'; empty.style.display = 'none';
+
+  if (windowSlideDirection === 'swipe_snap') {
+    card.style.transition = 'none';
+    card.style.transform = 'translateX(0)';
+    card.style.opacity = '1';
+  } else if (windowSlideDirection === 'left') {
+    card.style.transition = 'none'; card.style.transform = 'translateX(60vw)'; card.style.opacity = '0';
+    void card.offsetWidth;
+    card.style.transition = 'transform 0.25s ease-out, opacity 0.25s ease';
+    card.style.transform = 'translateX(0)'; card.style.opacity = '1';
+  } else if (windowSlideDirection === 'right') {
+    card.style.transition = 'none'; card.style.transform = 'translateX(-60vw)'; card.style.opacity = '0';
+    void card.offsetWidth;
+    card.style.transition = 'transform 0.25s ease-out, opacity 0.25s ease';
+    card.style.transform = 'translateX(0)'; card.style.opacity = '1';
+  } else {
+    card.style.transition = 'none'; card.style.transform = 'translateX(0)'; card.style.opacity = '1';
+  }
+  windowSlideDirection = ''; 
+
+  var id = state.list[state.pointer]; var q = quizData[id]; var rec = state.records[id] || {};
+  document.getElementById('currNum').textContent = state.pointer + 1; document.getElementById('totalNum').textContent = state.list.length;
+  document.getElementById('unitBadge').textContent = q.u || 'Question';
+
+  var parts = (q.q || '').split('@@');
+  document.getElementById('qText').innerHTML = hl(parts[0] || '');
+  document.getElementById('qTrans').innerHTML = hl(parts[1] || ''); document.getElementById('qTrans').style.display = state.showChinese ? 'block' : 'none';
+
+  var favBtn = document.getElementById('favBtn'); favBtn.textContent = rec.marked ? '⭐' : '☆'; favBtn.style.color = rec.marked ? '#f59e0b' : 'var(--text-muted)';
+
+  var labels = ['A','B','C','D','E'];
+  var order = (state.shuffled && state.optionMaps[id]) ? state.optionMaps[id] : q.opts.map(function(_, i){ return i; });
+  optList.innerHTML = '';
+  
+  order.forEach(function(origIdx, visIdx) {
+    var opt = q.opts[origIdx]; var optParts = (opt.t || '').split('@@');
+    var extraClass = '';
+    if (rec.userChoice === origIdx && !state.isExam) { extraClass = (origIdx === q.a) ? 'highlight-correct' : 'highlight-wrong'; } 
+    else if (state.isExam && rec.userChoice === origIdx) { extraClass = 'exam-selected'; }
+
+    var transVisible = state.showChinese && optParts[1] ? 'block' : 'none';
+    var btn = document.createElement('div'); btn.className = 'opt-btn ' + extraClass;
+    btn.innerHTML = '<span class="opt-key">' + labels[visIdx] + '</span>' +
+      '<div><div>' + hl(optParts[0]) + '</div><div class="opt-trans" style="display:' + transVisible + ';">' + hl(optParts[1]||'') + '</div></div>';
+    btn.onclick = function() { handleAnswer(id, origIdx); }; optList.appendChild(btn);
+  });
+
+  if (rec.userChoice !== undefined && !state.isExam) { showFeedback(id, rec.userChoice); } 
+  else { fb.style.display = 'none'; fb.innerHTML = ''; }
+  renderSidebar(); saveProgress();
+}
+
+function handleAnswer(id, origIdx) {
+  var q = quizData[id]; var isRight = origIdx === q.a; var oldMarked = state.records[id] ? state.records[id].marked : false;
+  if (state.isExam && !state.examSubmitted) {
+    if (!state.records[id]) state.records[id] = {}; state.records[id].userChoice = origIdx; state.records[id].status = 'answered'; renderQuestion(); return;
+  }
+  state.records[id] = { status: isRight ? 'correct' : 'wrong', userChoice: origIdx, marked: oldMarked }; saveProgress(); renderQuestion(); 
+}
+
+/* ==========================================================
+   FEEDBACK
+========================================================== */
+function showFeedback(id, choiceIdx) {
+  var q = quizData[id];
+  var isRight = choiceIdx === q.a;
+  var fb = document.getElementById('feedbackBox');
+  fb.className = 'feedback ' + (isRight ? 'ok' : 'bad');
+  fb.style.display = 'block';
+
+  var fText = (q.opts[choiceIdx].f || '').replace(/^[✅❌⚠️]+\s*/, '');
+
+  var html = '<span class="fb-title">' + (isRight ? '✅ Correct' : '❌ Incorrect') + '</span>';
+  html += '<div class="fb-msg">' + hl(fText) + '</div>';
+  html += '<hr class="fb-divider">';
+  html += '<div class="fb-section-label">Explanation</div>';
+  html += '<div class="fb-exp">' + hl(q.exp || '(no explanation)') + '</div>';
+
+  if (q.src !== undefined) {
+    html += '<hr class="fb-divider">';
+    html += '<div class="fb-row">';
+    html += '  <span class="fb-section-label">Source</span>';
+    html += '  <button class="edit-btn" onclick="enableEdit(' + id + ')">✏️ Edit</button>';
+    html += '</div>';
+    html += '<div class="fb-src" id="src-display-' + id + '">' + hl(q.src || '') + '</div>';
+    html += '<div id="editor-area-' + id + '" style="display:none;">';
+    html += '  <textarea class="src-textarea" id="src-input-' + id + '">' + (q.src || '') + '</textarea>';
+    html += '  <div class="save-row">';
+    html += '    <button class="primary" onclick="saveEdit(' + id + ', this)">Save</button>';
+    html += '    <button onclick="cancelEdit(' + id + ')">Cancel</button>';
+    html += '  </div>';
+    html += '  <div class="edit-warn">⚠️ Saved to browser. Use "Save updated file" in sidebar to persist.</div>';
+    html += '</div>';
+  }
+
+  fb.innerHTML = html;
+}
+
+function enableEdit(id) { document.getElementById('src-display-' + id).style.display = 'none'; var ea = document.getElementById('editor-area-' + id); ea.style.display = 'block'; var ta = document.getElementById('src-input-' + id); ta.value = quizData[id].src || ''; ta.focus(); }
+function cancelEdit(id) { document.getElementById('src-display-' + id).style.display = 'block'; document.getElementById('editor-area-' + id).style.display = 'none'; }
+function saveEdit(id, btn) {
+  var newSrc = document.getElementById('src-input-' + id).value; quizData[id].src = newSrc;
+  document.getElementById('src-display-' + id).textContent = newSrc; cancelEdit(id);
+  var edits = {}; try { edits = JSON.parse(localStorage.getItem(EDIT_KEY) || '{}'); } catch(e) {}
+  edits[id] = newSrc; localStorage.setItem(EDIT_KEY, JSON.stringify(edits));
+  if (btn) { var orig = btn.textContent; btn.textContent = 'Saved!'; btn.style.background = '#059669'; btn.style.color = 'white'; setTimeout(function() { btn.textContent = orig; btn.style.background = ''; btn.style.color = ''; }, 1200); }
+}
+
+/* ==========================================================
+   INTERACTIONS & UTILS
+========================================================== */
+function nextQ() { 
+  if (state.pointer < state.list.length - 1) { 
+    if (windowSlideDirection !== 'swipe_snap') windowSlideDirection = 'left'; 
+    state.pointer++; 
+    document.querySelector('.content-scroll').scrollTop = 0; // 切下一题时强制回顶
+    renderQuestion(); 
+  } 
+}
+function prevQ() { 
+  if (state.pointer > 0) { 
+    if (windowSlideDirection !== 'swipe_snap') windowSlideDirection = 'right'; 
+    state.pointer--; 
+    document.querySelector('.content-scroll').scrollTop = 0; // 切上一题时强制回顶
+    renderQuestion(); 
+  } 
+}
+function toggleStar() {
+  var id = state.list[state.pointer]; if (id === undefined) return;
+  if (!state.records[id]) state.records[id] = {}; var isNowMarked = !state.records[id].marked; state.records[id].marked = isNowMarked;
+  if (state.filter === 'star' && !isNowMarked) { state.list.splice(state.pointer, 1); if (state.pointer >= state.list.length) state.pointer = Math.max(0, state.list.length - 1); }
+  renderQuestion(); saveProgress(); showToast(isNowMarked ? '⭐ Starred' : 'Removed from Starred');
+}
+function showToast(msg) {
+  var t = document.getElementById('toastMsg'); if (!t) { t = document.createElement('div'); t.id = 'toastMsg'; t.className = 'toast'; document.body.appendChild(t); }
+  t.textContent = msg; t.classList.add('show'); setTimeout(function(){ t.classList.remove('show'); }, 1500);
+}
+function toggleChinese() { state.showChinese = document.getElementById('cnToggle').checked; document.getElementById('cnLabel').textContent = state.showChinese ? 'CN' : 'EN'; localStorage.setItem('g2_cn', state.showChinese ? '1' : '0'); renderQuestion(); }
+function initChinese() { if (localStorage.getItem('g2_cn') === '1') { state.showChinese = true; document.getElementById('cnToggle').checked = true; document.getElementById('cnLabel').textContent = 'CN'; } }
+function saveProgress() { try { localStorage.setItem(SAVE_KEY, JSON.stringify({ records: state.records, pointer: state.pointer, filter: state.filter, source: state.source })); } catch(e) {} }
+function loadProgress() { try { var s = JSON.parse(localStorage.getItem(SAVE_KEY)); if (s) { state.records = s.records||{}; state.pointer = s.pointer||0; state.filter = s.filter||'all'; state.source = s.source||'all'; } } catch(e) {} }
+
+/* ===== 新增的防误触、防拦截双击清除功能 ===== */
+var resetTimer = null;
+function resetProgress() { 
+  var link = document.querySelector('.reset-link');
+  var bBtn = document.querySelector('.result-btn.primary');
+  
+  if (!resetTimer) {
+    showToast("⚠️ Tap again to confirm"); 
+    if (link) { link.textContent = 'Sure to clear?'; link.style.color = '#e05a5a'; }
+    if (bBtn) { bBtn.textContent = 'Sure to Restart?'; bBtn.style.background = '#e05a5a'; bBtn.style.borderColor = '#e05a5a'; }
+    resetTimer = setTimeout(function() {
+      resetTimer = null;
+      if (link) { link.textContent = 'Clear progress'; link.style.color = ''; }
+      if (bBtn) { bBtn.textContent = 'Restart'; bBtn.style.background = ''; bBtn.style.borderColor = ''; }
+    }, 3000);
+    return;
+  }
+  if (resetTimer) { clearTimeout(resetTimer); resetTimer = null; }
+  if (link) { link.textContent = 'Clear progress'; link.style.color = ''; }
+  if (bBtn) { bBtn.textContent = 'Restart'; bBtn.style.background = ''; bBtn.style.borderColor = ''; }
+
+  localStorage.removeItem(SAVE_KEY); 
+  state.records = {}; state.pointer = 0; state.filter = 'all'; state.source = 'all'; 
+  if (state.isExam) toggleExam(); 
+  ['all','wrong','star'].forEach(function(t) { document.getElementById('tab-' + t).classList.toggle('active', t === 'all'); }); 
+  renderSourceTabs(); windowSlideDirection = 'swipe_snap'; applyFilter(); 
+  showToast("✅ Progress cleared!"); 
+}
+/* ======================================= */
+
+function toggleSidebar() { var sb = document.querySelector('.sidebar'); var ov = document.getElementById('sidebarOverlay'); var open = sb.classList.toggle('open'); ov.classList.toggle('show', open); }
+function closeSidebar() { document.querySelector('.sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('show'); }
+
+/* ==========================================================
+   EXAM MODE
+========================================================== */
+function toggleExam() {
+  if (document.getElementById('examToggle').checked) {
+    if (!confirm('Enable exam mode?\n- Answers hidden until submission\n- Timer starts\n- Submit when done')) { document.getElementById('examToggle').checked = false; return; }
+    state.isExam = true; state.examSubmitted = false; document.getElementById('timerBadge').style.display = 'block'; document.getElementById('topSubmitBtn').style.display = 'inline-block'; startTimer();
+  } else {
+    state.isExam = false; state.examSubmitted = false; clearInterval(timerInterval); document.getElementById('timerBadge').style.display = 'none'; document.getElementById('topSubmitBtn').style.display = 'none';
+  }
+  windowSlideDirection = ''; 
+  document.querySelector('.content-scroll').scrollTop = 0; // 切换模式回顶
+  renderQuestion(); saveProgress();
+}
+function startTimer() {
+  clearInterval(timerInterval);
+  timerInterval = setInterval(function() {
+    timeRemaining--; if (timeRemaining <= 0) { clearInterval(timerInterval); submitExam(); return; }
+    var h = Math.floor(timeRemaining / 3600), m = Math.floor((timeRemaining % 3600) / 60), s = timeRemaining % 60;
+    document.getElementById('timerBadge').textContent = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+  }, 1000);
+}
+function submitExam() {
+  state.examSubmitted = true; clearInterval(timerInterval); var correct = 0, wrong = 0;
+  quizData.forEach(function(q, i) { var rec = state.records[i]; if (rec && rec.userChoice !== undefined) { if (rec.userChoice === q.a) { correct++; rec.status = 'correct'; } else { wrong++; rec.status = 'wrong'; } } });
+  document.getElementById('resScore').textContent = Math.round(correct / quizData.length * 100) + '%'; document.getElementById('resTotal').textContent = quizData.length; document.getElementById('resRight').textContent = correct; document.getElementById('resWrong').textContent = wrong;
+  document.getElementById('overlay').style.display = 'flex'; document.getElementById('topSubmitBtn').style.display = 'none'; renderSidebar(); saveProgress();
+}
+function closeResult() { document.getElementById('overlay').style.display = 'none'; state.isExam = false; document.getElementById('examToggle').checked = false; document.getElementById('timerBadge').style.display = 'none'; windowSlideDirection = ''; renderQuestion(); }
+
+/* ==========================================================
+   PHANTOM RENDERER (带有解析满血状态的幻影卡片预加载)
+========================================================== */
+function renderPhantomCard(targetIdx) {
+  if(targetIdx < 0 || targetIdx >= state.list.length) return false;
+  var id = state.list[targetIdx]; var q = quizData[id]; var rec = state.records[id] || {};
+  
+  var html = '<div class="unit-badge">' + (q.u || 'Question') + '</div>';
+  var parts = (q.q || '').split('@@');
+  html += '<div class="q-text">' + hl(parts[0]) + '</div>';
+  if(state.showChinese && parts[1]) { html += '<div class="q-trans" style="display:block;">' + hl(parts[1]) + '</div>'; }
+  
+  html += '<div class="opt-list">';
+  var labels = ['A','B','C','D','E'];
+  var order = (state.shuffled && state.optionMaps[id]) ? state.optionMaps[id] : q.opts.map(function(_, i){ return i; });
+  
+  order.forEach(function(origIdx, visIdx) {
+    var opt = q.opts[origIdx]; var optParts = (opt.t || '').split('@@');
+    var extraClass = '';
+    if (rec.userChoice === origIdx && !state.isExam) { extraClass = (origIdx === q.a) ? 'highlight-correct' : 'highlight-wrong'; } 
+    else if (state.isExam && rec.userChoice === origIdx) { extraClass = 'exam-selected'; }
+    
+    html += '<div class="opt-btn ' + extraClass + '"><span class="opt-key">' + labels[visIdx] + '</span>';
+    html += '<div><div>' + hl(optParts[0]) + '</div>';
+    if(state.showChinese && optParts[1]) { html += '<div class="opt-trans" style="display:block;">' + hl(optParts[1]) + '</div>'; }
+    html += '</div></div>';
+  });
+  html += '</div>';
+  
+  // 🌟【修复点】把解析和错题记录也加进幻影卡片了
+  if (rec.userChoice !== undefined && !state.isExam) {
+    var choiceIdx = rec.userChoice;
+    var isRight = choiceIdx === q.a;
+    var fText = (q.opts[choiceIdx].f || '').replace(/^[✅❌⚠️]+\s*/, '');
+
+    html += '<div class="feedback ' + (isRight ? 'ok' : 'bad') + '" style="display:block;">';
+    html += '<span class="fb-title">' + (isRight ? '✅ Correct' : '❌ Incorrect') + '</span>';
+    html += '<div class="fb-msg">' + hl(fText) + '</div>';
+    html += '<hr class="fb-divider">';
+    html += '<div class="fb-section-label">Explanation</div>';
+    html += '<div class="fb-exp">' + hl(q.exp || '(no explanation)') + '</div>';
+
+    if (q.src !== undefined) {
+      html += '<hr class="fb-divider">';
+      html += '<div class="fb-row">';
+      html += '  <span class="fb-section-label">Source</span>';
+      html += '</div>';
+      html += '<div class="fb-src">' + hl(q.src || '') + '</div>';
+    }
+    html += '</div>';
+  }
+  
+  var pc = document.getElementById('phantomCard');
+  pc.innerHTML = html; pc.style.display = 'block'; return true;
+}
+
+/* ==========================================================
+   TOUCH TRACKING 
+========================================================== */
+var touchStartX = 0, touchStartY = 0;
+var currentDx = 0;
+var longPressTimer = null;
+var isLongPress = false;
+var isDragging = false;
+var isSwiping = false; 
+var phantomLoadedFor = -1;
+
+var scrollArea = document.querySelector('.content-scroll');
+var qCard = document.getElementById('questionCard');
+var pCard = document.getElementById('phantomCard');
+
+scrollArea.addEventListener('touchstart', function(e) {
+  if (e.touches.length > 1) return; 
+  touchStartX = e.touches[0].screenX; touchStartY = e.touches[0].screenY;
+  isLongPress = false; isDragging = true; isSwiping = false; currentDx = 0;
+  qCard.style.transition = 'none'; pCard.style.transition = 'none';
+
+  var tag = e.target.tagName;
+  if (tag === 'BUTTON' || tag === 'INPUT' || tag === 'TEXTAREA' || e.target.closest('.opt-btn') || e.target.closest('.search-box')) return; 
+
+  longPressTimer = setTimeout(function() {
+    if (!isSwiping) { isLongPress = true; toggleStar(); if('vibrate' in navigator) navigator.vibrate(40); }
+  }, 600);
+}, {passive: true});
+
+scrollArea.addEventListener('touchmove', function(e) {
+  if (!isDragging) return;
+  var dx = e.touches[0].screenX - touchStartX;
+  var dy = e.touches[0].screenY - touchStartY;
+
+  if (!isSwiping) {
+    if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 10) { isDragging = false; if (longPressTimer) clearTimeout(longPressTimer); return; } 
+    else if (Math.abs(dx) > 10) { isSwiping = true; if (longPressTimer) clearTimeout(longPressTimer); }
+  }
+
+  if (isSwiping) {
+    currentDx = dx; var screenW = window.innerWidth;
+    
+    if ((state.pointer === 0 && dx > 0) || (state.pointer === state.list.length - 1 && dx < 0)) {
+      dx = dx * 0.25; 
+      qCard.style.transform = 'translateX(' + dx + 'px)'; 
+      pCard.style.display = 'none';
+    } else {
+       var targetIdx = dx < 0 ? state.pointer + 1 : state.pointer - 1;
+       if (phantomLoadedFor !== targetIdx) { if(renderPhantomCard(targetIdx)) phantomLoadedFor = targetIdx; }
+       
+       qCard.style.transform = 'translateX(' + dx + 'px)';
+       qCard.style.opacity = '1'; 
+       
+       if(phantomLoadedFor !== -1) {
+          var pOffset = dx < 0 ? screenW + dx : -screenW + dx;
+          pCard.style.transform = 'translateX(' + pOffset + 'px)';
+          pCard.style.opacity = '1'; 
+       }
+    }
+  }
+}, {passive: true});
+
+scrollArea.addEventListener('touchend', function(e) {
+  if (longPressTimer) clearTimeout(longPressTimer);
+  if (!isDragging) return; isDragging = false;
+
+  if (!isLongPress && isSwiping) {
+    var threshold = window.innerWidth * 0.25; if (threshold < 80) threshold = 80;
+    
+    qCard.style.transition = 'transform 0.25s ease-out';
+    pCard.style.transition = 'transform 0.25s ease-out';
+
+    if (currentDx < -threshold && state.pointer < state.list.length - 1) {
+      qCard.style.transform = 'translateX(-100vw)'; 
+      pCard.style.transform = 'translateX(0)';
+      setTimeout(function() { 
+        windowSlideDirection = 'swipe_snap'; 
+        nextQ(); // 里面已经包含了自动回到顶部的代码
+        resetPhantom(); 
+      }, 250);
+    } else if (currentDx > threshold && state.pointer > 0) {
+      qCard.style.transform = 'translateX(100vw)'; 
+      pCard.style.transform = 'translateX(0)';
+      setTimeout(function() { 
+        windowSlideDirection = 'swipe_snap'; 
+        prevQ(); // 里面已经包含了自动回到顶部的代码
+        resetPhantom(); 
+      }, 250);
+    } else {
+      qCard.style.transform = 'translateX(0)'; 
+      if(phantomLoadedFor !== -1) pCard.style.transform = 'translateX(' + (currentDx < 0 ? window.innerWidth : -window.innerWidth) + 'px)';
+      setTimeout(resetPhantom, 250);
+    }
+  } else if (isSwiping) {
+      qCard.style.transition = 'transform 0.25s ease-out';
+      qCard.style.transform = 'translateX(0)'; 
+      setTimeout(resetPhantom, 250);
+  }
+  isSwiping = false;
+}, {passive: true});
+
+function resetPhantom() {
+  pCard.style.display = 'none'; pCard.style.transition = 'none'; phantomLoadedFor = -1;
+}
+
+/* ==========================================================
+   KEYBOARD SHORTCUTS
+========================================================== */
+function handleKey(e) {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  var k = e.key.toUpperCase();
+  if (k === 'ARROWRIGHT' || k === 'ENTER') { nextQ(); return; }
+  if (k === 'ARROWLEFT') { prevQ(); return; }
+  if (k === 'S') { toggleStar(); return; }
+
+  var id = state.list[state.pointer];
+  if (id === undefined) return;
+  var order = (state.shuffled && state.optionMaps[id]) ? state.optionMaps[id] : quizData[id].opts.map(function(_, i){ return i; });
+  var map = { '1': 0, 'A': 0, '2': 1, 'B': 1, '3': 2, 'C': 2, '4': 3, 'D': 3, '5': 4, 'E': 4 };
+  var visIdx = map[k];
+  if (visIdx !== undefined && visIdx < order.length) {
+    var btns = document.querySelectorAll('.opt-btn');
+    if (btns[visIdx]) btns[visIdx].click();
+  }
+}
+
+window.onload = init;
+</script>
+</body>
+</html>
