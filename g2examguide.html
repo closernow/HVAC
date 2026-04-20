@@ -1,0 +1,1931 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>G2 Practical Exam — 考试攻略</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Noto+Sans+SC:wght@300;400;700&display=swap');
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #161a24;
+    --border: #252d3d;
+    --accent: #f0a500;
+    --accent2: #3b82f6;
+    --danger: #ef4444;
+    --success: #22c55e;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --card: #1e2535;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans SC', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, #0d0f14 0%, #161a24 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header h1 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .header p { color: var(--muted); font-size: 11px; margin-top: 2px; }
+
+  /* TABS */
+  .tabs-wrapper {
+    overflow-x: auto;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .tabs-wrapper::-webkit-scrollbar { display: none; }
+
+  .tabs {
+    display: flex;
+    white-space: nowrap;
+    padding: 0 8px;
+    gap: 2px;
+    min-width: max-content;
+  }
+
+  .tab {
+    padding: 10px 14px;
+    cursor: pointer;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    user-select: none;
+    white-space: nowrap;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+  .tab.mandatory {
+    color: var(--danger);
+  }
+  .tab.mandatory.active {
+    border-bottom-color: var(--danger);
+  }
+
+  /* CONTENT */
+  .content { display: none; padding: 16px; max-width: 800px; margin: 0 auto; }
+  .content.active { display: block; }
+
+  /* SCORE BADGE */
+  .score-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+
+  /* MANDATORY ALERT */
+  .mandatory-alert {
+    background: rgba(239,68,68,0.1);
+    border: 1px solid var(--danger);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    font-size: 12px;
+    color: #fca5a5;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* SECTION */
+  .section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+
+  .section-header {
+    padding: 12px 16px;
+    background: rgba(255,255,255,0.03);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .section-header:hover { background: rgba(255,255,255,0.05); }
+
+  .section-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .icon-blue { background: rgba(59,130,246,0.2); }
+  .icon-amber { background: rgba(240,165,0,0.2); }
+  .icon-red { background: rgba(239,68,68,0.2); }
+  .icon-green { background: rgba(34,197,94,0.2); }
+  .icon-purple { background: rgba(168,85,247,0.2); }
+
+  .section-title {
+    font-weight: 700;
+    font-size: 13px;
+    flex: 1;
+  }
+  .section-sub {
+    font-size: 11px;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  .section-toggle {
+    color: var(--muted);
+    font-size: 16px;
+    transition: transform 0.2s;
+  }
+  .section.open .section-toggle { transform: rotate(90deg); }
+
+  .section-body {
+    display: none;
+    padding: 14px 16px;
+  }
+  .section.open .section-body { display: block; }
+
+  /* SEQUENCE */
+  .sequence {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+  }
+
+  .seq-item {
+    display: flex;
+    gap: 12px;
+    position: relative;
+  }
+
+  .seq-line {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .seq-num {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #000;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .seq-connector {
+    width: 2px;
+    flex: 1;
+    min-height: 16px;
+    background: var(--border);
+    margin: 4px 0;
+  }
+
+  .seq-content {
+    padding-bottom: 14px;
+    flex: 1;
+    padding-top: 2px;
+  }
+
+  .seq-title {
+    font-weight: 700;
+    font-size: 12px;
+    color: var(--accent);
+    margin-bottom: 2px;
+  }
+
+  .seq-en {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent2);
+    background: rgba(59,130,246,0.08);
+    border-left: 2px solid var(--accent2);
+    padding: 4px 8px;
+    border-radius: 0 4px 4px 0;
+    margin: 4px 0;
+  }
+
+  .seq-note {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  /* COMPONENT TABLE */
+  .comp-grid {
+    display: grid;
+    gap: 8px;
+  }
+
+  .comp-item {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+
+  .comp-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: 3px;
+  }
+
+  .comp-cn {
+    font-size: 11px;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .comp-function {
+    font-size: 11px;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    padding-top: 4px;
+    margin-top: 4px;
+  }
+
+  .comp-en-say {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--accent2);
+    margin-top: 4px;
+    font-style: italic;
+  }
+
+  /* FAULT TABLE */
+  .fault-grid {
+    display: grid;
+    gap: 8px;
+  }
+
+  .fault-item {
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  .fault-header {
+    padding: 8px 12px;
+    font-weight: 700;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .fault-body {
+    padding: 8px 12px;
+    background: rgba(0,0,0,0.2);
+    font-size: 11px;
+  }
+
+  .fault-body div { margin-bottom: 4px; }
+  .fault-label { color: var(--muted); display: inline; }
+  .fault-value { color: var(--text); display: inline; }
+
+  .code-badge {
+    background: rgba(240,165,0,0.2);
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 4px;
+    border: 1px solid rgba(240,165,0,0.3);
+  }
+
+  /* VOLTAGE TABLE */
+  .volt-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+  }
+  .volt-table th {
+    background: rgba(59,130,246,0.15);
+    color: var(--accent2);
+    padding: 6px 8px;
+    text-align: left;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+  }
+  .volt-table td {
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .volt-table tr:last-child td { border-bottom: none; }
+  .volt-table tr:hover td { background: rgba(255,255,255,0.03); }
+
+  /* WARNING BOX */
+  .warn-box {
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    font-size: 11px;
+    display: flex;
+    gap: 8px;
+  }
+  .warn-box.danger {
+    background: rgba(239,68,68,0.08);
+    border: 1px solid rgba(239,68,68,0.3);
+    color: #fca5a5;
+  }
+  .warn-box.info {
+    background: rgba(59,130,246,0.08);
+    border: 1px solid rgba(59,130,246,0.3);
+    color: #93c5fd;
+  }
+  .warn-box.success {
+    background: rgba(34,197,94,0.08);
+    border: 1px solid rgba(34,197,94,0.3);
+    color: #86efac;
+  }
+  .warn-box.amber {
+    background: rgba(240,165,0,0.08);
+    border: 1px solid rgba(240,165,0,0.3);
+    color: #fcd34d;
+  }
+
+  /* SPEAK BOX */
+  .speak-box {
+    background: rgba(34,197,94,0.06);
+    border: 1px solid rgba(34,197,94,0.25);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin: 8px 0;
+  }
+  .speak-label {
+    font-size: 10px;
+    color: var(--success);
+    font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 4px;
+    letter-spacing: 1px;
+  }
+  .speak-text {
+    font-size: 12px;
+    color: #d1fae5;
+    font-style: italic;
+  }
+
+  /* CHECKLIST */
+  .checklist {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 12px;
+    padding: 6px;
+    border-radius: 6px;
+    transition: background 0.15s;
+    cursor: pointer;
+  }
+  .check-item:hover { background: rgba(255,255,255,0.03); }
+  .check-item input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    accent-color: var(--accent);
+    margin-top: 1px;
+    cursor: pointer;
+  }
+  .check-item label { cursor: pointer; line-height: 1.4; }
+  .check-item.done label { color: var(--muted); text-decoration: line-through; }
+
+  /* KEY VALUES */
+  .kv-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .kv-item {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+  }
+  .kv-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--accent);
+    display: block;
+  }
+  .kv-label {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  /* STEP PROCEDURE */
+  .steps {
+    counter-reset: step;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .step {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 12px;
+    padding: 8px;
+    background: rgba(255,255,255,0.02);
+    border-radius: 6px;
+    border-left: 2px solid var(--border);
+  }
+  .step-n {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    min-width: 18px;
+    font-weight: 700;
+  }
+
+  /* DIVIDER */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 12px 0;
+  }
+
+  h3 {
+    font-size: 12px;
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    margin-top: 12px;
+  }
+  h3:first-child { margin-top: 0; }
+
+  p { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+
+  /* SCROLL PROGRESS */
+  .progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 2px;
+    background: var(--accent);
+    transition: width 0.1s;
+    z-index: 200;
+  }
+
+  /* Responsive */
+  @media (min-width: 600px) {
+    .comp-grid { grid-template-columns: 1fr 1fr; }
+    .kv-grid { grid-template-columns: repeat(4, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<div class="header">
+  <h1>⚡ G2 Practical Exam — 实战攻略</h1>
+  <p>Fanshawe HRAC · First Year · 2026 · Carrier PG95ESA Condensing Furnace</p>
+</div>
+
+<div class="tabs-wrapper">
+  <div class="tabs">
+    <div class="tab mandatory active" data-tab="s1">🔴 S1 强制站</div>
+    <div class="tab" data-tab="s2">S2 S636通风</div>
+    <div class="tab" data-tab="s3">S3 自然通风炉</div>
+    <div class="tab" data-tab="s4">S4 毫伏热电偶</div>
+    <div class="tab" data-tab="s5">S5 数字恒温器</div>
+    <div class="tab" data-tab="s6">S6 气压调节器</div>
+    <div class="tab" data-tab="s7">S7 清管/泄漏</div>
+    <div class="tab" data-tab="s8">S8 风机限位</div>
+    <div class="tab" data-tab="s9">S9 管道安装</div>
+  </div>
+</div>
+
+<!-- ===== STATION 1 ===== -->
+<div class="content active" id="s1">
+  <div class="mandatory-alert">
+    🔴 <strong>强制必考站 — 满分40分</strong>｜所有学生必须完成此站
+  </div>
+
+  <div class="score-badge">📊 /40分 &nbsp;|&nbsp; ⏱ 约20分钟</div>
+
+  <!-- OPENING SCRIPT -->
+  <div class="section open">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-green">🎤</div>
+      <div>
+        <div class="section-title">进站开场白</div>
+        <div class="section-sub">Entry Statement — 进去第一句话</div>
+      </div>
+      <div class="section-toggle">▶</div>
+    </div>
+    <div class="section-body">
+      <div class="speak-box">
+        <div class="speak-label">📢 说这句话</div>
+        <div class="speak-text">"Good morning. I have my B149 Gas Code, safety glasses, and work boots. Before I begin, I'd like to test my multimeter to confirm it's functioning correctly."</div>
+      </div>
+      <div class="warn-box info">
+        💡 先把万用表两表笔短接，蜂鸣响——让考官看到你在测试仪器。没有B149 Gas Code直接不合格。
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPONENTS -->
+  <div class="section open">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-blue">🔧</div>
+      <div>
+        <div class="section-title">零件识别 / Component ID</div>
+        <div class="section-sub">指出实物 + 说出功能</div>
+      </div>
+      <div class="section-toggle">▶</div>
+    </div>
+    <div class="section-body">
+      <div class="warn-box amber">
+        ⚡ 考官要求你指向实物并说明功能。手指明确指向部件，边指边说英文。
+      </div>
+      <div class="comp-grid">
+
+        <div class="comp-item">
+          <div class="comp-name">HSI (Hot Surface Igniter)</div>
+          <div class="comp-cn">🔥 热表面点火器</div>
+          <div class="comp-function">通电后加热至约900°C，点燃燃烧器气体。取代传统长明火pilot。</div>
+          <div class="comp-en-say">"This is the Hot Surface Igniter. It heats to approximately 900°C to ignite the gas at the burners. Resistance should be 40–70 ohms when cold."</div>
+        </div>
+
+        <div class="comp-item">
+          <div class="comp-name">Gas Valve (Valve Train)</div>
+          <div class="comp-cn">⚙️ 气阀 / 阀列</div>
+          <div class="comp-function">接收控制板24V信号后开启，允许天然气或丙烷流向燃烧器。包含压力调节功能。</div>
+          <div class="comp-en-say">"This is the gas valve. It opens on a 24V signal from the control board and allows gas to flow to the burners. It also has an internal pressure regulator."</div>
+        </div>
+
+        <div class="comp-item">
+          <div class="comp-name">HPS — Housing Pressure Switch</div>
+          <div class="comp-cn">💨 壳体压力开关（主压力开关）</div>
+          <div class="comp-function">验证引风机已运转并产生足够负压。正常运行时闭合（N.O.接点）。若堵塞或引风机故障则保持断开，锁定点火。</div>
+          <div class="comp-en-say">"This is the housing pressure switch, or HPS. It verifies the inducer motor is creating sufficient negative pressure before allowing ignition to proceed."</div>
+        </div>
+
+        <div class="comp-item">
+          <div class="comp-name">LPS — Low Gas Pressure Switch</div>
+          <div class="comp-cn">🔽 低气压保护开关（丙烷专用）</div>
+          <div class="comp-function">丙烷系统专用，气压过低时断开，防止不完全燃烧。天然气系统通常无此开关。</div>
+          <div class="comp-en-say">"This is the Low Gas Pressure Switch, used primarily on propane systems. It opens if inlet gas pressure drops too low, preventing incomplete combustion."</div>
+        </div>
+
+        <div class="comp-item">
+          <div class="comp-name">Flame Sensor / FSE</div>
+          <div class="comp-cn">🔦 火焰传感器</div>
+          <div class="comp-function">通过火焰整流原理，检测燃烧器是否点燃。若点火后2秒内无火焰信号，控制板关闭气阀，重试3次后锁定。</div>
+          <div class="comp-en-say">"This is the flame sensing electrode. It uses flame rectification to confirm burner ignition. If no signal within 2 seconds, the gas valve closes and re-tries up to 3 times."</div>
+        </div>
+
+        <div class="comp-item">
+          <div class="comp-name">Control Board (PCB)</div>
+          <div class="comp-cn">🖥️ 控制板 / 电路板</div>
+          <div class="comp-function">炉子的"大脑"，控制整个启动顺序、故障诊断和LED故障码显示。含3A保险丝。</div>
+          <div class="comp-en-say">"This is the furnace control board — the brain of the system. It controls the entire sequence of operation, displays diagnostic LED codes, and contains the 3-amp fuse."</div>
+        </div>
+
+        <div class="comp-item">
+          <div class="comp-name">Limit Switch (LS1, LS2)</div>
+          <div class="comp-cn">🌡️ 过热限位开关</div>
+          <div class="comp-function">热交换器温度超过设定值（强制送风炉约200°F）时自动断开，切断气阀，保护炉体不过热。手动复位款需按键复位。</div>
+          <div class="comp-en-say">"This is the high limit switch. It opens on over-temperature — set at approximately 200°F for a forced-warm-air furnace — cutting the gas valve to prevent overheating."</div>
+        </div>
+
+        <div class="comp-item">
+          <div class="comp-name">Inducer Motor (IDM)</div>
+          <div class="comp-cn">💨 引风机（诱导送风机）</div>
+          <div class="comp-function">首先启动，强制排出燃烧废气，同时产生负压使压力开关闭合。高效冷凝炉独有，取代传统烟囱浮力通风。</div>
+          <div class="comp-en-say">"This is the inducer draft motor. It starts first in the sequence, forces combustion gases out the vent, and creates the negative pressure that closes the pressure switch."</div>
+        </div>
+
+        <div class="comp-item">
+          <div class="comp-name">Transformer (TRAN)</div>
+          <div class="comp-cn">⚡ 变压器</div>
+          <div class="comp-function">将115V市电降压为24V，供控制回路使用。Primary（初级）115V，Secondary（次级）24V。</div>
+          <div class="comp-en-say">"This is the transformer. It steps down 115V line voltage to 24V for the control circuit. Primary side is 115V, secondary side is 24V."</div>
+        </div>
+
+        <div class="comp-item">
+          <div class="comp-name">Condensate Trap</div>
+          <div class="comp-cn">💧 冷凝水收集器</div>
+          <div class="comp-function">高效冷凝炉专有。二次热交换产生的酸性冷凝水（pH约3-4）收集在此，通过CPVC管排出。必须用水预灌（prime）。</div>
+          <div class="comp-en-say">"This is the condensate trap — unique to condensing furnaces. It collects acidic condensate from the secondary heat exchanger and must be primed with water before startup."</div>
+        </div>
+
+        <div class="comp-item">
+          <div class="comp-name">Blower Motor (BLWM)</div>
+          <div class="comp-cn">🌀 循环风机</div>
+          <div class="comp-function">热交换器加热后（约25秒），送热风进入管道。满足温控后继续运行（blower-off delay：120秒默认）带走余热。</div>
+          <div class="comp-en-say">"This is the circulating blower motor. It starts approximately 25 seconds after ignition to distribute heated air. After the thermostat is satisfied, it continues for the blower-off delay period — 120 seconds by default."</div>
+        </div>
+
+        <div class="comp-item">
+          <div class="comp-name">Flame Rollout Switch</div>
+          <div class="comp-cn">🔥 火焰外溢开关（手动复位）</div>
+          <div class="comp-function">位于燃烧器组件上，当火焰异常外溢时触发，切断气阀。必须手动按键复位。触发原因：通风受阻、气压过高等。</div>
+          <div class="comp-en-say">"This is the manual-reset flame rollout switch, located on the burner assembly. It trips if flame rolls out of the heat exchanger — indicating blocked venting or excessive gas pressure."</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- SEQUENCE OF OPERATION -->
+  <div class="section open">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-amber">📋</div>
+      <div>
+        <div class="section-title">操作顺序 / Sequence of Operation</div>
+        <div class="section-sub">必须按顺序说出来 — Carrier PG95ESA</div>
+      </div>
+      <div class="section-toggle">▶</div>
+    </div>
+    <div class="section-body">
+      <div class="warn-box info">
+        💡 口诀：<strong>T-I-P-H-G-F-B</strong> = Thermostat → Inducer → Pressure switch → HSI → Gas valve → Flame prove → Blower
+      </div>
+
+      <div class="sequence">
+
+        <div class="seq-item">
+          <div class="seq-line">
+            <div class="seq-num">1</div>
+            <div class="seq-connector"></div>
+          </div>
+          <div class="seq-content">
+            <div class="seq-title">恒温器呼叫供热 (Thermostat calls for heat)</div>
+            <div class="seq-en">"The wall thermostat closes the R-to-W circuit, sending a 24V call for heat to the furnace control board. The board performs a self-check, verifying the pressure switch contacts LPS and HPS are open."</div>
+            <div class="seq-note">W端到控制板，24V信号。R端是24V电源热端，W是供热请求。</div>
+          </div>
+        </div>
+
+        <div class="seq-item">
+          <div class="seq-line">
+            <div class="seq-num">2</div>
+            <div class="seq-connector"></div>
+          </div>
+          <div class="seq-content">
+            <div class="seq-title">引风机启动 — Inducer Pre-Purge (15秒)</div>
+            <div class="seq-en">"The control board energizes the inducer draft motor. As it comes up to speed, the collector box pressure switch LPS closes, beginning a 15-second pre-purge period."</div>
+            <div class="seq-note">引风机先启动，清除炉腔内残余气体，产生负压使压力开关闭合。</div>
+          </div>
+        </div>
+
+        <div class="seq-item">
+          <div class="seq-line">
+            <div class="seq-num">3</div>
+            <div class="seq-connector"></div>
+          </div>
+          <div class="seq-content">
+            <div class="seq-title">HSI预热 — Igniter Warm-Up (17秒)</div>
+            <div class="seq-en">"After the 15-second pre-purge, the housing pressure switch HPS closes, confirming adequate draft. The Hot Surface Igniter is then energized for a 17-second warm-up period."</div>
+            <div class="seq-note">HPS闭合后HSI才通电。HSI需要17秒加热至点火温度。</div>
+          </div>
+        </div>
+
+        <div class="seq-item">
+          <div class="seq-line">
+            <div class="seq-num">4</div>
+            <div class="seq-connector"></div>
+          </div>
+          <div class="seq-content">
+            <div class="seq-title">气阀开启 — Gas Valve Opens</div>
+            <div class="seq-en">"When the igniter warm-up is complete, the control board closes the gas valve relay GVR, energizing the gas valve GV. Gas flows to the burners and is ignited by the HSI."</div>
+            <div class="seq-note">控制板给气阀继电器通电，24V加到气阀线圈，气阀开启。</div>
+          </div>
+        </div>
+
+        <div class="seq-item">
+          <div class="seq-line">
+            <div class="seq-num">5</div>
+            <div class="seq-connector"></div>
+          </div>
+          <div class="seq-content">
+            <div class="seq-title">火焰确认 — Flame Proving (2秒)</div>
+            <div class="seq-en">"The flame sensor detects the burner flame by flame rectification. The control board begins the blower-on delay period of 25 seconds. If flame is not proven within 2 seconds, the gas valve closes and the sequence retries — up to 3 times before Ignition Lockout Code 14."</div>
+            <div class="seq-note">2秒内没有火焰信号 = 气阀关闭，重试，3次后锁定（故障码14）。</div>
+          </div>
+        </div>
+
+        <div class="seq-item">
+          <div class="seq-line">
+            <div class="seq-num">6</div>
+            <div class="seq-connector"></div>
+          </div>
+          <div class="seq-content">
+            <div class="seq-title">循环风机启动 — Blower-On Delay (25秒)</div>
+            <div class="seq-en">"25 seconds after gas valve opens and flame is proven, the blower motor starts on HEAT speed to distribute warm air throughout the duct system."</div>
+            <div class="seq-note">25秒延迟让热交换器先升温，避免冷风吹出。</div>
+          </div>
+        </div>
+
+        <div class="seq-item">
+          <div class="seq-line">
+            <div class="seq-num">7</div>
+            <div class="seq-connector"></div>
+          </div>
+          <div class="seq-content">
+            <div class="seq-title">满足温控 / Blower-Off Delay</div>
+            <div class="seq-en">"When the thermostat is satisfied, the R-to-W circuit opens. The gas valve de-energizes and closes. The inducer runs for a 15-second post-purge. The blower motor continues for the blower-off delay — 120 seconds by default — then shuts down."</div>
+            <div class="seq-note">引风机后冲15秒清余气，风机继续120秒（默认）带走余热。</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- MULTIMETER -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purple">📏</div>
+      <div>
+        <div class="section-title">万用表使用规范 / Multimeter Protocol</div>
+        <div class="section-sub">考官评分重点 — 测前先测表</div>
+      </div>
+      <div class="section-toggle">▶</div>
+    </div>
+    <div class="section-body">
+      <table class="volt-table">
+        <tr>
+          <th>测量点</th><th>档位</th><th>预期读数</th><th>状态说明</th>
+        </tr>
+        <tr>
+          <td>Transformer Primary</td>
+          <td>VAC &gt;120V</td>
+          <td>115V</td>
+          <td>有市电供入</td>
+        </tr>
+        <tr>
+          <td>Transformer Secondary</td>
+          <td>VAC &gt;30V</td>
+          <td>24V</td>
+          <td>控制回路正常</td>
+        </tr>
+        <tr>
+          <td>Gas Valve Coil</td>
+          <td>VAC &gt;30V</td>
+          <td>24V（加热时）</td>
+          <td>0V=未呼叫/故障</td>
+        </tr>
+        <tr>
+          <td>Thermostat W terminal</td>
+          <td>VAC &gt;30V</td>
+          <td>24V（呼叫供热时）</td>
+          <td>0V=线断或恒温器问题</td>
+        </tr>
+        <tr>
+          <td>Pressure Switch (断开)</td>
+          <td>VAC &gt;30V</td>
+          <td>24V（断路时）</td>
+          <td>0V=闭合=正常运行</td>
+        </tr>
+        <tr>
+          <td>Limit Switch (正常)</td>
+          <td>VAC &gt;30V</td>
+          <td>0V（闭合正常）</td>
+          <td>24V=断路=过热/故障</td>
+        </tr>
+        <tr>
+          <td>HSI (电阻)</td>
+          <td>Ω</td>
+          <td>40–70Ω</td>
+          <td>断路=坏，需断电测</td>
+        </tr>
+        <tr>
+          <td>Flame Sensor (微安)</td>
+          <td>DC μA</td>
+          <td>4.0–8.0 μA</td>
+          <td>&lt;0.5μA=传感器脏/坏</td>
+        </tr>
+      </table>
+
+      <div class="speak-box" style="margin-top:12px">
+        <div class="speak-label">📢 测量前必说</div>
+        <div class="speak-text">"Before taking any measurements, I'm testing my meter to confirm it's functioning. I'll select the appropriate range, and I'll verify my leads are in the correct terminals for voltage measurement."</div>
+      </div>
+
+      <div class="warn-box danger" style="margin-top:8px">
+        ⚠️ 测电阻/通断时必须先断电（de-energize circuit）！测电阻时绝不能通电。
+      </div>
+    </div>
+  </div>
+
+  <!-- TROUBLESHOOTING -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-red">🔍</div>
+      <div>
+        <div class="section-title">故障排查 / Troubleshooting</div>
+        <div class="section-sub">考官会预设故障，参照电路图(Fig.71)逐步测电压</div>
+      </div>
+      <div class="section-toggle">▶</div>
+    </div>
+    <div class="section-body">
+
+      <div class="speak-box">
+        <div class="speak-label">📢 排查开场白</div>
+        <div class="speak-text">"I'll reference the schematic diagram to understand the normal sequence of operation, then trace the circuit from the point of failure using voltage measurements, working from the power source toward the load."</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="fault-grid">
+
+        <div class="fault-item">
+          <div class="fault-header" style="background:rgba(239,68,68,0.1);color:#fca5a5">
+            🔴 Open High Limit (高限位断路) <span class="code-badge">LED 33</span>
+          </div>
+          <div class="fault-body">
+            <div><span class="fault-label">现象：</span><span class="fault-value">炉子不启动或运行中途停止，风机持续转4分钟</span></div>
+            <div><span class="fault-label">测量：</span><span class="fault-value">测limit switch两端电压 → 正常：0V（闭合）；故障：24V（断路）</span></div>
+            <div><span class="fault-label">原因：</span><span class="fault-value">过热（气流受阻/过滤网脏/风机慢），或limit开关本身坏</span></div>
+            <div class="seq-en" style="margin-top:6px">"I'm measuring across the high limit switch. I'm reading 24V, which tells me the switch is open — the limit has tripped due to an over-temperature condition or a failed switch."</div>
+          </div>
+        </div>
+
+        <div class="fault-item">
+          <div class="fault-header" style="background:rgba(239,68,68,0.1);color:#fca5a5">
+            🔴 HSI Failure (点火器故障) <span class="code-badge">LED 14/34</span>
+          </div>
+          <div class="fault-body">
+            <div><span class="fault-label">现象：</span><span class="fault-value">引风机运转，但炉子不点火，3次重试后锁定</span></div>
+            <div><span class="fault-label">测量：</span><span class="fault-value">通电测HSI：应有115V；断电测电阻：正常40-70Ω，断路=∞</span></div>
+            <div class="seq-en" style="margin-top:6px">"With power on, I'm measuring voltage at the HSI connector — I see 115V, so the board is commanding the igniter. Now I'll de-energize and check resistance — it reads open circuit, so the igniter itself has failed."</div>
+          </div>
+        </div>
+
+        <div class="fault-item">
+          <div class="fault-header" style="background:rgba(239,68,68,0.1);color:#fca5a5">
+            🔴 Pressure Switch Failure <span class="code-badge">LED 31</span>
+          </div>
+          <div class="fault-body">
+            <div><span class="fault-label">现象：</span><span class="fault-value">引风机转，但控制板序列不继续，HSI不通电</span></div>
+            <div><span class="fault-label">测量：</span><span class="fault-value">引风机运转时测PS两端：正常应为0V（闭合）；故障：24V（断路）</span></div>
+            <div><span class="fault-label">检查：</span><span class="fault-value">压力管堵塞/扭曲，冷凝水堵在管内，PS开关本身坏</span></div>
+          </div>
+        </div>
+
+        <div class="fault-item">
+          <div class="fault-header" style="background:rgba(239,68,68,0.1);color:#fca5a5">
+            🔴 Open Neutral Wire (中性线断路)
+          </div>
+          <div class="fault-body">
+            <div><span class="fault-label">现象：</span><span class="fault-value">炉子完全无响应，LED不亮</span></div>
+            <div><span class="fault-label">测量：</span><span class="fault-value">测transformer次级（SEC-1/SEC-2）：应有24V；测L1/L2：应有115V</span></div>
+            <div><span class="fault-label">若L2无电：</span><span class="fault-value">查断路器，查中性线连接</span></div>
+          </div>
+        </div>
+
+        <div class="fault-item">
+          <div class="fault-header" style="background:rgba(239,68,68,0.1);color:#fca5a5">
+            🔴 Broken "W" Wire (W线断路)
+          </div>
+          <div class="fault-body">
+            <div><span class="fault-label">现象：</span><span class="fault-value">恒温器呼叫但炉子无响应，24V系统正常</span></div>
+            <div><span class="fault-label">测量：</span><span class="fault-value">在控制板W端测24V对COM：应有24V（呼叫时）；若0V = W线断或恒温器问题</span></div>
+          </div>
+        </div>
+
+        <div class="fault-item">
+          <div class="fault-header" style="background:rgba(239,68,68,0.1);color:#fca5a5">
+            🔴 Inducer Motor Failure (引风机故障) <span class="code-badge">LED 31</span>
+          </div>
+          <div class="fault-body">
+            <div><span class="fault-label">现象：</span><span class="fault-value">无引风机声音，PS不闭合</span></div>
+            <div><span class="fault-label">测量：</span><span class="fault-value">测IDM电机端：有115V但不转 = 电机坏；无115V = 控制板问题</span></div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="divider"></div>
+      <h3>LED 故障码速查 (Fig. 64)</h3>
+      <table class="volt-table">
+        <tr><th>代码</th><th>含义</th><th>自动复位</th></tr>
+        <tr><td class="code-badge">13</td><td>Limit Circuit Lockout（限位回路锁定）</td><td>3小时后</td></tr>
+        <tr><td class="code-badge">14</td><td>Ignition Lockout（点火锁定，4次失败）</td><td>3小时后</td></tr>
+        <tr><td class="code-badge">21</td><td>Gas Heating Lockout（气体加热锁定）</td><td>❌手动</td></tr>
+        <tr><td class="code-badge">31</td><td>HPS 压力开关未闭合/重新打开</td><td>自动</td></tr>
+        <tr><td class="code-badge">33</td><td>Limit/Rollout 开关断路</td><td>自动</td></tr>
+        <tr><td class="code-badge">34</td><td>Ignition Proving Failure（点火证实失败）</td><td>自动</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- SAFE WORK CHECKLIST -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-green">✅</div>
+      <div>
+        <div class="section-title">安全操作清单 / Safe Work Practices</div>
+        <div class="section-sub">Station 10 — /20分，全程都在评分</div>
+      </div>
+      <div class="section-toggle">▶</div>
+    </div>
+    <div class="section-body">
+      <div class="checklist">
+        <div class="check-item"><input type="checkbox"><label>携带B149 Gas Code、安全眼镜、工作靴</label></div>
+        <div class="check-item"><input type="checkbox"><label>使用适当参考资料（说明书、Gas Code）</label></div>
+        <div class="check-item"><input type="checkbox"><label>在规定时间内完成各站</label></div>
+        <div class="check-item"><input type="checkbox"><label>始终遵循安全操作规范</label></div>
+        <div class="check-item"><input type="checkbox"><label>所有工作符合Gas Code要求</label></div>
+        <div class="check-item"><input type="checkbox"><label>所有电气连接在断电状态下进行</label></div>
+        <div class="check-item"><input type="checkbox"><label>使用前测试万用表</label></div>
+        <div class="check-item"><input type="checkbox"><label>欧姆表在断电状态下使用</label></div>
+        <div class="check-item"><input type="checkbox"><label>选择正确档位和量程</label></div>
+        <div class="check-item"><input type="checkbox"><label>正确读取仪表数值</label></div>
+        <div class="check-item"><input type="checkbox"><label>供气侧连接压力表时关闭气线；歧管侧需关闭气阀或置于Pilot位</label></div>
+        <div class="check-item"><input type="checkbox"><label>正确回答口头提问</label></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== STATION 2 ===== -->
+<div class="content" id="s2">
+  <div class="score-badge">📊 /40分 &nbsp;|&nbsp; S2 — ULC S636 Plastic Venting</div>
+
+  <div class="section open">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-blue">📌</div>
+      <div><div class="section-title">核心知识 / Key Concepts</div></div>
+      <div class="section-toggle">▶</div>
+    </div>
+    <div class="section-body">
+      <div class="warn-box amber">⚡ 考站要求：正确安装ULC S636排气管道到热水器，涉及排气坡度、等效长度、管道材料和solderless接头。</div>
+
+      <h3>什么是 ULC S636？</h3>
+      <p>ULC S636是加拿大对Category IV（正压/冷凝型）排气系统的认证标准。在加拿大，所有高效冷凝炉和热水器的PVC/ABS通风管道必须符合此标准。管道、胶水、底漆必须来自同一厂商。</p>
+
+      <div class="speak-box">
+        <div class="speak-label">📢 解释S636</div>
+        <div class="speak-text">"ULC S636 is the Canadian certification standard for Category IV venting systems — that is, positive-pressure, condensing appliances. The pipe, fittings, primer, and cement must all be from the same manufacturer and ULC S636 listed. In Canada, CAN/CSA B149 requires this for condensing appliances."</div>
+      </div>
+
+      <div class="kv-grid">
+        <div class="kv-item"><span class="kv-value">¼"</span><span class="kv-label">每英尺坡度 slope/ft (回向炉子)</span></div>
+        <div class="kv-item"><span class="kv-value">S636</span><span class="kv-label">加拿大认证标准</span></div>
+        <div class="kv-item"><span class="kv-value">5ft</span><span class="kv-label">90°弯头等效长度</span></div>
+        <div class="kv-item"><span class="kv-value">2.5ft</span><span class="kv-label">45°弯头等效长度</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-amber">📐</div>
+      <div><div class="section-title">等效长度计算 / Equivalent Vent Length</div></div>
+      <div class="section-toggle">▶</div>
+    </div>
+    <div class="section-body">
+      <h3>TEVL = Total Equivalent Vent Length</h3>
+      <div class="steps">
+        <div class="step"><div class="step-n">1</div>量出每根管道的实际长度（从炉子到终端）</div>
+        <div class="step"><div class="step-n">2</div>统计弯头数量和类型（90°还是45°，long/medium/mitered）</div>
+        <div class="step"><div class="step-n">3</div>每个弯头乘以其等效长度（查Table 14）：90° Long Radius = 3ft，Medium = 5ft，Mitered = 8ft</div>
+        <div class="step"><div class="step-n">4</div>TEVL = 管道总长 + 所有弯头等效长度</div>
+        <div class="step"><div class="step-n">5</div>与MEVL（Table 13查最大等效长度）对比：TEVL &lt; MEVL = ✅ 允许</div>
+      </div>
+
+      <div class="speak-box">
+        <div class="speak-label">📢 解释等效长度</div>
+        <div class="speak-text">"The equivalent length accounts for the resistance created by elbows and fittings. A 90-degree long-radius elbow, for example, adds 3 feet of equivalent resistance to the vent system. We add these to the actual pipe length to get the Total Equivalent Vent Length, and verify it does not exceed the Maximum Equivalent Vent Length for this appliance and pipe size."</div>
+      </div>
+
+      <div class="speak-box">
+        <div class="speak-label">📢 解释超标后果</div>
+        <div class="speak-text">"If we exceed the manufacturer's maximum allowable vent length, or fail to account for equivalent lengths of fittings, the system will not have adequate draft — leading to incomplete combustion, nuisance lockouts, condensate freeze-up at the termination, and potential carbon monoxide spillage into the structure."</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-green">🔧</div>
+      <div><div class="section-title">安装操作步骤 / Installation Procedure</div></div>
+      <div class="section-toggle">▶</div>
+    </div>
+    <div class="section-body">
+      <div class="steps">
+        <div class="step"><div class="step-n">1</div>参照说明书确认此炉型允许的最大等效长度（MEVL，Table 13）</div>
+        <div class="step"><div class="step-n">2</div>量管、切管、去毛边（deburr）、倒角（chamfer）</div>
+        <div class="step"><div class="step-n">3</div>干插试合（dry fit），在管端标记插入深度</div>
+        <div class="step"><div class="step-n">4</div>涂底漆（primer）至管端和插口内部，待干</div>
+        <div class="step"><div class="step-n">5</div>涂胶水（cement）— 管端和插口内部均匀涂抹</div>
+        <div class="step"><div class="step-n">6</div>插入后旋转¼圈（quarter turn），保持30秒</div>
+        <div class="step"><div class="step-n">7</div>水平排气管向炉子方向坡下 ≥ ¼"每英尺（min slope back）</div>
+        <div class="step"><div class="step-n">8</div>按Table 16用管夹支撑（PVC 3ft间距）</div>
+        <div class="step"><div class="step-n">9</div>用水平仪确认坡度</div>
+      </div>
+
+      <div class="warn-box danger" style="margin-top:10px">
+        ⚠️ 加拿大：底漆和胶水必须与管道同一厂商，均须ULC S636认证。不能使用不同厂商的材料。
+      </div>
+
+      <div class="speak-box">
+        <div class="speak-label">📢 演示排气坡度</div>
+        <div class="speak-text">"I'm using a level to verify the slope of this horizontal vent section. Per the manufacturer's instructions, horizontal vent pipe must slope downward toward the furnace at a minimum of one-quarter inch per linear foot. This ensures condensate drains back to the furnace rather than pooling in the pipe, which could block the vent or cause freeze-up."</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purple">🔌</div>
+      <div><div class="section-title">Solderless Electrical Connectors</div></div>
+      <div class="section-toggle">▶</div>
+    </div>
+    <div class="section-body">
+      <div class="steps">
+        <div class="step"><div class="step-n">1</div>选择正确线规（gauge）— 确认AWG规格</div>
+        <div class="step"><div class="step-n">2</div>剥线长度正确，不损伤铜芯（no scoring or weakening）</div>
+        <div class="step"><div class="step-n">3</div>Marrette（wire nut）：顺时针旋紧，拉一下测试（tug test）</div>
+        <div class="step"><div class="step-n">4</div>Spade terminal：压接工具夹紧，拉测试</div>
+        <div class="step"><div class="step-n">5</div>螺丝接线：线绕螺丝¾圈（顺时针），拧紧</div>
+      </div>
+
+      <div class="speak-box">
+        <div class="speak-label">📢 演示时说</div>
+        <div class="speak-text">"I'm stripping the wire to the correct length — approximately three-quarters of an inch — being careful not to score or nick the conductor. After installing the connector, I'll perform a tug test to verify a secure mechanical connection."</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== STATION 3 ===== -->
+<div class="content" id="s3">
+  <div class="score-badge">📊 /40分 &nbsp;|&nbsp; S3 — Natural Draft Furnace Operation</div>
+
+  <div class="section open">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-blue">🏠</div>
+      <div><div class="section-title">自然通风炉 vs 高效冷凝炉</div></div>
+      <div class="section-toggle">▶</div>
+    </div>
+    <div class="section-body">
+      <table class="volt-table">
+        <tr><th>特征</th><th>自然通风炉 (Natural Draft)</th><th>高效炉 (Condensing)</th></tr>
+        <tr><td>效率</td><td>~60-80% AFUE</td><td>~90-98% AFUE</td></tr>
+        <tr><td>通风方式</td><td>热气上升自然浮力</td><td>引风机强制排风</td></tr>
+        <tr><td>排气温度</td><td>高（约400°F）</td><td>低（约120°F），有冷凝水</td></tr>
+        <tr><td>烟囱类型</td><td>B型金属烟囱</td><td>PVC/ABS S636管道</td></tr>
+        <tr><td>调风板</td><td>有（Draft Diverter）</td><td>无</td></tr>
+        <tr><td>热交换器</td><td>一级（primary only）</td><td>两级（primary + secondary）</td></tr>
+        <tr><td>点火方式</td><td>常明火Pilot 或 HSI</td><td>通常HSI</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-amber">🔥</div>
+      <div><div class="section-title">自然通风炉操作顺序 / Sequence</div></div>
+      <div class="section-toggle">▶</div>
+    </div>
+    <div class="section-body">
+      <div class="sequence">
+        <div class="seq-item">
+          <div class="seq-line"><div class="seq-num">1</div><div class="seq-connector"></div></div>
+          <div class="seq-content">
+            <div class="seq-title">恒温器呼叫 Thermostat Calls for Heat</div>
+            <div class="seq-en">"The thermostat closes the R-to-W circuit, applying 24V to the gas valve and other controls."</div>
+          </div>
+        </div>
+        <div class="seq-item">
+          <div class="seq-line"><div class="seq-num">2</div><div class="seq-connector"></div></div>
+          <div class="seq-content">
+            <div class="seq-title">气阀开启 / Pilot点燃主燃烧器</div>
+            <div class="seq-en">"The gas valve opens. On standing pilot systems, the pilot ignites the main burners. On HSI systems, the igniter heats and opens the valve."</div>
+            <div class="seq-note">无引风机！自然浮力通风。</div>
+          </div>
+        </div>
+        <div class="seq-item">
+          <div class="seq-line"><div class="seq-num">3</div><div class="seq-connector"></div></div>
+          <div class="seq-content">
+            <div class="seq-title">风机/限位开关感温启动送风机</div>
+            <div class="seq-en">"As the heat exchanger warms, the fan switch within the fan/limit control closes — typically around 130°F — starting the blower motor to distribute warm air."</div>
+            <div class="seq-note">Fan switch感温控制风机，非定时。Limit部分（200°F）保护过热。</div>
+          </div>
+        </div>
+        <div class="seq-item">
+          <div class="seq-line"><div class="seq-num">4</div><div class="seq-connector"></div></div>
+          <div class="seq-content">
+            <div class="seq-title">恒温器满足，气阀关闭</div>
+            <div class="seq-en">"The thermostat is satisfied. The gas valve closes, burners shut off. The blower continues until the heat exchanger cools enough for the fan switch to open."</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-red">🌡️</div>
+      <div><div class="section-title">调风板烟道测试 / Draft Diverter & Smoke Test</div></div>
+      <div class="section-toggle">▶</div>
+    </div>
+    <div class="section-body">
+      <div class="speak-box">
+        <div class="speak-label">📢 解释调风板功能</div>
+        <div class="speak-text">"The draft diverter serves three functions: it relieves sudden down-drafts that could extinguish the pilot, it dilutes flue gases with room air to reduce chimney corrosion, and it maintains a constant draft at the heat exchanger regardless of variations in chimney draft."</div>
+      </div>
+
+      <h3>烟雾/溢出测试（Spillage Test）</h3>
+      <div class="steps">
+        <div class="step"><div class="step-n">1</div>炉子运行5分钟后进行</div>
+        <div class="step"><div class="step-n">2</div>在调风板开口处用蜡烛/火柴检查</div>
+        <div class="step"><div class="step-n">3</div>正常：烟气/烟进入调风板（上升通风正常）</div>
+        <div class="step"><div class="step-n">4</div>异常：烟气/烟从调风板吹出 = 溢出（spillage） = 通风受阻或建筑负压</div>
+      </div>
+
+      <div class="warn-box danger">
+        ⚠️ 检测到溢出立即停炉！溢出意味着CO进入室内，危及生命。
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purple">📏</div>
+      <div><div class="section-title">电压读数 / Voltage Readings</div></div>
+      <div class="section-toggle">▶</div>
+    </div>
+    <div class="section-body">
+      <table class="volt-table">
+        <tr><th>测量点</th><th>正常读数</th><th>说明</th></tr>
+        <tr><td>Transformer Primary</td><td>115V AC</td><td>市电供入</td></tr>
+        <tr><td>Transformer Secondary</td><td>24V AC</td><td>控制回路电压</td></tr>
+        <tr><td>Gas Valve Coil（加热时）</td><td>24V AC</td><td>气阀通电开启</td></tr>
+        <tr><td>Gas Valve（不加热）</td><td>0V</td><td>气阀断电关闭</td></tr>
+        <tr><td>Thermostat W（供热呼叫）</td><td>24V AC</td><td>W端有信号</td></tr>
+        <tr><td>Fan/Limit Switch（正常运行）</td><td>0V</td><td>开关闭合（无压降）</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ===== STATION 4 ===== -->
+<div class="content" id="s4">
+  <div class="score-badge">📊 /40分 &nbsp;|&nbsp; S4 — Standing Pilot / 30mV Thermocouple System</div>
+
+  <div class="section open">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-amber">🔥</div>
+      <div><div class="section-title">热电偶系统原理 / Thermocouple Basics</div></div>
+      <div class="section-toggle">▶</div>
+    </div>
+    <div class="section-body">
+      <div class="speak-box">
+        <div class="speak-label">📢 解释热电偶原理</div>
+        <div class="speak-text">"A thermocouple is a safety device that generates a small millivolt EMF — typically 25 to 30 millivolts — when its tip is heated by the pilot flame. This voltage holds open the gas valve safety electromagnet. If the pilot goes out, the thermocouple cools, the voltage drops, and the safety magnet releases, closing the gas valve to prevent unburned gas from escaping."</div>
+      </div>
+
+      <div class="kv-grid">
+        <div class="kv-item"><span class="kv-value">25–30mV</span><span class="kv-label">Open Circuit 开路电压</span></div>
+        <div class="kv-item"><span class="kv-value">≥10mV</span><span class="kv-label">Closed Circuit 闭路电压（最小）</span></div>
+        <div class="kv-item"><span class="kv-value">2–4mV</span><span class="kv-label">Drop-Out 断开压降</span></div>
+        <div class="kv-item"><span class="kv-value">90秒</span><span class="kv-label">Gas Code 断开时间要求</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-blue">🔬</div>
+      <div><div class="section-title">三项测试操作 / Three Tests</div></div>
+      <div class="section-toggle">▶</div>
+    </div>
+    <div class="section-body">
+
+      <h3>1. 开路测试 (Open Circuit Test)</h3>
+      <div class="steps">
+        <div class="step"><div class="step-n">准备</div>长明火正常燃烧，万用表设到DC mV档</div>
+        <div class="step"><div class="step-n">测量</div>直接在热电偶接头处测量（不接气阀）</div>
+        <div class="step"><div class="step-n">读数</div>正常：25–30mV；低于25mV = 热电偶弱或pilot火焰位置不对</div>
+      </div>
+      <div class="seq-en" style="margin:8px 0">"I'm measuring the open-circuit output of the thermocouple at the connection fitting. I'm reading 28mV, which is within the normal range of 25 to 30 millivolts. This indicates the thermocouple is generating adequate voltage."</div>
+
+      <div class="divider"></div>
+      <h3>2. 闭路测试 (Closed Circuit / Load Test)</h3>
+      <div class="steps">
+        <div class="step"><div class="step-n">准备</div>安装热电偶适配器，将热电偶接回气阀但通过适配器引出测量点</div>
+        <div class="step"><div class="step-n">测量</div>在适配器处测量（有负载/under load）</div>
+        <div class="step"><div class="step-n">读数</div>应为开路电压的约一半：≥10mV；若低于10mV = 热电偶弱或气阀电磁铁有问题</div>
+      </div>
+      <div class="seq-en" style="margin:8px 0">"For the closed-circuit test, I'm using the thermocouple adaptor to measure voltage under load — with the thermocouple connected to the gas valve. The reading should be at least half the open-circuit value, and not less than 10 millivolts."</div>
+
+      <div class="divider"></div>
+      <h3>3. 断开测试 (Drop-Out Test)</h3>
+      <div class="steps">
+        <div class="step"><div class="step-n">步骤</div>pilot正常燃烧时，手动熄灭pilot（如盖住或关闭pilot旋钮）</div>
+        <div class="step"><div class="step-n">计时</div>从pilot熄灭到气阀关闭（听到"咔哒"声）</div>
+        <div class="step"><div class="step-n">要求</div>Gas Code要求 ≤ 90秒内关闭；此时电压降至2–4mV</div>
+      </div>
+      <div class="seq-en" style="margin:8px 0">"For the drop-out test, I'll extinguish the pilot and time how long it takes for the gas valve to close. The Gas Code requires this to occur within 90 seconds. During drop-out, the voltage will fall to approximately 2 to 4 millivolts."</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-green">🔥</div>
+      <div><div class="section-title">Pilot火焰特征 / Pilot Flame Characteristics</div></div>
+      <div class="section-toggle">▶</div>
+    </div>
+    <div class="section-body">
+      <div class="speak-box">
+        <div class="speak-label">📢 描述理想pilot火焰</div>
+        <div class="speak-text">"A proper pilot flame should be steady and strong — blue in color if aerated, or luminous/yellow-orange if not aerated. The flame should envelope the thermocouple tip by approximately one-half to three-eighths of an inch. A weak, flickering, or lifting flame will produce inadequate thermocouple voltage."</div>
+      </div>
+
+      <table class="volt-table">
+        <tr><th>火焰状态</th><th>颜色</th><th>原因</th></tr>
+        <tr><td>理想（aerated）</td><td>蓝色，稳定</td><td>空气/气体比例正确</td></div></tr>
+        <tr><td>非通气式</td><td>黄橙色，发光</td><td>无引入空气，正常for某些设计</td></tr>
+        <tr><td>火焰飘动</td><td>任何颜色</td><td>气流/通风问题</td></tr>
+        <tr><td>火焰离起</td><td>蓝色但漂浮</td><td>气压过高</td></tr>
+      </table>
+
+      <h3>热电偶拆装步骤</h3>
+      <div class="steps">
+        <div class="step"><div class="step-n">拆</div>手拧（hand tight），然后用扳手旋松¼圈（+1/4 turn with wrench）</div>
+        <div class="step"><div class="step-n">装</div>手拧紧，再用扳手拧紧¼圈</div>
+        <div class="step"><div class="step-n">位置</div>热电偶端头置于pilot火焰中心，探入深度½"–⅜"</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purple">🔌</div>
+      <div><div class="section-title">线材识别 / Wire Types & Sizes</div></div>
+      <div class="section-toggle">▶</div>
+    </div>
+    <div class="section-body">
+      <table class="volt-table">
+        <tr><th>线材类型</th><th>应用</th><th>常见规格</th><th>保险丝要求</th></tr>
+        <tr><td>NMD 90</td><td>室内固定布线（干燥处）</td><td>14 AWG, 12 AWG</td><td>15A(14AWG), 20A(12AWG)</td></tr>
+        <tr><td>NMW BX</td><td>带铠甲保护布线</td><td>14 AWG, 12 AWG</td><td>同上</td></tr>
+        <tr><td>Thermostat Wire</td><td>低压控制（18 AWG典型）</td><td>18 AWG（≤100ft）16 AWG（&gt;100ft）</td><td>3A保险丝（在控制板上）</td></tr>
+      </table>
+
+      <div class="speak-box">
+        <div class="speak-label">📢 识别线材时说</div>
+        <div class="speak-text">"This is NMD 90 cable — non-metallic sheathed cable rated for 90°C insulation, for use in dry indoor locations. The gauge here is 14 AWG, which requires a 15-amp overcurrent protection device."</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== STATION 5 ===== -->
+<div class="content" id="s5">
+  <div class="score-badge">📊 /40分 &nbsp;|&nbsp; S5 — 24V Digital Thermostat & Fireplace Startup</div>
+
+  <div class="section open">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-blue">🌡️</div>
+      <div><div class="section-title">24V数字恒温器 / Digital Thermostat</div></div>
+      <div class="section-toggle">▶</div>
+    </div>
+    <div class="section-body">
+      <div class="speak-box">
+        <div class="speak-label">📢 解释anticipator（热预感器）</div>
+        <div class="speak-text">"The heat anticipator is a small resistor in the thermostat that generates heat slightly before the room reaches the set temperature, causing the thermostat to shut off the furnace a little early. This prevents the room from overshooting the set temperature due to residual heat in the heat exchanger. The anticipator is set to match the amperage draw of the gas valve and control circuit."</div>
+      </div>
+
+      <h3>Anticipator设置步骤</h3>
+      <div class="steps">
+        <div class="step"><div class="step-n">1</div>从墙上取下恒温器（不断24V，避免短路）</div>
+        <div class="step"><div class="step-n">2</div>在R和W端子间连接钩形电流表（hook-around ammeter，10圈）</div>
+        <div class="step"><div class="step-n">3</div>读取电流值（安培），除以10（因为绕了10圈）</div>
+        <div class="step"><div class="step-n">4</div>将anticipator拨到该电流值（通常0.1–0.9A）</div>
+      </div>
+      <div class="seq-en" style="margin:8px 0">"I'm measuring the amperage draw through the R-to-W thermostat circuit using a hook-around ammeter with 10 turns around the jaws. I read 5.0 amps on the meter, divided by 10 turns equals 0.5 amps — so I'll set the heat anticipator to 0.5."</div>
+
+      <div class="kv-grid">
+        <div class="kv-item"><span class="kv-value">R–W</span><span class="kv-label">供热回路接线</span></div>
+        <div class="kv-item"><span class="kv-value">18 AWG</span><span class="kv-label">恒温器线材规格</span></div>
+        <div class="kv-item"><span class="kv-value">24V</span><span class="kv-label">控制回路电压</span></div>
+        <div class="kv-item"><span class="kv-value">R-G-Y-C-W</span><span class="kv-label">5线恒温器端子</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-red">🔥</div>
+      <div><div class="section-title">壁炉安全启动 / Fireplace Safe Startup</div></div>
+      <div class="section-toggle">▶</div>
+    </div>
+    <div class="section-body">
+      <div class="warn-box danger">
+        ⚠️ 安全最关键！点火顺序错误可能导致爆燃。考官评分重点在于安全程序。
+      </div>
+
+      <div class="speak-box">
+        <div class="speak-label">📢 点火前说</div>
+        <div class="speak-text">"Before lighting the fireplace, I'll verify the area is clear of combustibles, the manual gas cock is closed, and the thermostat is calling for heat with the gas valve in the PILOT position."</div>
+      </div>
+
+      <div class="sequence">
+        <div class="seq-item">
+          <div class="seq-line"><div class="seq-num">1</div><div class="seq-connector"></div></div>
+          <div class="seq-content">
+            <div class="seq-title">气阀旋到 PILOT 位置</div>
+            <div class="seq-en">"Turn the gas control knob to the PILOT position."</div>
+          </div>
+        </div>
+        <div class="seq-item">
+          <div class="seq-line"><div class="seq-num">2</div><div class="seq-connector"></div></div>
+          <div class="seq-content">
+            <div class="seq-title">面朝壁炉背面，手在燃烧口外侧</div>
+            <div class="seq-en">"Face the back of the appliance. Keep hands outside the combustion opening at all times."</div>
+          </div>
+        </div>
+        <div class="seq-item">
+          <div class="seq-line"><div class="seq-num">3</div><div class="seq-connector"></div></div>
+          <div class="seq-content">
+            <div class="seq-title">先点燃打火机/点火棒，放到pilot旁</div>
+            <div class="seq-en">"Light the lighter or extension lighter FIRST, place it next to the pilot orifice."</div>
+            <div class="seq-note">先有火，后开气！不能先开气后找火。</div>
+          </div>
+        </div>
+        <div class="seq-item">
+          <div class="seq-line"><div class="seq-num">4</div><div class="seq-connector"></div></div>
+          <div class="seq-content">
+            <div class="seq-title">按下pilot旋钮，保持60秒</div>
+            <div class="seq-en">"Depress the pilot knob fully to introduce pilot gas. Hold the knob down for 60 seconds once the pilot lights to allow the thermocouple to heat sufficiently."</div>
+          </div>
+        </div>
+        <div class="seq-item">
+          <div class="seq-line"><div class="seq-num">5</div><div class="seq-connector"></div></div>
+          <div class="seq-content">
+            <div class="seq-title">松开旋钮，确认pilot维持</div>
+            <div class="seq-en">"Release the knob. If the pilot remains lit, the thermocouple is holding the safety valve open."</div>
+          </div>
+        </div>
+        <div class="seq-item">
+          <div class="seq-line"><div class="seq-num">6</div><div class="seq-connector"></div></div>
+          <div class="seq-content">
+            <div class="seq-title">气阀旋到 ON 位置</div>
+            <div class="seq-en">"Turn the gas cock to the ON position. With the thermostat calling for heat, observe the main burners for smooth light-off within a few seconds."</div>
+            <div class="seq-note">若主燃烧器未在几秒内顺滑点燃，立即将气阀旋回PILOT，调查原因。</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="speak-box" style="margin-top:10px">
+        <div class="speak-label">📢 若不点燃</div>
+        <div class="speak-text">"If the main burners do not light smoothly within a few seconds after the thermostat calls for heat, IMMEDIATELY turn the gas valve back to the PILOT position, then investigate the cause before attempting to start again."</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== STATION 6 ===== -->
+<div class="content" id="s6">
+  <div class="score-badge">📊 /40分 &nbsp;|&nbsp; S6 — Gas Pressure Regulators</div>
+
+  <div class="section open">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-amber">⚙️</div>
+      <div><div class="section-title">调节器五大组件 / 5 Regulator Components</div></div>
+      <div class="section-toggle">▶</div>
+    </div>
+    <div class="section-body">
+      <div class="comp-grid">
+        <div class="comp-item">
+          <div class="comp-name">Loading Element (Spring)</div>
+          <div class="comp-cn">🔩 负载弹簧</div>
+          <div class="comp-function">提供设定压力的参考力。顺时针旋紧弹簧 = 增加出口压力；逆时针 = 降低压力。</div>
+          <div class="comp-en-say">"The loading element is the spring. Turning the adjustment screw clockwise compresses the spring and increases outlet pressure."</div>
+        </div>
+        <div class="comp-item">
+          <div class="comp-name">Measuring Element (Diaphragm)</div>
+          <div class="comp-cn">🔵 测量膜片</div>
+          <div class="comp-function">感应出口压力变化，与弹簧力对比平衡，控制阀口开度。</div>
+          <div class="comp-en-say">"The diaphragm is the measuring element. It senses outlet pressure and moves in response to changes — balancing against the spring force."</div>
+        </div>
+        <div class="comp-item">
+          <div class="comp-name">Restricting Element (Orifice)</div>
+          <div class="comp-cn">🔸 节流元件（孔板/阀座）</div>
+          <div class="comp-function">实际限制气体流量的部件。膜片位移控制其开度大小，从而调节出口压力。</div>
+          <div class="comp-en-say">"The restricting element — a disk, valve seat, or plug — actually controls the gas flow. The diaphragm movement changes how much this orifice opens or closes."</div>
+        </div>
+        <div class="comp-item">
+          <div class="comp-name">Atmospheric Vent</div>
+          <div class="comp-cn">🌬️ 大气排气口</div>
+          <div class="comp-function">允许膜片下方的空间与大气相通，确保膜片能自由移动。若堵塞 = 调节器不能正常工作。</div>
+          <div class="comp-en-say">"The atmospheric vent allows the space below the diaphragm to communicate with atmosphere, enabling the diaphragm to move freely in response to pressure changes."</div>
+        </div>
+        <div class="comp-item">
+          <div class="comp-name">Block Vent Effect</div>
+          <div class="comp-cn">🚫 堵塞通气口效果</div>
+          <div class="comp-function">若大气排气口被堵（如积冰、昆虫筑巢），调节器无法正确调压，可能导致出口压力过高或过低。</div>
+          <div class="comp-en-say">"If the atmospheric vent is blocked — by ice, insects, or debris — the regulator cannot properly sense outlet pressure. This can cause outlet pressure to increase dramatically, potentially overfiring the appliance."</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-blue">📊</div>
+      <div><div class="section-title">压力设定值 / Pressure Settings</div></div>
+      <div class="section-toggle">▶</div>
+    </div>
+    <div class="section-body">
+      <table class="volt-table">
+        <tr><th>类型</th><th>供气压力（进口）</th><th>出口压力设定</th></tr>
+        <tr><td>Natural Gas Service Regulator</td><td>2–5 PSIG（讲师设置）</td><td>7" WC（天然气服务压力）</td></tr>
+        <tr><td>NG Appliance Regulator（气阀内）</td><td>7" WC</td><td>3.5" WC（歧管压力）</td></tr>
+        <tr><td>Propane First Stage</td><td>30–40 PSIG（高压）</td><td>10 PSIG</td></tr>
+        <tr><td>Propane Second Stage</td><td>10 PSIG</td><td>11" WC</td></tr>
+      </table>
+
+      <div class="warn-box amber" style="margin-top:10px">
+        ⚡ 丙烷第一级压力高，不能用WC压力表（manometer）测！需要用PSIG压力表（gauge）。
+      </div>
+
+      <div class="speak-box">
+        <div class="speak-label">📢 调节器调压操作</div>
+        <div class="speak-text">"To adjust the regulator, I'll first remove the regulator adjustment cover cap. Turning the adjusting screw clockwise increases outlet pressure; counterclockwise decreases it. I'll make small adjustments and monitor the manometer reading. The cover must be replaced before taking the final reading."</div>
+      </div>
+
+      <h3>压力表调零步骤</h3>
+      <div class="steps">
+        <div class="step"><div class="step-n">1</div>连接前确认气体已关闭</div>
+        <div class="step"><div class="step-n">2</div>连接压力表软管至测压点</div>
+        <div class="step"><div class="step-n">3</div>调零（zero）— 确保基准正确</div>
+        <div class="step"><div class="step-n">4</div>选择正确量程</div>
+        <div class="step"><div class="step-n">5</div>开气，读数</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-green">🔒</div>
+      <div><div class="section-title">泄漏限流孔 / Leak Limiting Device</div></div>
+      <div class="section-toggle">▶</div>
+    </div>
+    <div class="section-body">
+      <div class="speak-box">
+        <div class="speak-label">📢 解释泄漏限流装置</div>
+        <div class="speak-text">"A leak limiting orifice — or leak limiting device — is a small fixed orifice installed in the appliance regulator that limits the amount of gas that can escape if the diaphragm ruptures. It can only be used where the gas supply pressure does not exceed 2 psig for natural gas or 5 psig for propane, as allowed by the Gas Code."</div>
+      </div>
+
+      <table class="volt-table">
+        <tr><th>气体类型</th><th>允许最大泄漏量</th></tr>
+        <tr><td>Natural Gas（天然气）</td><td>根据Gas Code，泄漏限流装置泄漏量需符合CSA认证规格</td></tr>
+        <tr><td>Propane（丙烷）</td><td>同上，需符合CSA B149.1的规定</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ===== STATION 7 ===== -->
+<div class="content" id="s7">
+  <div class="score-badge">📊 /40分 &nbsp;|&nbsp; S7 — Purging, Leak Testing & Safe Startup</div>
+
+  <div class="section open">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-red">⚠️</div>
+      <div><div class="section-title">清管（Purging）规定</div></div>
+      <div class="section-toggle">▶</div>
+    </div>
+    <div class="section-body">
+      <div class="speak-box">
+        <div class="speak-label">📢 解释清管工具使用限制（Gas Code）</div>
+        <div class="speak-text">"Per CAN/CSA B149.1, a purging tool — or purging device — may only be used where the purge volume is less than the maximum allowed by code. The tool must not create an ignition source. Before beginning purging, I must verify there are no sources of ignition in the area, including open flames, electrical switches, and smoking materials."</div>
+      </div>
+
+      <div class="warn-box danger">
+        ⚠️ 清管前必须确认：附近无明火、无电气开关操作、无吸烟。天然气不能清进燃烧室（Never purge into a combustion chamber）！
+      </div>
+
+      <h3>清管步骤</h3>
+      <div class="steps">
+        <div class="step"><div class="step-n">1</div>确认无点火源（no ignition sources）</div>
+        <div class="step"><div class="step-n">2</div>正确使用清管工具（approved purging tool）将气线中的空气排出</div>
+        <div class="step"><div class="step-n">3</div>清管至管道中空气被完全替换（嗅到气味或检测仪确认）</div>
+        <div class="step"><div class="step-n">4</div>进行皂液漏气测试</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-amber">🧼</div>
+      <div><div class="section-title">漏气测试 / Leak Testing</div></div>
+      <div class="section-toggle">▶</div>
+    </div>
+    <div class="section-body">
+      <div class="speak-box">
+        <div class="speak-label">📢 皂液测试（Soap Test）</div>
+        <div class="speak-text">"I'm applying a commercially available leak detection solution to all gas connections and fittings. I'll observe each joint for bubble formation, which would indicate a gas leak. I'll never use an open flame to test for leaks."</div>
+      </div>
+
+      <h3>气表拨盘测试（Dial Test）</h3>
+      <div class="steps">
+        <div class="step"><div class="step-n">1</div>所有气用设备关闭（所有用气点OFF）</div>
+        <div class="step"><div class="step-n">2</div>找最小表盘（smallest dial）</div>
+        <div class="step"><div class="step-n">3</div>用胶带标记当前指针位置（tape mark）</div>
+        <div class="step"><div class="step-n">4</div>等待10分钟</div>
+        <div class="step"><div class="step-n">5</div>若指针移动 = 有泄漏！</div>
+      </div>
+
+      <div class="speak-box">
+        <div class="speak-label">📢 解释拨盘测试</div>
+        <div class="speak-text">"For the dial test, I've closed all gas appliances. I'm using the smallest test dial on the meter — the 2 or 5 cubic foot dial — and marking the pointer position with tape. After 10 minutes, if the needle has moved, this indicates gas is flowing, meaning there is a leak somewhere in the system."</div>
+      </div>
+
+      <div class="warn-box info">
+        💡 拨盘测试何时可以进行：Gas Code规定，只有在供气压力 ≤ ½ psig (14" WC) 时才能进行拨盘测试（不能在高压测试中进行）。
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-blue">🕐</div>
+      <div><div class="section-title">气表计时 / Clocking the Gas Meter</div></div>
+      <div class="section-toggle">▶</div>
+    </div>
+    <div class="section-body">
+      <div class="speak-box">
+        <div class="speak-label">📢 解释计时公式</div>
+        <div class="speak-text">"To clock the appliance input, I'll turn off all other gas appliances, run this furnace in heating mode, and time how long it takes for the test dial to complete one full revolution. I'll do this 3 times and take the average."</div>
+      </div>
+
+      <h3>计算公式</h3>
+      <div style="background:rgba(240,165,0,0.1);border:1px solid rgba(240,165,0,0.3);border-radius:8px;padding:12px;margin-bottom:10px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent);text-align:center">
+          Gas Rate (ft³/hr) = 3600 ÷ 秒数 × 表盘容积(ft³)
+        </div>
+        <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:4px">BTU/h = ft³/hr × 1,000 (天然气近似值) 或 × 35,310 (m³/hr转BTU/h)</div>
+      </div>
+
+      <div class="seq-en">"For example: if using the 2-cubic-foot test dial, and it takes 30 seconds for one revolution: Gas Rate = 3600 ÷ 30 × 2 = 240 cubic feet per hour. Multiplied by the heating value of natural gas — approximately 1,000 BTU per cubic foot — gives 240,000 BTU/h input. I'll compare this to the nameplate input rating."</div>
+
+      <div class="warn-box info" style="margin-top:10px">
+        💡 <strong>过开（Over-firing）</strong>：实际输入 &gt; 铭牌额定值 = 热交换器过热，缩短寿命<br>
+        <strong>欠开（Under-firing）</strong>：实际输入 &lt; 铭牌额定值 = 加热不足，冷凝水问题<br>
+        允许范围：额定值 ±2%
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-green">▶️</div>
+      <div><div class="section-title">高效炉安全启动 / HE Furnace Safe Startup</div></div>
+      <div class="section-toggle">▶</div>
+    </div>
+    <div class="section-body">
+      <div class="steps">
+        <div class="step"><div class="step-n">1</div>确认120V ON/OFF开关在OFF位置（开关向下）</div>
+        <div class="step"><div class="step-n">2</div>确认气阀旋到ON位置</div>
+        <div class="step"><div class="step-n">3</div>恒温器设定到呼叫供热温度</div>
+        <div class="step"><div class="step-n">4</div>打开120V开关（ON）</div>
+        <div class="step"><div class="step-n">5</div>观察炉子在几秒内顺滑点燃</div>
+        <div class="step"><div class="step-n">6</div>若未顺滑点燃：立即将ON/OFF开关关到OFF，然后气阀旋到OFF，调查原因</div>
+      </div>
+      <div class="speak-box">
+        <div class="speak-label">📢 启动前说</div>
+        <div class="speak-text">"Before safe startup, I'll confirm the 120-volt ON/OFF switch is in the open — or OFF — position, the gas valve is turned to the ON position, and the thermostat is calling for heat. I'll then close the switch and observe for smooth ignition."</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== STATION 8 ===== -->
+<div class="content" id="s8">
+  <div class="score-badge">📊 /40分 &nbsp;|&nbsp; S8 — Fan/Limit Switch & Gas Pressure Measurement</div>
+
+  <div class="section open">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-amber">🌡️</div>
+      <div><div class="section-title">Fan/Limit Control 调整</div></div>
+      <div class="section-toggle">▶</div>
+    </div>
+    <div class="section-body">
+      <table class="volt-table">
+        <tr><th>设定点</th><th>含义</th><th>典型值</th></tr>
+        <tr><td>Fan ON</td><td>送风机启动温度</td><td>~130°F (自然通风炉)</td></tr>
+        <tr><td>Fan OFF</td><td>送风机停止温度</td><td>~90-100°F</td></tr>
+        <tr><td>High Limit</td><td>过热保护切断温度</td><td>200°F (强制送风炉)</td></tr>
+      </table>
+
+      <div class="warn-box danger" style="margin-top:10px">
+        ⚠️ 绝对不要手动移动high limit温度表盘！测试高限位时，必须移除风机皮带或风机马达连线，让炉子自然升温到限位触发温度，观察表盘是否在达到200°F时炉子关闭。
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-red">🧪</div>
+      <div><div class="section-title">高限位测试步骤 / High Limit Test Procedure</div></div>
+      <div class="section-toggle">▶</div>
+    </div>
+    <div class="section-body">
+      <div class="speak-box">
+        <div class="speak-label">📢 解释高限位测试</div>
+        <div class="speak-text">"To test the high limit, I'll remove the blower motor wire or belt to prevent air circulation. This allows the heat exchanger to heat up naturally toward the limit setting. I'll watch the temperature dial move toward 200°F — the furnace must shut down on limit at that point. If it does not shut down, the limit switch has failed and must be replaced."</div>
+      </div>
+
+      <div class="steps">
+        <div class="step"><div class="step-n">1</div>运行炉子至少5分钟</div>
+        <div class="step"><div class="step-n">2</div>逐渐用厚纸板挡住回风口（或移除风机皮带/导线）</div>
+        <div class="step"><div class="step-n">3</div>观察温度表盘向高限位设定值移动</div>
+        <div class="step"><div class="step-n">4</div>炉子必须在达到200°F时关机（气阀关闭）</div>
+        <div class="step"><div class="step-n">5</div>若不关机 = 高限位失效，必须立即关炉并更换限位开关</div>
+        <div class="step"><div class="step-n">6</div>测试完毕：断电，恢复风机线路，重启炉子恢复正常运行</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-blue">📊</div>
+      <div><div class="section-title">气压测量 / Gas Pressure Measurement</div></div>
+      <div class="section-toggle">▶</div>
+    </div>
+    <div class="section-body">
+      <h3>供气压力（Supply Pressure）测量</h3>
+      <div class="steps">
+        <div class="step"><div class="step-n">1</div>关闭气源（gas supply OFF）</div>
+        <div class="step"><div class="step-n">2</div>取下gas valve进口处dirt pocket上的测压堵头（cap）</div>
+        <div class="step"><div class="step-n">3</div>连接水柱压力表（manometer）</div>
+        <div class="step"><div class="step-n">4</div>压力表调零</div>
+        <div class="step"><div class="step-n">5</div>开气源，炉子点火运行（最大加热状态）</div>
+        <div class="step"><div class="step-n">6</div>读取供气压力：天然气应在4.5–14" WC范围内</div>
+      </div>
+
+      <h3>歧管压力（Manifold Pressure）测量</h3>
+      <div class="steps">
+        <div class="step"><div class="step-n">1</div>将气阀置于Manual或Pilot位置（不完全关闭）</div>
+        <div class="step"><div class="step-n">2</div>用3/32"六角扳手松开气阀manifold pressure tap上的set screw（不超过一圈）</div>
+        <div class="step"><div class="step-n">3</div>或取下1/8" NPT堵头</div>
+        <div class="step"><div class="step-n">4</div>连接压力表软管</div>
+        <div class="step"><div class="step-n">5</div>气阀ON，炉子运行，读取歧管压力</div>
+        <div class="step"><div class="step-n">6</div>与铭牌对比：NG通常3.5" WC；丙烷通常10" WC</div>
+        <div class="step"><div class="step-n">7</div>调整：取下调节帽，顺时针增压，逆时针减压</div>
+        <div class="step"><div class="step-n">8</div>替换帽子后再读取最终数值！</div>
+      </div>
+
+      <div class="speak-box">
+        <div class="speak-label">📢 解释高低歧管压力的影响</div>
+        <div class="speak-text">"High manifold pressure results in over-firing — excessive BTU input — leading to heat exchanger overheating, shorter component life, and potential CO production from incomplete combustion. Low manifold pressure results in under-firing — insufficient heat output — and may cause delayed ignition or rough lighting."</div>
+      </div>
+
+      <div class="kv-grid">
+        <div class="kv-item"><span class="kv-value">3.5"</span><span class="kv-label">NG歧管压力 WC</span></div>
+        <div class="kv-item"><span class="kv-value">10"</span><span class="kv-label">LP歧管压力 WC</span></div>
+        <div class="kv-item"><span class="kv-value">4.5–14"</span><span class="kv-label">NG供气压力范围 WC</span></div>
+        <div class="kv-item"><span class="kv-value">11"</span><span class="kv-label">LP二级出口压力 WC</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== STATION 9 ===== -->
+<div class="content" id="s9">
+  <div class="score-badge">📊 /40分 &nbsp;|&nbsp; S9 — Gas Pipe Installation & Breaker Panel</div>
+
+  <div class="section open">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-blue">🔧</div>
+      <div><div class="section-title">钢管安装 / Schedule 40 Steel Pipe</div></div>
+      <div class="section-toggle">▶</div>
+    </div>
+    <div class="section-body">
+      <h3>工具识别</h3>
+      <div class="comp-grid">
+        <div class="comp-item">
+          <div class="comp-name">Hand Threader</div>
+          <div class="comp-cn">手动套丝器</div>
+          <div class="comp-function">用于小管径手动切螺纹（NPT螺纹）</div>
+        </div>
+        <div class="comp-item">
+          <div class="comp-name">Power Threader</div>
+          <div class="comp-cn">电动套丝机</div>
+          <div class="comp-function">效率更高，适合大量管道螺纹加工</div>
+        </div>
+        <div class="comp-item">
+          <div class="comp-name">Reamer</div>
+          <div class="comp-cn">铰刀/去毛刺器</div>
+          <div class="comp-function">切管后去除管道内径毛边，防止气流受阻</div>
+        </div>
+        <div class="comp-item">
+          <div class="comp-name">Pipe Vise</div>
+          <div class="comp-cn">管道虎钳</div>
+          <div class="comp-function">固定管道进行切割和套丝操作</div>
+        </div>
+        <div class="comp-item">
+          <div class="comp-name">Pipe Wrenches (2)</div>
+          <div class="comp-cn">管钳（两把）</div>
+          <div class="comp-function">一把固定，一把旋转。连接气阀时必须用back-up wrench防止损坏阀体。</div>
+        </div>
+      </div>
+
+      <h3 style="margin-top:12px">铜管系统工具（Copper Tubing）</h3>
+      <div class="comp-grid">
+        <div class="comp-item">
+          <div class="comp-name">Tubing Cutter</div>
+          <div class="comp-cn">铜管切割器</div>
+          <div class="comp-function">切割铜管，比锯子切面更整齐</div>
+        </div>
+        <div class="comp-item">
+          <div class="comp-name">Flaring Tool</div>
+          <div class="comp-cn">胀口工具</div>
+          <div class="comp-function">制作铜管喇叭口接头</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-amber">📋</div>
+      <div><div class="section-title">安装规范 / Code Requirements</div></div>
+      <div class="section-toggle">▶</div>
+    </div>
+    <div class="section-body">
+      <div class="steps">
+        <div class="step"><div class="step-n">1</div>管道尺寸按Gas Code Table（参照Table 10 — Maximum Capacity of Pipe）</div>
+        <div class="step"><div class="step-n">2</div>管道支撑：每6ft (2M) 至少一个管夹/吊架</div>
+        <div class="step"><div class="step-n">3</div>Sediment Trap（沉淀阱/dirt pocket）：必须在每个用气设备进口前安装，接在riser底部，防止杂质进入气阀</div>
+        <div class="step"><div class="step-n">4</div>管道密封：管道螺纹涂抹管道密封胶（pipe dope），只能涂在外螺纹（male threads），且必须是耐丙烷型（propane-resistant）</div>
+        <div class="step"><div class="step-n">5</div>禁止PTFE螺纹密封胶带（不耐丙烷，可能松脱堵塞阀口）</div>
+        <div class="step"><div class="step-n">6</div>Manual shutoff valve：必须在设备外部6ft（2M）以内，且便于操作</div>
+      </div>
+
+      <div class="speak-box">
+        <div class="speak-label">📢 解释dirt pocket</div>
+        <div class="speak-text">"A sediment trap — or dirt pocket — is required by the Gas Code upstream of each appliance gas control valve. It's constructed by installing a tee in the supply riser, with a capped nipple extending below the tee. Any scale, moisture, or debris falls into the trap rather than entering the gas valve, which could cause the valve to stick open or closed."</div>
+      </div>
+
+      <div class="speak-box">
+        <div class="speak-label">📢 解释管道密封剂涂抹</div>
+        <div class="speak-text">"I'm applying pipe dope sparingly to the male threads only — the external threads. Applying it to the female threads or socket can contaminate the gas valve. The sealant must be approved for use with the specific gas being used — propane requires a propane-resistant compound."</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-green">🔌</div>
+      <div><div class="section-title">Breaker Panel 安装</div></div>
+      <div class="section-toggle">▶</div>
+    </div>
+    <div class="section-body">
+      <table class="volt-table">
+        <tr><th>线材规格</th><th>断路器容量</th><th>用途</th></tr>
+        <tr><td>14 AWG</td><td>15A</td><td>一般照明/插座回路</td></tr>
+        <tr><td>12 AWG</td><td>20A</td><td>厨房/浴室/大功率插座</td></tr>
+        <tr><td>10 AWG</td><td>30A</td><td>干衣机/空调等</td></tr>
+        <tr><td>8 AWG</td><td>40A</td><td>电炉/大型设备</td></tr>
+      </table>
+
+      <div class="speak-box">
+        <div class="speak-label">📢 解释接地与等电位</div>
+        <div class="speak-text">"The grounding conductor connects the electrical system to earth ground at the main panel, protecting against fault currents and lightning. Bonding connects all metallic components together — gas piping, ductwork, electrical panel — ensuring they're at the same electrical potential, preventing voltage differences that could cause shock or sparks near gas piping."</div>
+      </div>
+
+      <h3>120V vs 240V 识别</h3>
+      <div class="steps">
+        <div class="step"><div class="step-n">120V</div>使用单极断路器（single pole），接一根hot线（黑色），一根neutral（白色），一根ground（绿/裸铜）</div>
+        <div class="step"><div class="step-n">240V</div>使用双极断路器（double pole），接两根hot线，通常无neutral（纯240V设备）</div>
+        <div class="step"><div class="step-n">240V+N</div>接两根hot + neutral + ground（干衣机等需要120V+240V的设备）</div>
+      </div>
+
+      <div class="speak-box">
+        <div class="speak-label">📢 演示断路器安装</div>
+        <div class="speak-text">"I'll connect the hot conductor to the breaker terminal, the neutral to the neutral bus bar, and the equipment ground to the ground bus bar. I'll verify the wire gauge matches the breaker rating — 14 AWG with a 15-amp breaker, 12 AWG with a 20-amp breaker."</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon icon-purple">🧼</div>
+      <div><div class="section-title">管道系统泄漏测试 / Pipe Leak Test</div></div>
+      <div class="section-toggle">▶</div>
+    </div>
+    <div class="section-body">
+      <div class="warn-box danger">
+        ⚠️ 压力测试超过½ psig时，必须将炉子（和气阀）与管道系统断开！气阀最高承受½ psig测试压力。
+      </div>
+
+      <div class="steps">
+        <div class="step"><div class="step-n">高压测试 &gt; ½ psig</div>断开炉子手动截止阀，用堵头封住管道末端。充气至测试压力，保压，皂液检漏。</div>
+        <div class="step"><div class="step-n">低压测试 ≤ ½ psig</div>关闭炉子手动截止阀（无需断开）。充气，保压，皂液检漏，也可配合拨盘测试。</div>
+      </div>
+
+      <div class="speak-box">
+        <div class="speak-label">📢 解释管道压力测试规定</div>
+        <div class="speak-text">"For pressure testing above one-half psig, the furnace and its individual shutoff valve must be disconnected from the gas supply piping system. This protects the gas valve, which is not rated for high-pressure testing. For tests at or below one-half psig, we isolate the furnace by closing the manual shutoff valve only."</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Tab switching
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const target = tab.dataset.tab;
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById(target).classList.add('active');
+      window.scrollTo(0, 0);
+    });
+  });
+
+  // Section toggle
+  function toggleSection(header) {
+    const section = header.parentElement;
+    section.classList.toggle('open');
+  }
+
+  // Checkbox memory
+  document.querySelectorAll('.check-item input').forEach(cb => {
+    cb.addEventListener('change', () => {
+      cb.closest('.check-item').classList.toggle('done', cb.checked);
+    });
+  });
+
+  // Progress bar
+  window.addEventListener('scroll', () => {
+    const total = document.body.scrollHeight - window.innerHeight;
+    const progress = (window.scrollY / total) * 100;
+    document.getElementById('progressBar').style.width = progress + '%';
+  });
+
+  // Auto-scroll tabs to active
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      tab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    });
+  });
+</script>
+</body>
+</html>
