@@ -1,0 +1,1910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>G2 Practical Exam — Station Guide</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap');
+
+:root {
+  --bg: #0a0c10;
+  --surface: #12151d;
+  --card: #181c27;
+  --border: #222840;
+  --border2: #2d3555;
+  --accent: #f59e0b;
+  --accent-dim: rgba(245,158,11,0.12);
+  --blue: #60a5fa;
+  --blue-dim: rgba(96,165,250,0.1);
+  --green: #34d399;
+  --green-dim: rgba(52,211,153,0.1);
+  --red: #f87171;
+  --red-dim: rgba(248,113,113,0.1);
+  --purple: #c084fc;
+  --purple-dim: rgba(192,132,252,0.1);
+  --cyan: #22d3ee;
+  --text: #e2e8f0;
+  --muted: #64748b;
+  --muted2: #94a3b8;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+/* ── HEADER ── */
+.header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 16px;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+}
+.header-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.header-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+.header-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+/* ── TABS ── */
+.tabs-bar {
+  background: var(--surface);
+  border-bottom: 2px solid var(--border);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.tabs-bar::-webkit-scrollbar { display: none; }
+.tabs-inner {
+  display: flex;
+  white-space: nowrap;
+  padding: 0 8px;
+  min-width: max-content;
+}
+.tab {
+  padding: 9px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  cursor: pointer;
+  transition: color 0.15s;
+  user-select: none;
+}
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.tab.mandatory { color: var(--red); }
+.tab.mandatory.active { color: var(--red); border-bottom-color: var(--red); }
+
+/* ── PAGE ── */
+.page { display: none; padding: 16px; max-width: 820px; margin: 0 auto; }
+.page.active { display: block; }
+
+/* ── STATION HEADER ── */
+.station-hero {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+.station-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.station-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.station-meta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+.badge-amber { background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(245,158,11,0.25); }
+.badge-red { background: var(--red-dim); color: var(--red); border: 1px solid rgba(248,113,113,0.25); }
+.badge-blue { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(96,165,250,0.25); }
+.badge-green { background: var(--green-dim); color: var(--green); border: 1px solid rgba(52,211,153,0.25); }
+
+/* ── SCENARIO BLOCK ── */
+.scenario-block {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--blue);
+  border-radius: 0 10px 10px 0;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+}
+.scenario-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--blue);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.scenario-text {
+  font-size: 13px;
+  color: var(--muted2);
+}
+
+/* ── CRITERIA SECTION ── */
+.criteria-section {
+  margin-bottom: 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.criteria-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  background: rgba(255,255,255,0.025);
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s;
+}
+.criteria-header:hover { background: rgba(255,255,255,0.04); }
+.criteria-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+.ci-blue { background: var(--blue-dim); }
+.ci-amber { background: var(--accent-dim); }
+.ci-green { background: var(--green-dim); }
+.ci-red { background: var(--red-dim); }
+.ci-purple { background: var(--purple-dim); }
+.ci-cyan { background: rgba(34,211,238,0.1); }
+
+.criteria-title {
+  flex: 1;
+  font-weight: 600;
+  font-size: 13px;
+}
+.criteria-cn {
+  font-size: 10px;
+  color: var(--muted);
+  font-style: italic;
+}
+.criteria-arrow {
+  color: var(--muted);
+  font-size: 12px;
+  transition: transform 0.2s;
+}
+.criteria-section.open .criteria-arrow { transform: rotate(90deg); }
+
+.criteria-body {
+  display: none;
+  padding: 14px 16px;
+  border-top: 1px solid var(--border);
+}
+.criteria-section.open .criteria-body { display: block; }
+
+/* ── SPEAK BOX ── */
+.speak-box {
+  background: var(--green-dim);
+  border: 1px solid rgba(52,211,153,0.25);
+  border-radius: 8px;
+  padding: 10px 13px;
+  margin: 10px 0;
+}
+.speak-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--green);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+.speak-text {
+  font-size: 12px;
+  color: #a7f3d0;
+  line-height: 1.6;
+  font-style: italic;
+}
+
+/* ── WARN BOXES ── */
+.warn {
+  border-radius: 8px;
+  padding: 10px 13px;
+  margin: 8px 0;
+  font-size: 12px;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  line-height: 1.55;
+}
+.warn-icon { flex-shrink: 0; font-size: 14px; margin-top: 1px; }
+.warn.danger { background: var(--red-dim); border: 1px solid rgba(248,113,113,0.25); color: #fca5a5; }
+.warn.info { background: var(--blue-dim); border: 1px solid rgba(96,165,250,0.25); color: #93c5fd; }
+.warn.amber { background: var(--accent-dim); border: 1px solid rgba(245,158,11,0.25); color: #fcd34d; }
+.warn.success { background: var(--green-dim); border: 1px solid rgba(52,211,153,0.25); color: #86efac; }
+
+/* ── STEPS ── */
+.steps { display: flex; flex-direction: column; gap: 7px; }
+.step {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 9px 11px;
+  background: rgba(255,255,255,0.025);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  font-size: 12px;
+  line-height: 1.55;
+}
+.step-n {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--accent);
+  min-width: 22px;
+  margin-top: 1px;
+  flex-shrink: 0;
+}
+.step-note { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+/* ── SEQUENCE ── */
+.seq { display: flex; flex-direction: column; }
+.seq-row {
+  display: flex;
+  gap: 12px;
+}
+.seq-spine {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+.seq-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #000;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.seq-line {
+  width: 2px;
+  flex: 1;
+  min-height: 14px;
+  background: var(--border2);
+  margin: 4px 0;
+}
+.seq-content {
+  flex: 1;
+  padding-bottom: 16px;
+  padding-top: 3px;
+}
+.seq-title {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+
+/* ── TABLE ── */
+.tbl {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  margin: 8px 0;
+}
+.tbl th {
+  background: rgba(96,165,250,0.12);
+  color: var(--blue);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 7px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--border2);
+}
+.tbl td {
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--border);
+  color: var(--muted2);
+  vertical-align: top;
+}
+.tbl tr:last-child td { border-bottom: none; }
+.tbl tr:hover td { background: rgba(255,255,255,0.02); }
+.tbl-val {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* ── KEY VALUE GRID ── */
+.kv-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin: 8px 0;
+}
+@media(min-width:500px) { .kv-grid { grid-template-columns: repeat(4, 1fr); } }
+.kv {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
+}
+.kv-val {
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--accent);
+}
+.kv-lbl { font-size: 10px; color: var(--muted); margin-top: 2px; line-height: 1.3; }
+
+/* ── COMPONENT CARD ── */
+.comp-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  margin: 8px 0;
+}
+@media(min-width:500px) { .comp-grid { grid-template-columns: 1fr 1fr; } }
+.comp {
+  background: rgba(255,255,255,0.025);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 11px 13px;
+}
+.comp-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 2px;
+}
+.comp-cn { font-size: 11px; color: var(--muted2); margin-bottom: 5px; }
+.comp-fn { font-size: 11px; color: var(--muted); border-top: 1px solid var(--border); padding-top: 5px; margin-top: 3px; line-height: 1.5; }
+
+/* ── INLINE CODE ── */
+.code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  background: rgba(240,165,0,0.15);
+  color: var(--accent);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+/* ── SECTION HEADINGS inside body ── */
+.sh {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--accent);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin: 14px 0 7px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid var(--border);
+}
+.sh:first-child { margin-top: 0; }
+
+/* ── FORMULA BOX ── */
+.formula {
+  background: rgba(245,158,11,0.08);
+  border: 1px solid rgba(245,158,11,0.25);
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin: 8px 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--accent);
+  text-align: center;
+  line-height: 1.7;
+}
+.formula-note { font-size: 11px; color: var(--muted); font-family: 'IBM Plex Sans', sans-serif; margin-top: 4px; }
+
+/* ── CHECKLIST ── */
+.checklist { display: flex; flex-direction: column; gap: 5px; }
+.cl-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+  padding: 7px 9px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.cl-item:hover { background: rgba(255,255,255,0.03); }
+.cl-item input { accent-color: var(--accent); width: 15px; height: 15px; flex-shrink: 0; margin-top: 2px; cursor: pointer; }
+.cl-item label { cursor: pointer; line-height: 1.45; }
+.cl-item.done label { color: var(--muted); text-decoration: line-through; }
+
+/* ── DIVIDER ── */
+.div { height: 1px; background: var(--border); margin: 12px 0; }
+
+/* ── PROGRESS ── */
+#prog { position: fixed; top: 0; left: 0; height: 2px; background: var(--accent); z-index: 999; transition: width 0.1s; }
+</style>
+</head>
+<body>
+<div id="prog"></div>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-top">
+    <div>
+      <div class="header-title">⚡ G2 Practical Exam — Station Guide</div>
+      <div class="header-sub">Fanshawe HRAC · First Year · 2026 &nbsp;|&nbsp; Carrier PG95ESA Condensing Furnace</div>
+    </div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs-bar">
+  <div class="tabs-inner">
+    <div class="tab mandatory active" data-tab="s1">🔴 S1 · MANDATORY</div>
+    <div class="tab" data-tab="s2">S2 · S636 Venting</div>
+    <div class="tab" data-tab="s3">S3 · Natural Draft</div>
+    <div class="tab" data-tab="s4">S4 · Standing Pilot</div>
+    <div class="tab" data-tab="s5">S5 · Thermostat</div>
+    <div class="tab" data-tab="s6">S6 · Gas Regulators</div>
+    <div class="tab" data-tab="s7">S7 · Purging</div>
+    <div class="tab" data-tab="s8">S8 · Fan/Limit</div>
+    <div class="tab" data-tab="s9">S9 · Gas Pipe</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     STATION 1 — MANDATORY
+════════════════════════════════════════════ -->
+<div class="page active" id="s1">
+
+  <div class="station-hero">
+    <div class="station-num">Test Station 1</div>
+    <div class="station-name">Troubleshooting a Fault in Simulation Work Station</div>
+    <div class="station-meta">
+      <span class="badge badge-red">🔴 MANDATORY — All Students</span>
+      <span class="badge badge-amber">Work Station 1 or 2</span>
+      <span class="badge badge-blue">/40 Marks</span>
+    </div>
+  </div>
+
+  <!-- SCENARIO -->
+  <div class="scenario-block">
+    <div class="scenario-label">📋 Scenario (from exam sheet)</div>
+    <div class="scenario-text">
+      Identify furnace components (Work station 1 or 2) and correctly explain the sequence of operation using the associated schematic diagram.<br><br>
+      <strong>Components on your notes:</strong> HSI · Valve train · Condensate track · Low gas sensor (propane) · Pressure switch<br><br>
+      Demonstrate proper use of schematic diagram and electrical testing equipment to identify a fault placed within Furnace in the Work Station.
+    </div>
+  </div>
+
+  <!-- ── CRITERIA 1: Identify Components ── -->
+  <div class="criteria-section open">
+    <div class="criteria-header" onclick="tog(this)">
+      <div class="criteria-icon ci-blue">🔧</div>
+      <div>
+        <div class="criteria-title">Identify Furnace Components &amp; Explain Their Function</div>
+        <div class="criteria-cn">零件识别 + 功能说明 — 指向实物，说出功能</div>
+      </div>
+      <div class="criteria-arrow">▶</div>
+    </div>
+    <div class="criteria-body">
+      <div class="warn amber"><div class="warn-icon">💡</div><div>Point clearly at each physical component while speaking. The examiner wants to see you can locate AND explain the function in one confident statement.</div></div>
+
+      <div class="comp-grid">
+        <div class="comp">
+          <div class="comp-name">HSI — Hot Surface Igniter</div>
+          <div class="comp-cn">热表面点火器</div>
+          <div class="comp-fn">Energized at 115 VAC for a 17-second warm-up period. Heats to ~900°C to ignite gas at the burners. Replaces standing pilot.</div>
+          <div class="speak-box" style="margin-top:7px">
+            <div class="speak-label">Say this</div>
+            <div class="speak-text">"This is the Hot Surface Igniter. It's energized at 115 volts for approximately 17 seconds to reach ignition temperature — around 900 degrees Celsius. Cold resistance should be between 40 and 70 ohms."</div>
+          </div>
+        </div>
+
+        <div class="comp">
+          <div class="comp-name">Gas Valve / Valve Train (GV)</div>
+          <div class="comp-cn">气阀 / 阀列</div>
+          <div class="comp-fn">Opens on a 24 VAC signal from the control board via relay GVR. Controls gas flow to the burners. Contains an internal pressure regulator (manifold pressure). Factory set: 3.5" WC for NG.</div>
+          <div class="speak-box" style="margin-top:7px">
+            <div class="speak-label">Say this</div>
+            <div class="speak-text">"This is the gas valve. It opens when the control board energizes the gas valve relay — GVR — supplying 24 volts to the valve coil. It also contains the internal manifold pressure regulator."</div>
+          </div>
+        </div>
+
+        <div class="comp">
+          <div class="comp-name">HPS — Housing Pressure Switch</div>
+          <div class="comp-cn">壳体压力开关（主压力开关）</div>
+          <div class="comp-fn">Normally Open (N.O.) contact. Closes when inducer motor creates sufficient negative pressure (draft). Ignored for the first minute after gas valve closes per the Carrier sequence. Nominal break point: 0.63–0.73" WC. (Source: manual Service label Fig. 64)</div>
+          <div class="speak-box" style="margin-top:7px">
+            <div class="speak-label">Say this</div>
+            <div class="speak-text">"This is the housing pressure switch — HPS. It's a normally-open switch that closes when the inducer creates sufficient negative pressure in the collector box, signalling the control board that it's safe to proceed with ignition."</div>
+          </div>
+        </div>
+
+        <div class="comp">
+          <div class="comp-name">LPS — Low Gas Pressure Switch</div>
+          <div class="comp-cn">低气压保护开关（丙烷系统）</div>
+          <div class="comp-fn">Used on propane systems. Opens if inlet gas pressure drops below safe minimum, preventing incomplete combustion. Factory connected only when LGPS is used (see wiring diagram Fig. 71 note 10).</div>
+          <div class="speak-box" style="margin-top:7px">
+            <div class="speak-label">Say this</div>
+            <div class="speak-text">"This is the Low Gas Pressure Switch — LGPS — primarily used on propane systems. It opens if the supply gas pressure falls below the minimum required, shutting down the furnace to prevent incomplete combustion."</div>
+          </div>
+        </div>
+
+        <div class="comp">
+          <div class="comp-name">Pressure Switch (Collector Box — LPS)</div>
+          <div class="comp-cn">集流箱压力开关</div>
+          <div class="comp-fn">First pressure switch to close as inducer comes up to speed. Begins the 15-second pre-purge. Labeled "COLLECTOR BOX-LPS" on the switch (manual p.62). Nominal break: 0.63" WC min.</div>
+          <div class="speak-box" style="margin-top:7px">
+            <div class="speak-label">Say this</div>
+            <div class="speak-text">"This pressure switch — labeled COLLECTOR BOX LPS — is the first to close as the inducer motor comes up to speed, initiating the 15-second pre-purge period."</div>
+          </div>
+        </div>
+
+        <div class="comp">
+          <div class="comp-name">Flame Sensor / FSE</div>
+          <div class="comp-cn">火焰传感器</div>
+          <div class="comp-fn">Uses flame rectification to prove burner ignition. Control board reads 4.0–8.0 µA DC (nominal). If flame not proved within 2 seconds, gas valve closes. Retries up to 3 times → Lockout Code 14. Clean with 0000 steel wool only.</div>
+          <div class="speak-box" style="margin-top:7px">
+            <div class="speak-label">Say this</div>
+            <div class="speak-text">"This is the flame sensing electrode — FSE. It uses flame rectification to prove ignition. The control board looks for 4 to 8 microamps DC. If flame is not proved within 2 seconds, the gas valve closes and the sequence retries up to 3 times before ignition lockout."</div>
+          </div>
+        </div>
+
+        <div class="comp">
+          <div class="comp-name">Control Board / PCB</div>
+          <div class="comp-cn">控制板 / 电路板</div>
+          <div class="comp-fn">The "brain" of the furnace. Controls entire sequence of operation, monitors all safety switches, displays 2-digit LED fault codes. Contains 3-amp automotive-type blade fuse (SEC-1 & SEC-2 connections = 24V secondary). Status LED is amber. (Fig. 36, Fig. 64)</div>
+          <div class="speak-box" style="margin-top:7px">
+            <div class="speak-label">Say this</div>
+            <div class="speak-text">"This is the furnace control board. It manages the entire sequence of operation, monitors all safety switch inputs, and displays 2-digit LED fault codes visible through the blower door window. It contains a 3-amp blade fuse protecting the 24-volt secondary circuit."</div>
+          </div>
+        </div>
+
+        <div class="comp">
+          <div class="comp-name">Limit Switches — LS1, LS2</div>
+          <div class="comp-cn">过热限位开关</div>
+          <div class="comp-fn">Auto-reset. Opens on over-temperature condition. Blower runs for up to 4 minutes to cool exchanger when limit trips (Code 33). Manual-reset flame rollout switch is also on burner assembly — requires physical button reset. (Service label Fig. 64)</div>
+          <div class="speak-box" style="margin-top:7px">
+            <div class="speak-label">Say this</div>
+            <div class="speak-text">"These are the limit switches — LS1 and LS2. They are auto-reset and open on over-temperature. When a limit trips, the blower continues to run for up to 4 minutes to cool the heat exchanger. The flame rollout switch on the burner assembly, by contrast, requires manual reset."</div>
+          </div>
+        </div>
+
+        <div class="comp">
+          <div class="comp-name">Inducer Motor (IDM)</div>
+          <div class="comp-cn">引风机 / 诱导送风机</div>
+          <div class="comp-fn">First component energized in every heating call. Creates negative pressure to close pressure switches. Also provides post-purge for 15 seconds after gas valve closes. 115 VAC motor. (Sequence of Operation, manual p.69)</div>
+          <div class="speak-box" style="margin-top:7px">
+            <div class="speak-label">Say this</div>
+            <div class="speak-text">"This is the inducer draft motor — IDM. It is the first component energized on every call for heat. It creates negative pressure to close the pressure switches and also runs for a 15-second post-purge after the gas valve closes."</div>
+          </div>
+        </div>
+
+        <div class="comp">
+          <div class="comp-name">Transformer (TRAN)</div>
+          <div class="comp-cn">变压器</div>
+          <div class="comp-fn">Steps 115 VAC (primary, PR-1) down to 24 VAC (secondary, SEC-1 & SEC-2) for the control circuit. SEC-1 feeds the 3-amp fuse. Visible on control board Fig. 36 as "115-VAC (PR-1) TRANSFORMER PRIMARY".</div>
+          <div class="speak-box" style="margin-top:7px">
+            <div class="speak-label">Say this</div>
+            <div class="speak-text">"This is the transformer. It steps 115 volts line voltage down to 24 volts for the low-voltage control circuit. The primary is 115 VAC; the secondary feeds the 3-amp fuse and the control board."</div>
+          </div>
+        </div>
+
+        <div class="comp">
+          <div class="comp-name">Condensate Trap</div>
+          <div class="comp-cn">冷凝水收集器</div>
+          <div class="comp-fn">Unique to condensing furnaces. Collects acidic condensate from secondary heat exchanger. MUST be primed with 1 quart (1 litre) of water before first startup — pour into collector box port (manual p.51, Fig. 59). Drain line: min 1/4" per foot slope. Drain via 1/2" CPVC to code-approved drain.</div>
+          <div class="speak-box" style="margin-top:7px">
+            <div class="speak-label">Say this</div>
+            <div class="speak-text">"This is the condensate trap — specific to condensing furnaces. It collects acidic condensate from the secondary heat exchanger and must be primed with one quart of water before startup. The condensate drain line requires a minimum slope of one-quarter inch per foot toward the drain."</div>
+          </div>
+        </div>
+
+        <div class="comp">
+          <div class="comp-name">Blower Motor (BLWM)</div>
+          <div class="comp-cn">循环风机</div>
+          <div class="comp-fn">Starts 25 seconds after flame is proved (blower-ON delay). Distributes conditioned air through duct system. After thermostat is satisfied: runs for blower-OFF delay — factory set 120 seconds (adjustable 90/120/150/180 sec via J1 jumper, Table 20). Multiple speed taps: HEAT, COOL, FAN, SPARE. (manual p.55 & Fig. 36)</div>
+          <div class="speak-box" style="margin-top:7px">
+            <div class="speak-label">Say this</div>
+            <div class="speak-text">"This is the circulating blower motor. It starts 25 seconds after flame is proved to allow the heat exchanger to warm up. After the thermostat is satisfied, it continues for the blower-off delay — factory set at 120 seconds — to extract residual heat from the exchanger."</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CRITERIA 2: Sequence of Operation ── -->
+  <div class="criteria-section open">
+    <div class="criteria-header" onclick="tog(this)">
+      <div class="criteria-icon ci-amber">📋</div>
+      <div>
+        <div class="criteria-title">Explain &amp; Follow the Sequence of Operation</div>
+        <div class="criteria-cn">操作顺序 — 按说明书 p.69 逐步讲解，参照电路图 Fig. 71</div>
+      </div>
+      <div class="criteria-arrow">▶</div>
+    </div>
+    <div class="criteria-body">
+      <div class="warn info"><div class="warn-icon">💡</div><div>Memory hook: <strong>T – I – P – H – G – F – B</strong> &nbsp;(Thermostat → Inducer → Pre-purge → HSI → Gas valve → Flame → Blower)</div></div>
+
+      <div class="sh">Heating Mode — from manual p.69</div>
+      <div class="seq">
+
+        <div class="seq-row">
+          <div class="seq-spine"><div class="seq-dot">1</div><div class="seq-line"></div></div>
+          <div class="seq-content">
+            <div class="seq-title">Thermostat calls for heat — R-to-W circuit closes</div>
+            <div class="speak-box">
+              <div class="speak-label">Say this</div>
+              <div class="speak-text">"The wall thermostat closes the R-to-W circuit, applying 24 volts to the furnace control board. The board performs a self-check, confirming the collector box pressure switch LPS and housing pressure switch HPS are both open."</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="seq-row">
+          <div class="seq-spine"><div class="seq-dot">2</div><div class="seq-line"></div></div>
+          <div class="seq-content">
+            <div class="seq-title">Inducer Motor starts — Pre-Purge Period (15 sec)</div>
+            <div class="speak-box">
+              <div class="speak-label">Say this</div>
+              <div class="speak-text">"The control board energizes the inducer motor IDM. As it comes up to speed, the collector box pressure switch LPS closes, beginning a 15-second pre-purge period to clear the heat exchanger of any residual gases."</div>
+            </div>
+            <div class="step-note" style="margin-top:5px">Source: manual p.69 — "As the inducer motor IDM comes up to speed, the collector box pressure switch contacts LPS close to begin a 15-sec prepurge period."</div>
+          </div>
+        </div>
+
+        <div class="seq-row">
+          <div class="seq-spine"><div class="seq-dot">3</div><div class="seq-line"></div></div>
+          <div class="seq-content">
+            <div class="seq-title">HPS closes — HSI Warm-Up (17 sec)</div>
+            <div class="speak-box">
+              <div class="speak-label">Say this</div>
+              <div class="speak-text">"At the end of the pre-purge period, the inducer housing pressure switch HPS closes, confirming adequate draft. The hot surface igniter HSI is then energized at 115 volts for a 17-second warm-up period."</div>
+            </div>
+            <div class="step-note" style="margin-top:5px">Source: manual p.69 — "At the end of the prepurge period, the Hot-Surface igniter HSI is energized for a 17-sec igniter warm-up period."</div>
+          </div>
+        </div>
+
+        <div class="seq-row">
+          <div class="seq-spine"><div class="seq-dot">4</div><div class="seq-line"></div></div>
+          <div class="seq-content">
+            <div class="seq-title">Trial-for-Ignition — Gas Valve opens</div>
+            <div class="speak-box">
+              <div class="speak-label">Say this</div>
+              <div class="speak-text">"When the igniter warm-up is complete, the main gas valve relay GVR closes, energizing the gas valve GV. Gas flows to the burners and is ignited by the HSI. 24 VAC is also supplied to the humidifier terminal HUM at this point."</div>
+            </div>
+            <div class="step-note" style="margin-top:5px">Source: manual p.69 — "the main gas valve relay contacts GVR close to energize the gas valve GV."</div>
+          </div>
+        </div>
+
+        <div class="seq-row">
+          <div class="seq-spine"><div class="seq-dot">5</div><div class="seq-line"></div></div>
+          <div class="seq-content">
+            <div class="seq-title">Flame Proving — FSE confirms ignition (2 sec window)</div>
+            <div class="speak-box">
+              <div class="speak-label">Say this</div>
+              <div class="speak-text">"Five seconds after GVR closes, the 2-second flame proving period begins. The flame sensor FSE uses flame rectification to confirm the burner flame is present. If flame is not proved, the gas valve closes and the board retries the ignition sequence up to 3 more times before going to Ignition Lockout — Code 14."</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="seq-row">
+          <div class="seq-spine"><div class="seq-dot">6</div><div class="seq-line"></div></div>
+          <div class="seq-content">
+            <div class="seq-title">Blower-ON Delay (25 sec) — BLWM starts on HEAT speed</div>
+            <div class="speak-box">
+              <div class="speak-label">Say this</div>
+              <div class="speak-text">"When flame is proved, the control board starts the blower-ON delay — 25 seconds. This allows the heat exchanger to warm up before distributing air. After 25 seconds, the blower motor starts on the HEAT speed tap."</div>
+            </div>
+            <div class="step-note" style="margin-top:5px">Source: manual p.69 — "the furnace control CPU begins the blower-ON delay period and continues to hold the gas valve GV open."</div>
+          </div>
+        </div>
+
+        <div class="seq-row">
+          <div class="seq-spine"><div class="seq-dot">7</div><div class="seq-line"></div></div>
+          <div class="seq-content">
+            <div class="seq-title">Thermostat satisfied — Blower-OFF Delay (120 sec default)</div>
+            <div class="speak-box">
+              <div class="speak-label">Say this</div>
+              <div class="speak-text">"When the thermostat is satisfied, the R-to-W circuit opens, de-energizing gas valve GV and the humidifier terminal. The inducer runs for a 15-second post-purge. The blower motor and EAC-1 terminal remain energized for the blower-OFF delay — factory set at 120 seconds — then shut down."</div>
+            </div>
+            <div class="step-note" style="margin-top:5px">Source: manual p.69 — "The inducer motor IDM will remain energized for a 15-sec post-purge period. The blower motor BLWM… will remain energized for 90, 120, 150, or 180 sec depending on the blower-OFF delay selection."</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CRITERIA 3: Multimeter ── -->
+  <div class="criteria-section">
+    <div class="criteria-header" onclick="tog(this)">
+      <div class="criteria-icon ci-purple">📏</div>
+      <div>
+        <div class="criteria-title">Demonstrate Correct Multimeter Use</div>
+        <div class="criteria-cn">万用表操作规范 — test meter before use · correct setting · scale · interpretation</div>
+      </div>
+      <div class="criteria-arrow">▶</div>
+    </div>
+    <div class="criteria-body">
+      <div class="speak-box">
+        <div class="speak-label">Do this FIRST — before any measurement</div>
+        <div class="speak-text">"Before taking any measurements, I am testing my meter. I'll set it to continuity — short the leads together — confirm the beep, then select the appropriate voltage range above the expected reading."</div>
+      </div>
+
+      <div class="sh">Voltage Measurement Points (Fig. 71 Schematic)</div>
+      <table class="tbl">
+        <tr><th>Test Point</th><th>Meter Setting</th><th>Normal Reading</th><th>Fault = ?</th></tr>
+        <tr><td>Transformer Primary (L1–L2)</td><td>VAC &gt;150V</td><td class="tbl-val">115 V</td><td>0V = no power / open breaker</td></tr>
+        <tr><td>Transformer Secondary (SEC-1/SEC-2)</td><td>VAC &gt;30V</td><td class="tbl-val">24 V</td><td>0V = blown fuse or bad transformer</td></tr>
+        <tr><td>Gas Valve coil (GV) — heating</td><td>VAC &gt;30V</td><td class="tbl-val">24 V</td><td>0V = no call or GVR relay stuck open</td></tr>
+        <tr><td>W terminal (thermostat call)</td><td>VAC &gt;30V</td><td class="tbl-val">24 V</td><td>0V = broken W wire or T-stat fault</td></tr>
+        <tr><td>Limit Switch across terminals</td><td>VAC &gt;30V</td><td class="tbl-val">0 V (closed)</td><td>24V = open limit (tripped/failed)</td></tr>
+        <tr><td>HPS Pressure Switch across terminals</td><td>VAC &gt;30V</td><td class="tbl-val">0 V (closed during run)</td><td>24V = switch open (PS fault)</td></tr>
+        <tr><td>HSI (resistance) — power OFF</td><td>Ω</td><td class="tbl-val">40–70 Ω</td><td>OL = open igniter (failed)</td></tr>
+      </table>
+
+      <div class="warn danger"><div class="warn-icon">⚠️</div><div>ALWAYS de-energize the circuit before measuring resistance or continuity. Ohmmeter leads must be plugged into the Ω / COM terminals, NOT the Voltage terminals.</div></div>
+
+      <div class="sh">Demonstrate: Voltage at Gas Valve, Transformer Primary &amp; Secondary, Thermostat Contacts</div>
+      <div class="steps">
+        <div class="step"><div class="step-n">1</div><div>Set meter to VAC, range above 120V. Plug red to V, black to COM.</div></div>
+        <div class="step"><div class="step-n">2</div><div>Measure L1 to Neutral at furnace disconnect — confirm 115 VAC.</div></div>
+        <div class="step"><div class="step-n">3</div><div>Lower range to above 30V. Measure SEC-1 to SEC-2 on control board — confirm 24 VAC.</div></div>
+        <div class="step"><div class="step-n">4</div><div>With thermostat calling for heat, measure W to COM terminal — confirm 24 VAC.</div></div>
+        <div class="step"><div class="step-n">5</div><div>During run, measure across gas valve coil terminals — confirm 24 VAC.</div></div>
+        <div class="step"><div class="step-n">6</div><div>De-energize. Switch to Ω. Re-test meter (short leads — check reading ≈ 0Ω). Measure HSI resistance at connector — confirm 40–70Ω.</div></div>
+      </div>
+
+      <div class="sh">Demonstrate: Resistance &amp; Continuity — Power Disconnected, Component Isolated</div>
+      <div class="warn danger"><div class="warn-icon">⚠️</div><div>Must demonstrate that power has been disconnected, confirmed with meter, and component isolated from circuit before resistance measurement.</div></div>
+      <div class="steps">
+        <div class="step"><div class="step-n">1</div><div>Open 115V disconnect / switch OFF.</div></div>
+        <div class="step"><div class="step-n">2</div><div>Confirm: measure L1–Neutral with meter — reads 0V.</div></div>
+        <div class="step"><div class="step-n">3</div><div>Disconnect the component (e.g., unplug HSI connector to isolate from circuit).</div></div>
+        <div class="step"><div class="step-n">4</div><div>Set meter to Ω (or continuity/beep). Short test leads to verify meter function.</div></div>
+        <div class="step"><div class="step-n">5</div><div>Measure across the component. Interpret reading.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CRITERIA 4: Troubleshooting ── -->
+  <div class="criteria-section">
+    <div class="criteria-header" onclick="tog(this)">
+      <div class="criteria-icon ci-red">🔍</div>
+      <div>
+        <div class="criteria-title">Identify the Fault — Logical Step-by-Step Troubleshooting</div>
+        <div class="criteria-cn">故障排查 — 参照电路图 Fig. 71，逐步测量</div>
+      </div>
+      <div class="criteria-arrow">▶</div>
+    </div>
+    <div class="criteria-body">
+      <div class="speak-box">
+        <div class="speak-label">Opening statement to examiner</div>
+        <div class="speak-text">"I'll reference the schematic diagram — Fig. 71 — to understand the normal sequence of operation, then trace the circuit from the power source toward the load, using voltage measurements to find where power stops, which will identify the fault."</div>
+      </div>
+
+      <div class="sh">Faults the Exam Sheet Names — What to Look For</div>
+
+      <!-- Open High Limit -->
+      <div class="criteria-section" style="margin-bottom:8px;border-color:var(--red-dim)">
+        <div class="criteria-header" onclick="tog(this)" style="background:var(--red-dim)">
+          <div class="criteria-icon ci-red">🔴</div>
+          <div><div class="criteria-title" style="font-size:12px">Open High Limit</div><div class="criteria-cn">高限位断路</div></div>
+          <div class="criteria-arrow">▶</div>
+        </div>
+        <div class="criteria-body">
+          <table class="tbl">
+            <tr><th>Symptom</th><td>Furnace does not start, or shuts off mid-cycle. Blower runs up to 4 min. LED Code 33.</td></tr>
+            <tr><th>Measure</th><td>Measure across limit switch terminals (line voltage present = switch open). Normal = 0V (closed). Fault = 24V (open).</td></tr>
+            <tr><th>Causes</th><td>Dirty filter, blocked return air, failed blower motor, blower belt slipping, over-fired, restricted ducts.</td></tr>
+          </table>
+          <div class="speak-box"><div class="speak-label">Say this</div><div class="speak-text">"I'm measuring across the high limit switch. I read 24 volts — this tells me the switch contacts are open. The limit has tripped due to an over-temperature condition. I need to find and correct the root cause before resetting."</div></div>
+        </div>
+      </div>
+
+      <!-- HSI Failure -->
+      <div class="criteria-section" style="margin-bottom:8px;border-color:var(--red-dim)">
+        <div class="criteria-header" onclick="tog(this)" style="background:var(--red-dim)">
+          <div class="criteria-icon ci-red">🔴</div>
+          <div><div class="criteria-title" style="font-size:12px">HSI Failure</div><div class="criteria-cn">点火器故障</div></div>
+          <div class="criteria-arrow">▶</div>
+        </div>
+        <div class="criteria-body">
+          <table class="tbl">
+            <tr><th>Symptom</th><td>Inducer runs, pressure switch closes, but no ignition. Three retries then Code 14 Ignition Lockout.</td></tr>
+            <tr><th>Measure (power ON)</th><td>Check 115V at HSI connector during warm-up window (17 sec). If 115V present but no glow → HSI failed.</td></tr>
+            <tr><th>Measure (power OFF)</th><td>Disconnect HSI. Set meter to Ω. Normal = 40–70Ω. OL (open) = failed igniter.</td></tr>
+          </table>
+          <div class="speak-box"><div class="speak-label">Say this</div><div class="speak-text">"With power on, I measured 115 volts at the HSI connector during the warm-up period — the board is commanding the igniter. I'll now de-energize, confirm zero volts, isolate the igniter, and measure resistance. It reads open circuit — the igniter has failed and needs replacement."</div></div>
+          <div class="warn info"><div class="warn-icon">📌</div><div>Carrier manual (p.65–66): "Check igniter resistance. Nominal resistance is 40 to 70 ohms at room temperature… Cold reading should be between 40 ohms and 70 ohms."</div></div>
+        </div>
+      </div>
+
+      <!-- Open Neutral Wire -->
+      <div class="criteria-section" style="margin-bottom:8px;border-color:var(--red-dim)">
+        <div class="criteria-header" onclick="tog(this)" style="background:var(--red-dim)">
+          <div class="criteria-icon ci-red">🔴</div>
+          <div><div class="criteria-title" style="font-size:12px">Open Neutral Wire</div><div class="criteria-cn">中性线断路</div></div>
+          <div class="criteria-arrow">▶</div>
+        </div>
+        <div class="criteria-body">
+          <table class="tbl">
+            <tr><th>Symptom</th><td>Furnace completely dead — LED status light OFF.</td></tr>
+            <tr><th>Measure</th><td>Test 115V at L1 and L2 at furnace junction box. If L1 hot to ground = 120V but L1 to L2 = 0V → neutral (L2/WHT) open.</td></tr>
+          </table>
+          <div class="speak-box"><div class="speak-label">Say this</div><div class="speak-text">"The LED status light is completely off. I'll first check for 115 volts at the furnace disconnect. I read 115V from L1 to ground, but 0V from L1 to L2 — this indicates the neutral wire or L2 connection is open. I'll trace back to the panel."</div></div>
+        </div>
+      </div>
+
+      <!-- Pressure Switch Failure -->
+      <div class="criteria-section" style="margin-bottom:8px;border-color:var(--red-dim)">
+        <div class="criteria-header" onclick="tog(this)" style="background:var(--red-dim)">
+          <div class="criteria-icon ci-red">🔴</div>
+          <div><div class="criteria-title" style="font-size:12px">Pressure Switch Failure</div><div class="criteria-cn">压力开关故障 — LED Code 31</div></div>
+          <div class="criteria-arrow">▶</div>
+        </div>
+        <div class="criteria-body">
+          <table class="tbl">
+            <tr><th>Symptom</th><td>Inducer runs but sequence does not advance. HSI never energized. LED Code 31.</td></tr>
+            <tr><th>Measure</th><td>While inducer runs, measure across HPS terminals. Normal = 0V (closed). Fault = 24V (switch stuck open).</td></tr>
+            <tr><th>Checks</th><td>Inspect pressure tubing for blockage, kinks, or condensate. Check inducer operation. Manual p.62: "Check for: Obstructed pressure tubing — Pressure switch stuck closed."</td></tr>
+          </table>
+          <div class="speak-box"><div class="speak-label">Say this</div><div class="speak-text">"With the inducer running, I'm measuring across the housing pressure switch. I read 24 volts — the switch contacts are still open. The inducer is running but the switch is not closing. I'll check the pressure tubing for blockage or condensate, and verify the inducer is actually creating draft."</div></div>
+        </div>
+      </div>
+
+      <!-- Broken W wire -->
+      <div class="criteria-section" style="margin-bottom:8px;border-color:var(--red-dim)">
+        <div class="criteria-header" onclick="tog(this)" style="background:var(--red-dim)">
+          <div class="criteria-icon ci-red">🔴</div>
+          <div><div class="criteria-title" style="font-size:12px">Broken "W" Wire</div><div class="criteria-cn">W线（供热呼叫线）断路</div></div>
+          <div class="criteria-arrow">▶</div>
+        </div>
+        <div class="criteria-body">
+          <table class="tbl">
+            <tr><th>Symptom</th><td>24V system normal, thermostat set above room temp, but furnace does not respond.</td></tr>
+            <tr><th>Measure</th><td>At control board W terminal vs COM: should be 24V when T-stat calls. Reading 0V = broken W wire or T-stat contact open.</td></tr>
+          </table>
+          <div class="speak-box"><div class="speak-label">Say this</div><div class="speak-text">"The 24-volt supply is confirmed at the transformer secondary. The thermostat is calling for heat, but I read 0 volts at the W terminal on the control board. The heating call is not reaching the board — I'll check the W wire continuity from the thermostat sub-base to the furnace."</div></div>
+        </div>
+      </div>
+
+      <!-- Ventor motor failure -->
+      <div class="criteria-section" style="margin-bottom:8px;border-color:var(--red-dim)">
+        <div class="criteria-header" onclick="tog(this)" style="background:var(--red-dim)">
+          <div class="criteria-icon ci-red">🔴</div>
+          <div><div class="criteria-title" style="font-size:12px">Ventor (Inducer) Motor Failure</div><div class="criteria-cn">引风机电机故障 — LED Code 31</div></div>
+          <div class="criteria-arrow">▶</div>
+        </div>
+        <div class="criteria-body">
+          <table class="tbl">
+            <tr><th>Symptom</th><td>No inducer sound. Pressure switches never close. Code 31.</td></tr>
+            <tr><th>Measure (power ON)</th><td>Check 115V at IDM motor terminals. 115V present but motor not running → motor failed. 0V → control board not commanding motor / IDM relay (DR) fault.</td></tr>
+          </table>
+          <div class="speak-box"><div class="speak-label">Say this</div><div class="speak-text">"There is no inducer motor noise. I'll measure voltage at the inducer motor terminals. I read 115 volts — the board is commanding the motor — but the motor is not running. This indicates the inducer motor itself has failed."</div></div>
+        </div>
+      </div>
+
+      <div class="sh">LED Fault Code Quick Reference (Service Label — Fig. 64)</div>
+      <table class="tbl">
+        <tr><th>Code</th><th>Meaning</th><th>Auto-Reset?</th></tr>
+        <tr><td><span class="code">13</span></td><td>Limit Circuit Lockout (open &gt;3 min)</td><td>3 hours</td></tr>
+        <tr><td><span class="code">14</span></td><td>Ignition Lockout (4 failed trials)</td><td>3 hours</td></tr>
+        <tr><td><span class="code">21</span></td><td>Gas Heating Lockout — mis-wired gas valve / defective control</td><td>❌ Manual</td></tr>
+        <tr><td><span class="code">22</span></td><td>Abnormal Flame-Proving Signal — flame when GV de-energized (leaky valve)</td><td>Auto</td></tr>
+        <tr><td><span class="code">23</span></td><td>Pressure Switch Did Not Open — check PS tubing / stuck closed</td><td>Auto</td></tr>
+        <tr><td><span class="code">24</span></td><td>Secondary Voltage Fuse Open — short in 24V wiring</td><td>Auto</td></tr>
+        <tr><td><span class="code">31</span></td><td>HPS Pressure Switch Did Not Close or Reopened</td><td>Auto</td></tr>
+        <tr><td><span class="code">33</span></td><td>Limit Circuit Fault (limit or rollout open)</td><td>Auto</td></tr>
+        <tr><td><span class="code">34</span></td><td>Ignition Proving Failure (flame lost during run)</td><td>Auto</td></tr>
+        <tr><td><span class="code">45</span></td><td>Control Circuitry Lockout — 1 hour auto reset</td><td>1 hour</td></tr>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /s1 -->
+
+
+<!-- ═══════════════════════════════════════════
+     STATION 2 — S636 Venting
+════════════════════════════════════════════ -->
+<div class="page" id="s2">
+  <div class="station-hero">
+    <div class="station-num">Test Station 2</div>
+    <div class="station-name">Install S636 Venting &amp; Solderless Electrical Connectors</div>
+    <div class="station-meta">
+      <span class="badge badge-amber">Random Selection</span>
+      <span class="badge badge-blue">/40 Marks</span>
+    </div>
+  </div>
+  <div class="scenario-block">
+    <div class="scenario-label">📋 Scenario</div>
+    <div class="scenario-text">Demonstrate correct installation of ULC-S636 plastic venting to power vented water heater. Demonstrate correctly installing solderless electrical connectors (spade) Marrettes, and bare wire connections on various component terminations.</div>
+  </div>
+
+  <div class="criteria-section open">
+    <div class="criteria-header" onclick="tog(this)">
+      <div class="criteria-icon ci-blue">🪛</div>
+      <div><div class="criteria-title">Proper Vent Installation — Tool Use, Literature Reference, Adhesive Selection &amp; Application</div><div class="criteria-cn">正确通风管道安装</div></div>
+      <div class="criteria-arrow">▶</div>
+    </div>
+    <div class="criteria-body">
+      <div class="warn amber"><div class="warn-icon">📖</div><div>Open your B149 Gas Code AND manufacturer's literature before starting. Examiner awards marks for referencing literature.</div></div>
+
+      <div class="speak-box">
+        <div class="speak-label">Say this — referencing literature</div>
+        <div class="speak-text">"I'll reference the manufacturer's installation instructions and the B149.1 Gas Code for the venting requirements applicable to this appliance."</div>
+      </div>
+
+      <div class="sh">What is ULC S636?</div>
+      <div class="speak-box">
+        <div class="speak-label">Say this</div>
+        <div class="speak-text">"ULC S636 is the Canadian certification standard for Category IV — positive-pressure condensing — venting systems. Per CAN/CSA B149.1, all pipe, fittings, primer, and cement must be ULC S636 listed AND from the same manufacturer. You cannot mix brands of cement and pipe."</div>
+      </div>
+
+      <div class="sh">Installation Steps — PVC/ABS S636 Pipe</div>
+      <div class="steps">
+        <div class="step"><div class="step-n">1</div><div>Measure and cut pipe to required length using appropriate saw.</div></div>
+        <div class="step"><div class="step-n">2</div><div>Deburr the inside edge and chamfer (bevel) the outside edge of the cut end for better cement distribution.</div></div>
+        <div class="step"><div class="step-n">3</div><div>Dry-fit all pieces. Mark insertion depth on pipe with a pencil.</div></div>
+        <div class="step"><div class="step-n">4</div><div>Apply primer to pipe end AND inside of fitting socket — use the appropriate applicator for the pipe diameter.</div></div>
+        <div class="step"><div class="step-n">5</div><div>Apply cement to pipe end AND inside of fitting socket in a light, uniform coat.</div></div>
+        <div class="step"><div class="step-n">6</div><div>Insert pipe fully into fitting (to the pencil mark) and rotate one-quarter turn while cement is still wet. Hold for ~30 seconds.</div></div>
+        <div class="step"><div class="step-n">7</div><div>A continuous bead of cement should be visible around the joint perimeter — confirms full coverage.</div></div>
+        <div class="step"><div class="step-n">8</div><div>Support pipe per Table 16 (Hanger Spacing): PVC Sch 40 → max 3 ft spacing for 1½" to 3" pipe.</div></div>
+      </div>
+
+      <div class="warn danger"><div class="warn-icon">⚠️</div><div>In Canada: primer and cement must be from the same manufacturer as the pipe. Do NOT mix manufacturers. Never use cement past its expiry date. (Carrier manual p.47 — "DO NOT CEMENT POLYPROPYLENE FITTINGS.")</div></div>
+    </div>
+  </div>
+
+  <div class="criteria-section">
+    <div class="criteria-header" onclick="tog(this)">
+      <div class="criteria-icon ci-amber">📐</div>
+      <div><div class="criteria-title">Explain "Allowable Vent Length" &amp; "Equivalent Length"</div><div class="criteria-cn">允许排气长度 &amp; 等效长度</div></div>
+      <div class="criteria-arrow">▶</div>
+    </div>
+    <div class="criteria-body">
+      <div class="speak-box">
+        <div class="speak-label">Say this — Allowable Vent Length</div>
+        <div class="speak-text">"Allowable vent length is the maximum length of venting pipe permitted by the manufacturer for a specific appliance model and pipe diameter. For this furnace, it is found in Table 13 — Maximum Equivalent Vent Length. Exceeding this length reduces draft, causes poor combustion, nuisance lockouts, and potential vent freeze-up."</div>
+      </div>
+      <div class="speak-box">
+        <div class="speak-label">Say this — Equivalent Length</div>
+        <div class="speak-text">"Equivalent length accounts for the additional flow resistance created by elbows and fittings. A 90-degree long-radius elbow, for example, adds 3 feet of equivalent resistance. A mitered 90-degree elbow adds 8 feet. We add equivalent lengths to actual pipe lengths to get the Total Equivalent Vent Length — TEVL — and compare it to the Maximum Equivalent Vent Length — MEVL."</div>
+      </div>
+
+      <div class="sh">Deductions Table (Table 14 — Carrier Manual)</div>
+      <table class="tbl">
+        <tr><th>Fitting Type</th><th>Equiv. Length (ft)</th></tr>
+        <tr><td>Mitered 90° Elbow</td><td class="tbl-val">8 ft</td></tr>
+        <tr><td>Medium Radius 90° Elbow</td><td class="tbl-val">5 ft</td></tr>
+        <tr><td>Long Radius 90° Elbow</td><td class="tbl-val">3 ft</td></tr>
+        <tr><td>Mitered 45° Elbow</td><td class="tbl-val">4 ft</td></tr>
+        <tr><td>Medium Radius 45° Elbow</td><td class="tbl-val">2.5 ft</td></tr>
+        <tr><td>Long Radius 45° Elbow</td><td class="tbl-val">1.5 ft</td></tr>
+        <tr><td>Tee (running tee, combustion air pipe)</td><td class="tbl-val">16 ft</td></tr>
+        <tr><td>Concentric Vent Termination</td><td class="tbl-val">0 ft (included in MEVL)</td></tr>
+      </table>
+
+      <div class="speak-box">
+        <div class="speak-label">Say this — Effect of exceeding allowable length</div>
+        <div class="speak-text">"If the total equivalent vent length exceeds the manufacturer's maximum, or if we fail to account for the equivalent length of fittings, the system will have inadequate draft — resulting in incomplete combustion, nuisance pressure switch lockouts, condensate freeze-up at the vent termination, and potential carbon monoxide spillage."</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="criteria-section">
+    <div class="criteria-header" onclick="tog(this)">
+      <div class="criteria-icon ci-green">📏</div>
+      <div><div class="criteria-title">Correct Vent Slope — Using a Level</div><div class="criteria-cn">排气坡度 — 用水平仪演示</div></div>
+      <div class="criteria-arrow">▶</div>
+    </div>
+    <div class="criteria-body">
+      <div class="speak-box">
+        <div class="speak-label">Say this while using level</div>
+        <div class="speak-text">"I'm using a level to verify the slope of this horizontal vent section. Per the manufacturer's installation instructions and Fig. 51, horizontal vent pipe must slope downward toward the furnace at a minimum of one-quarter inch per linear foot. This ensures condensate drains back to the furnace condensate trap rather than pooling in the pipe, which could block the vent or freeze."</div>
+      </div>
+      <div class="kv-grid">
+        <div class="kv"><span class="kv-val">¼"</span><span class="kv-lbl">min slope per foot toward furnace</span></div>
+        <div class="kv"><span class="kv-val">3 ft</span><span class="kv-lbl">max hanger spacing (PVC Sch40)</span></div>
+        <div class="kv"><span class="kv-val">15 lb-in</span><span class="kv-lbl">vent elbow clamp torque</span></div>
+        <div class="kv"><span class="kv-val">S636</span><span class="kv-lbl">Required Canadian certification</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="criteria-section">
+    <div class="criteria-header" onclick="tog(this)">
+      <div class="criteria-icon ci-cyan">⚡</div>
+      <div><div class="criteria-title">Gas Code Requirements — Acceptable S636 Venting Material</div><div class="criteria-cn">Gas Code要求 — S636材料规定</div></div>
+      <div class="criteria-arrow">▶</div>
+    </div>
+    <div class="criteria-body">
+      <div class="speak-box">
+        <div class="speak-label">Say this</div>
+        <div class="speak-text">"Per CAN/CSA B149.1 and the Carrier installation manual, venting for this condensing furnace must be composed of pipe, fittings, cements, and primers listed to ULC S636. The primer and cement must be the same manufacturer as the pipe and fittings. Acceptable materials include PVC Schedule 40, ABS Schedule 40, and CPVC — all ULC S636 listed. In Canada, Royal Pipe and IPEX systems are approved suppliers."</div>
+      </div>
+      <div class="warn info"><div class="warn-icon">📖</div><div>Source: Carrier manual p.31 — "Vent systems must be composed of pipe, fittings, cements, and primers from the same supplier and listed to ULC S636."</div></div>
+    </div>
+  </div>
+
+  <div class="criteria-section">
+    <div class="criteria-header" onclick="tog(this)">
+      <div class="criteria-icon ci-purple">🔌</div>
+      <div><div class="criteria-title">Solderless Electrical Connectors — Correct Installation</div><div class="criteria-cn">无焊电气接头 — Marrette · Spade · Bare Wire</div></div>
+      <div class="criteria-arrow">▶</div>
+    </div>
+    <div class="criteria-body">
+      <div class="sh">Wire Stripping</div>
+      <div class="speak-box">
+        <div class="speak-label">Say this</div>
+        <div class="speak-text">"I'm stripping the wire to the correct length — approximately three-quarters of an inch for a Marrette, matching the connector barrel length for a spade terminal. I'm using a wire stripping tool, being careful not to nick or score the conductor strands, which would weaken the wire."</div>
+      </div>
+
+      <div class="sh">Marrette (Wire Nut) — Tug Test</div>
+      <div class="steps">
+        <div class="step"><div class="step-n">1</div><div>Select correct Marrette size for the wire gauge and number of conductors.</div></div>
+        <div class="step"><div class="step-n">2</div><div>Insert stripped wires side by side. Twist Marrette clockwise until firm — wires should twist together inside.</div></div>
+        <div class="step"><div class="step-n">3</div><div>Perform tug test — pull each wire individually. No slippage = secure connection.</div></div>
+      </div>
+
+      <div class="sh">Spade (Quick-Disconnect) Terminal</div>
+      <div class="steps">
+        <div class="step"><div class="step-n">1</div><div>Insert stripped wire into terminal barrel fully.</div></div>
+        <div class="step"><div class="step-n">2</div><div>Crimp with correct crimping tool (not pliers).</div></div>
+        <div class="step"><div class="step-n">3</div><div>Tug test — no slippage.</div></div>
+      </div>
+
+      <div class="sh">Bare Wire — Screw Terminal (e.g., thermostat sub-base)</div>
+      <div class="steps">
+        <div class="step"><div class="step-n">1</div><div>Strip wire to correct length.</div></div>
+        <div class="step"><div class="step-n">2</div><div>Form a clockwise loop (so tightening screw draws wire in).</div></div>
+        <div class="step"><div class="step-n">3</div><div>Wrap wire ¾ around screw. Tighten clockwise.</div></div>
+        <div class="step"><div class="step-n">4</div><div>Tug test. Demonstrate correct wire gauge used for the circuit.</div></div>
+      </div>
+
+      <div class="speak-box">
+        <div class="speak-label">Say this — wire gauge</div>
+        <div class="speak-text">"I'm using 18 AWG colour-coded thermostat wire for the 24-volt control circuit — as specified in the installation manual. For 115-volt line-voltage connections, I'd use a minimum of 14 AWG copper conductors, protected by a 15-amp overcurrent device."</div>
+      </div>
+    </div>
+  </div>
+</div><!-- /s2 -->
+
+
+<!-- ═══════════════════════════════════════════
+     STATION 3 — Natural Draft Furnace
+════════════════════════════════════════════ -->
+<div class="page" id="s3">
+  <div class="station-hero">
+    <div class="station-num">Test Station 3</div>
+    <div class="station-name">Natural Draft Furnace Operation</div>
+    <div class="station-meta">
+      <span class="badge badge-amber">Random Selection</span>
+      <span class="badge badge-blue">/40 Marks</span>
+    </div>
+  </div>
+  <div class="scenario-block">
+    <div class="scenario-label">📋 Scenario</div>
+    <div class="scenario-text">Explain the operation of a natural draft furnace. Explain furnace sequence of operation. Identify major furnace components and explain their function. Demonstrate correct measurement and interpretation of voltage readings at transformer, across thermostat circuit and at gas valve. Demonstrate correctly installing solderless electrical connectors.</div>
+  </div>
+
+  <div class="criteria-section open">
+    <div class="criteria-header" onclick="tog(this)">
+      <div class="criteria-icon ci-amber">🏠</div>
+      <div><div class="criteria-title">Furnace Operation — Atmospheric Burner Design, Primary &amp; Secondary Air, Venting, Air Supply, Draft Diverter &amp; Smoke Test, Efficiency</div><div class="criteria-cn">自然通风炉工作原理</div></div>
+      <div class="criteria-arrow">▶</div>
+    </div>
+    <div class="criteria-body">
+      <div class="speak-box">
+        <div class="speak-label">Say this — Overview</div>
+        <div class="speak-text">"A natural draft furnace uses an atmospheric burner that draws combustion air by natural convection. Primary air is mixed with gas at the burner orifice through a venturi effect. Secondary air surrounds the flame and completes combustion. Hot combustion products rise by natural buoyancy up through the heat exchanger, through the draft diverter, and up the flue — no fan is required for venting. Efficiency is approximately 60 to 80 percent AFUE because the flue gas leaves at high temperature, carrying significant heat up the chimney."</div>
+      </div>
+
+      <div class="sh">Draft Diverter — Purpose &amp; Smoke Test</div>
+      <div class="speak-box">
+        <div class="speak-label">Say this — Draft Diverter</div>
+        <div class="speak-text">"The draft diverter serves three functions: it relieves sudden down-drafts that could extinguish the pilot flame; it dilutes flue gases with room air to prevent chimney deterioration; and it maintains a constant, stable draft at the heat exchanger regardless of variations in chimney pull."</div>
+      </div>
+      <div class="speak-box">
+        <div class="speak-label">Say this — Smoke / Spillage Test</div>
+        <div class="speak-text">"To perform the spillage test, I run the furnace for at least 5 minutes, then hold a smoke match or candle at the relief opening of the draft diverter. If smoke is drawn in — toward the furnace — draft is functioning correctly. If smoke is pushed out — spillage — combustion gases are entering the living space. I must immediately shut down the furnace and investigate the cause."</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="criteria-section">
+    <div class="criteria-header" onclick="tog(this)">
+      <div class="criteria-icon ci-blue">📋</div>
+      <div><div class="criteria-title">Sequence of Operation — Natural Draft Furnace</div><div class="criteria-cn">自然通风炉操作顺序</div></div>
+      <div class="criteria-arrow">▶</div>
+    </div>
+    <div class="criteria-body">
+      <div class="seq">
+        <div class="seq-row">
+          <div class="seq-spine"><div class="seq-dot">1</div><div class="seq-line"></div></div>
+          <div class="seq-content">
+            <div class="seq-title">Thermostat calls for heat — R-to-W closes — 24V to gas valve</div>
+            <div class="speak-box"><div class="speak-label">Say this</div><div class="speak-text">"The thermostat closes the R-to-W circuit, applying 24 volts to the gas valve coil. On a standing pilot system, the pilot is already burning, so the main gas valve opens immediately."</div></div>
+          </div>
+        </div>
+        <div class="seq-row">
+          <div class="seq-spine"><div class="seq-dot">2</div><div class="seq-line"></div></div>
+          <div class="seq-content">
+            <div class="seq-title">Gas valve opens — main burners ignite from pilot</div>
+            <div class="speak-box"><div class="speak-label">Say this</div><div class="speak-text">"The gas valve opens, gas flows to the main burners, and the standing pilot ignites the main burner flame. There is no inducer motor — combustion gases rise by natural buoyancy through the heat exchanger and up the flue."</div></div>
+          </div>
+        </div>
+        <div class="seq-row">
+          <div class="seq-spine"><div class="seq-dot">3</div><div class="seq-line"></div></div>
+          <div class="seq-content">
+            <div class="seq-title">Heat exchanger warms → Fan switch closes → Blower starts</div>
+            <div class="speak-box"><div class="speak-label">Say this</div><div class="speak-text">"As the heat exchanger warms, the fan switch bimetal element within the fan/limit control reaches its set point — typically around 130°F — and closes, starting the circulating blower motor to distribute warm air. The fan switch is temperature-actuated, not time-delayed."</div></div>
+          </div>
+        </div>
+        <div class="seq-row">
+          <div class="seq-spine"><div class="seq-dot">4</div><div class="seq-line"></div></div>
+          <div class="seq-content">
+            <div class="seq-title">Thermostat satisfied → Gas valve closes → Blower continues until cool</div>
+            <div class="speak-box"><div class="speak-label">Say this</div><div class="speak-text">"When the thermostat is satisfied, the gas valve closes and the burners shut off. The blower continues to run until the heat exchanger cools enough for the fan switch to open — typically around 90 to 100°F — then the blower shuts down."</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="criteria-section">
+    <div class="criteria-header" onclick="tog(this)">
+      <div class="criteria-icon ci-purple">🔧</div>
+      <div><div class="criteria-title">Identify Components: Gas Valve Coil, Transformer, Thermostat Circuits &amp; Contacts — Indicate Expected Voltages</div><div class="criteria-cn">零件识别 + 预期电压</div></div>
+      <div class="criteria-arrow">▶</div>
+    </div>
+    <div class="criteria-body">
+      <div class="sh">Components — Natural Draft Furnace</div>
+      <div class="comp-grid">
+        <div class="comp"><div class="comp-name">Limit / Fan Switch</div><div class="comp-cn">风机/限位开关</div><div class="comp-fn">Combined bimetal device. Fan section: temperature-actuated (closes ~130°F, opens ~90°F). Limit section: over-temp protection, opens at ~200°F for forced warm-air furnace, cutting 24V to gas valve.</div></div>
+        <div class="comp"><div class="comp-name">Blower Motor</div><div class="comp-cn">循环风机</div><div class="comp-fn">Started by fan switch closing (temp-actuated). Runs until exchanger cools. Multiple speed taps selectable.</div></div>
+        <div class="comp"><div class="comp-name">Pilot / Thermocouple</div><div class="comp-cn">长明火 / 热电偶</div><div class="comp-fn">Standing pilot burns continuously. Thermocouple tip in flame generates 25–30 mV to hold gas valve safety seat open.</div></div>
+        <div class="comp"><div class="comp-name">Heat Exchanger</div><div class="comp-cn">热交换器</div><div class="comp-fn">Single-stage (primary only). Hot combustion gases flow through; return air flows over the outside surface, picking up heat.</div></div>
+        <div class="comp"><div class="comp-name">Draft Diverter</div><div class="comp-cn">调风板</div><div class="comp-fn">Relieves down-draft, dilutes flue gas, maintains stable heat exchanger draft. Located between heat exchanger outlet and flue connector.</div></div>
+        <div class="comp"><div class="comp-name">Gas Valve</div><div class="comp-cn">气阀</div><div class="comp-fn">24V coil. Includes thermocouple safety seat (millivolt), main gas operator, and pilot operator. Verify pilot valve is correct for NG or LP.</div></div>
+      </div>
+
+      <div class="sh">Expected Voltages — Indicate to Examiner</div>
+      <table class="tbl">
+        <tr><th>Point</th><th>Normal Voltage</th></tr>
+        <tr><td>Transformer Primary</td><td class="tbl-val">115 V AC</td></tr>
+        <tr><td>Transformer Secondary</td><td class="tbl-val">24 V AC</td></tr>
+        <tr><td>Gas Valve coil (heating call active)</td><td class="tbl-val">24 V AC</td></tr>
+        <tr><td>Gas Valve coil (no call / satisfied)</td><td class="tbl-val">0 V</td></tr>
+        <tr><td>Thermostat W terminal (calling)</td><td class="tbl-val">24 V AC</td></tr>
+        <tr><td>Limit switch — normal (closed)</td><td class="tbl-val">0 V (no drop across closed switch)</td></tr>
+        <tr><td>Limit switch — tripped (open)</td><td class="tbl-val">24 V (full voltage appears across open switch)</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="criteria-section">
+    <div class="criteria-header" onclick="tog(this)">
+      <div class="criteria-icon ci-red">📏</div>
+      <div><div class="criteria-title">Correctly Measure Voltages — Multimeter Demonstration</div><div class="criteria-cn">万用表正确测量电压</div></div>
+      <div class="criteria-arrow">▶</div>
+    </div>
+    <div class="criteria-body">
+      <div class="speak-box"><div class="speak-label">Do this first</div><div class="speak-text">"Before any measurement, I'm testing my meter — select continuity, short the leads, confirm beep. Now I'll switch to VAC, select a range above 120 volts for primary measurements."</div></div>
+      <div class="steps">
+        <div class="step"><div class="step-n">1</div><div>Measure transformer primary (L1–Neutral): confirm 115 VAC.</div></div>
+        <div class="step"><div class="step-n">2</div><div>Measure transformer secondary: confirm 24 VAC.</div></div>
+        <div class="step"><div class="step-n">3</div><div>With thermostat calling: measure W to COM — confirm 24 VAC.</div></div>
+        <div class="step"><div class="step-n">4</div><div>Measure across gas valve coil during heating call — confirm 24 VAC.</div></div>
+        <div class="step"><div class="step-n">5</div><div>State interpretation of each reading to examiner.</div></div>
+      </div>
+    </div>
+  </div>
+</div><!-- /s3 -->
+
+
+<!-- ═══════════════════════════════════════════
+     STATION 4 — Standing Pilot / 30mV
+════════════════════════════════════════════ -->
+<div class="page" id="s4">
+  <div class="station-hero">
+    <div class="station-num">Test Station 4</div>
+    <div class="station-name">Standing Pilot — 30 mV Thermocouple / Flame Safe Guard System</div>
+    <div class="station-meta">
+      <span class="badge badge-amber">Random Selection</span>
+      <span class="badge badge-blue">/40 Marks</span>
+    </div>
+  </div>
+  <div class="scenario-block">
+    <div class="scenario-label">📋 Scenario</div>
+    <div class="scenario-text">Measure and interpret standing pilot millivolt circuit readings for a 30 mV thermocouple pilot safety system connected to functioning furnace. Conduct: Open circuit · Closed circuit · Drop out · Flame Failure Response Time. Identify various wire types and applications NMD/NMW BX, thermostat wire, AWG sizes, fuse requirements.</div>
+  </div>
+
+  <div class="criteria-section open">
+    <div class="criteria-header" onclick="tog(this)">
+      <div class="criteria-icon ci-amber">⚡</div>
+      <div><div class="criteria-title">When Would You Conduct This Test? (Pilot outage)</div><div class="criteria-cn">何时进行此测试</div></div>
+      <div class="criteria-arrow">▶</div>
+    </div>
+    <div class="criteria-body">
+      <div class="speak-box">
+        <div class="speak-label">Say this</div>
+        <div class="speak-text">"I would generally conduct thermocouple millivolt testing when a pilot outage has occurred — when the pilot will not stay lit after the knob is released, or when the main burner fails to ignite even though the pilot appears lit. It helps determine whether the thermocouple is generating adequate voltage to hold the gas valve safety seat open."</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="criteria-section open">
+    <div class="criteria-header" onclick="tog(this)">
+      <div class="criteria-icon ci-blue">🔬</div>
+      <div><div class="criteria-title">Three Tests + Flame Failure Response Time</div><div class="criteria-cn">三项测试 + 火焰故障响应时间</div></div>
+      <div class="criteria-arrow">▶</div>
+    </div>
+    <div class="criteria-body">
+      <div class="kv-grid">
+        <div class="kv"><span class="kv-val">25–30 mV</span><span class="kv-lbl">Open Circuit (no load)</span></div>
+        <div class="kv"><span class="kv-val">≥10 mV</span><span class="kv-lbl">Closed Circuit (under load, minimum)</span></div>
+        <div class="kv"><span class="kv-val">2–4 mV</span><span class="kv-lbl">Drop-Out voltage</span></div>
+        <div class="kv"><span class="kv-val">≤90 sec</span><span class="kv-lbl">Gas Code: valve must close</span></div>
+      </div>
+
+      <div class="sh">1. Open Circuit Test</div>
+      <div class="speak-box"><div class="speak-label">Say this</div><div class="speak-text">"For the open circuit test, I disconnect the thermocouple from the gas valve and measure the millivolt output directly at the thermocouple connection with the pilot burning normally. I'm reading 28 millivolts — within the normal range of 25 to 30 mV. This confirms the thermocouple is generating adequate EMF."</div></div>
+
+      <div class="sh">2. Closed Circuit Test (Under Load)</div>
+      <div class="speak-box"><div class="speak-label">Say this</div><div class="speak-text">"For the closed circuit test, I install the thermocouple adaptor to reconnect the thermocouple to the gas valve while maintaining a measurement point. With the thermocouple under load — powering the safety magnet — I measure the voltage. Per the exam criteria, the output under load should not be less than 10 millivolts. A reading below 10 mV indicates a weak thermocouple or a defective gas valve magnet."</div></div>
+
+      <div class="sh">3. Drop-Out Test</div>
+      <div class="speak-box"><div class="speak-label">Say this</div><div class="speak-text">"For the drop-out test, I extinguish the pilot and start timing. I watch the millivolt reading drop — from approximately 25–30 mV toward 2–4 mV — and listen for the gas valve to click closed. The Gas Code requires the valve to close within 90 seconds of pilot outage. The 2 to 4 millivolt drop-out voltage indicates the minimum EMF that can hold the safety magnet open."</div></div>
+
+      <div class="sh">Thermocouple Removal &amp; Installation — Correct Wrench Use</div>
+      <div class="steps">
+        <div class="step"><div class="step-n">Remove</div><div>Hand-tight plus ¼ turn with wrench to loosen (do not over-tighten or strip threads).</div></div>
+        <div class="step"><div class="step-n">Install</div><div>Thread by hand until snug, then tighten ¼ turn with wrench. "Hand tight plus one-quarter turn."</div></div>
+        <div class="step"><div class="step-n">Position</div><div>Tip of thermocouple must be in the pilot flame: ½ inch to ⅜ inch of the thermocouple tip enveloped by the pilot flame.</div></div>
+      </div>
+
+      <div class="sh">Thermocouple Adaptor — Closed Circuit Test Installation</div>
+      <div class="speak-box"><div class="speak-label">Say this</div><div class="speak-text">"When conducting the closed circuit test, I install the thermocouple adaptor between the thermocouple and the gas valve connection fitting. This allows me to take a millivolt reading under actual load conditions — with the thermocouple powering the gas valve safety electromagnet — which is the more meaningful test of real-world thermocouple performance."</div></div>
+    </div>
+  </div>
+
+  <div class="criteria-section">
+    <div class="criteria-header" onclick="tog(this)">
+      <div class="criteria-icon ci-green">🔥</div>
+      <div><div class="criteria-title">Pilot Flame Characteristics — Steady, Strong, Blue/Luminous, Thermocouple Location</div><div class="criteria-cn">长明火火焰特征 + 热电偶位置</div></div>
+      <div class="criteria-arrow">▶</div>
+    </div>
+    <div class="criteria-body">
+      <div class="speak-box"><div class="speak-label">Say this</div><div class="speak-text">"A correct pilot flame should be steady and strong — not flickering or lifting. If the pilot is aerated — primary air is mixed with the gas — the flame will be blue, almost transparent. If the pilot is non-aerated — no primary air inlet — the flame will be luminous, yellow-orange in colour. Either can be correct depending on design. The thermocouple tip should be enveloped by the pilot flame approximately one-half to three-eighths of an inch. A weak, yellowish, or sooty flame produces inadequate millivoltage."</div></div>
+    </div>
+  </div>
+
+  <div class="criteria-section">
+    <div class="criteria-header" onclick="tog(this)">
+      <div class="criteria-icon ci-purple">🔌</div>
+      <div><div class="criteria-title">Wire Types, Sizes, Applications &amp; Fuse Requirements</div><div class="criteria-cn">线材类型、规格、应用和保险丝要求</div></div>
+      <div class="criteria-arrow">▶</div>
+    </div>
+    <div class="criteria-body">
+      <div class="speak-box"><div class="speak-label">Say this — using the sheet provided</div><div class="speak-text">"I'm identifying each numbered wire. I'll indicate the wire type, the AWG size — measuring diameter with a wire gauge if needed — the application for that wire type, and the appropriate fuse or breaker rating."</div></div>
+      <table class="tbl">
+        <tr><th>Wire Type</th><th>Application</th><th>Common Gauge</th><th>Fuse / Breaker</th></tr>
+        <tr><td>NMD 90</td><td>Indoor fixed wiring, dry locations</td><td class="tbl-val">14 AWG / 12 AWG</td><td class="tbl-val">15A / 20A</td></tr>
+        <tr><td>NMW BX (Armoured)</td><td>Indoor wiring, mechanical protection</td><td class="tbl-val">14 AWG / 12 AWG</td><td class="tbl-val">15A / 20A</td></tr>
+        <tr><td>Thermostat Wire</td><td>Low-voltage 24V control circuits</td><td class="tbl-val">18 AWG (≤100 ft) / 16 AWG (&gt;100 ft)</td><td class="tbl-val">3A (on control board)</td></tr>
+      </table>
+    </div>
+  </div>
+</div><!-- /s4 -->
+
+
+<!-- ═══════════════════════════════════════════
+     STATION 5 — Digital Thermostat / Fireplace
+════════════════════════════════════════════ -->
+<div class="page" id="s5">
+  <div class="station-hero">
+    <div class="station-num">Test Station 5</div>
+    <div class="station-name">Install 24V Digital Thermostat &amp; Fireplace Safe Startup</div>
+    <div class="station-meta">
+      <span class="badge badge-amber">Random Selection</span>
+      <span class="badge badge-blue">/40 Marks</span>
+    </div>
+  </div>
+  <div class="scenario-block">
+    <div class="scenario-label">📋 Scenario</div>
+    <div class="scenario-text">Explain the operation of a 24-volt digital thermostat including function and setting of anticipator. Demonstrate professional installation of a 24-volt digital thermostat to a Fireplace gas valve. Properly determine what the thermostat heat anticipator setting should be. Demonstrate safe start-up procedure.</div>
+  </div>
+
+  <div class="criteria-section open">
+    <div class="criteria-header" onclick="tog(this)">
+      <div class="criteria-icon ci-blue">🌡️</div>
+      <div><div class="criteria-title">Thermostat Wiring — Power Disconnected, Proper Size Wire, Correct Terminals R-W, Secure Connections, Level</div><div class="criteria-cn">恒温器接线</div></div>
+      <div class="criteria-arrow">▶</div>
+    </div>
+    <div class="criteria-body">
+      <div class="warn danger"><div class="warn-icon">⚠️</div><div>Always demonstrate wiring of thermostat with power DISCONNECTED to the fireplace. Prevent accidental 24V shorts.</div></div>
+      <div class="steps">
+        <div class="step"><div class="step-n">1</div><div>Confirm power is off at the appliance disconnect.</div></div>
+        <div class="step"><div class="step-n">2</div><div>Use 18 AWG colour-coded thermostat wire (as specified — Carrier manual p.28: "Use AWG No. 18 color-coded copper thermostat wire for lengths up to 100 ft").</div></div>
+        <div class="step"><div class="step-n">3</div><div>Connect: R (24V hot from transformer) → R terminal; W (heating call) → W terminal on thermostat. For fireplace heating circuit: R-W is the only circuit required.</div></div>
+        <div class="step"><div class="step-n">4</div><div>Ensure all connections are secure — no bare wire exposed beyond terminal, no loose strands.</div></div>
+        <div class="step"><div class="step-n">5</div><div>Mount thermostat level using built-in bubble level or external level — a tilted thermostat bimetal can affect temperature calibration.</div></div>
+      </div>
+      <div class="speak-box"><div class="speak-label">Say this</div><div class="speak-text">"I'm wiring the thermostat with power disconnected. I'm using 18 AWG colour-coded copper thermostat wire. The R terminal receives the 24-volt hot supply from the transformer; the W terminal carries the heating call to the gas valve. I'll verify all connections are tight and the thermostat is mounted level."</div></div>
+    </div>
+  </div>
+
+  <div class="criteria-section">
+    <div class="criteria-header" onclick="tog(this)">
+      <div class="criteria-icon ci-amber">⚙️</div>
+      <div><div class="criteria-title">Heat Anticipator — Function, Explanation &amp; Setting Current Draw</div><div class="criteria-cn">热预感器 — 原理 + 电流测量 + 设置</div></div>
+      <div class="criteria-arrow">▶</div>
+    </div>
+    <div class="criteria-body">
+      <div class="speak-box"><div class="speak-label">Say this — Function</div><div class="speak-text">"The heat anticipator is a small fixed or adjustable resistor inside a mechanical thermostat bimetal. It carries the current of the R-to-W circuit and generates a small amount of heat directly on the bimetal, causing the thermostat to shut off the furnace slightly before the room reaches the set point. This compensates for the residual heat stored in the heat exchanger, preventing room temperature overshoot. The anticipator is set to match the actual current draw through the heating circuit."</div></div>
+
+      <div class="sh">How to Set the Anticipator — Ammeter Method</div>
+      <div class="steps">
+        <div class="step"><div class="step-n">1</div><div>Remove thermostat from sub-base (do not disconnect wires — keep circuit active).</div></div>
+        <div class="step"><div class="step-n">2</div><div>Connect a hook-around ammeter across the R and W sub-base terminals by wrapping the wire 10 turns around the ammeter jaws.</div></div>
+        <div class="step"><div class="step-n">3</div><div>Ensure thermostat is calling for heat (thermostat leads jumpered at sub-base R-W if needed).</div></div>
+        <div class="step"><div class="step-n">4</div><div>Record ammeter reading. Divide by 10 (because of 10 turns) to get true current.</div></div>
+        <div class="step"><div class="step-n">5</div><div>Set anticipator dial to that value.</div></div>
+      </div>
+      <div class="formula">True Current (A) = Ammeter Reading ÷ 10 turns<div class="formula-note">Example: Ammeter reads 5.0A → 5.0 ÷ 10 = 0.5A → set anticipator to 0.5</div></div>
+      <div class="speak-box"><div class="speak-label">Say this</div><div class="speak-text">"I'm wrapping the R-to-W wire 10 turns around the jaws of my hook-around ammeter to amplify the low current reading. I read 5 amps on the meter — divided by 10 turns gives 0.5 amps actual. I'll set the heat anticipator to 0.5."</div></div>
+    </div>
+  </div>
+
+  <div class="criteria-section">
+    <div class="criteria-header" onclick="tog(this)">
+      <div class="criteria-icon ci-purple">🔥</div>
+      <div><div class="criteria-title">Gas Valve Operation — Pilot / On / Off Settings, Pilotstat</div><div class="criteria-cn">气阀操作 — Pilot/On/Off旋钮说明</div></div>
+      <div class="criteria-arrow">▶</div>
+    </div>
+    <div class="criteria-body">
+      <div class="speak-box"><div class="speak-label">Say this</div><div class="speak-text">"The gas control knob on a fireplace valve has three positions: PILOT — which allows gas flow to the pilot orifice only, for lighting the pilot; ON — which allows gas to flow to both the pilot and the main burner, controlled by the thermostat; and OFF — which closes all gas flow. The pilotstat is the thermocouple safety seat inside the valve — it must be energized by the thermocouple before the ON position can operate the main burner."</div></div>
+    </div>
+  </div>
+
+  <div class="criteria-section">
+    <div class="criteria-header" onclick="tog(this)">
+      <div class="criteria-icon ci-red">🔥</div>
+      <div><div class="criteria-title">Furnace Safe Startup — Correct Pilot Lighting Procedure</div><div class="criteria-cn">安全启动程序 — 壁炉点火</div></div>
+      <div class="criteria-arrow">▶</div>
+    </div>
+    <div class="criteria-body">
+      <div class="warn danger"><div class="warn-icon">⚠️</div><div>Hands must stay OUTSIDE the combustion opening at all times. Light the lighter FIRST — before introducing gas. This is a critical safety assessment point.</div></div>
+
+      <div class="seq">
+        <div class="seq-row"><div class="seq-spine"><div class="seq-dot">1</div><div class="seq-line"></div></div>
+          <div class="seq-content"><div class="seq-title">Turn gas control knob to PILOT position.</div>
+          <div class="speak-box"><div class="speak-label">Say this</div><div class="speak-text">"I'm turning the gas control knob to the PILOT position."</div></div></div></div>
+        <div class="seq-row"><div class="seq-spine"><div class="seq-dot">2</div><div class="seq-line"></div></div>
+          <div class="seq-content"><div class="seq-title">Face the back of the appliance. Hands outside the combustion opening.</div>
+          <div class="speak-box"><div class="speak-label">Say this</div><div class="speak-text">"I'm facing the back of the appliance and keeping my hands outside of the combustion opening."</div></div></div></div>
+        <div class="seq-row"><div class="seq-spine"><div class="seq-dot">3</div><div class="seq-line"></div></div>
+          <div class="seq-content"><div class="seq-title">Light the extension lighter FIRST — place next to pilot.</div>
+          <div class="speak-box"><div class="speak-label">Say this</div><div class="speak-text">"I'm lighting the extension lighter first, before introducing any gas, and placing it next to the pilot orifice."</div></div></div></div>
+        <div class="seq-row"><div class="seq-spine"><div class="seq-dot">4</div><div class="seq-line"></div></div>
+          <div class="seq-content"><div class="seq-title">Depress pilot knob — hold 60 seconds once pilot lights.</div>
+          <div class="speak-box"><div class="speak-label">Say this</div><div class="speak-text">"I'm depressing the pilot knob to introduce gas to the pilot. Once the pilot lights, I'll hold the knob down for 60 seconds to allow the thermocouple to heat sufficiently and generate enough millivoltage to hold the safety seat open."</div></div></div></div>
+        <div class="seq-row"><div class="seq-spine"><div class="seq-dot">5</div><div class="seq-line"></div></div>
+          <div class="seq-content"><div class="seq-title">Release knob. Confirm pilot holds. Turn gas cock ON.</div>
+          <div class="speak-box"><div class="speak-label">Say this</div><div class="speak-text">"I'm releasing the knob — the pilot remains lit, confirming the thermocouple is holding the safety valve open. I'll now turn the gas cock to the ON position."</div></div></div></div>
+        <div class="seq-row"><div class="seq-spine"><div class="seq-dot">6</div><div class="seq-line"></div></div>
+          <div class="seq-content"><div class="seq-title">With gas valve ON and thermostat calling — observe smooth light-off within a few seconds.</div>
+          <div class="speak-box"><div class="speak-label">Say this</div><div class="speak-text">"With the gas valve in the ON position and the thermostat calling for heat, I observe the main burners light smoothly within a few seconds. NOTE: If the fireplace does not light smoothly within a few seconds, I will IMMEDIATELY turn the gas valve back to the PILOT position, then investigate the cause before attempting again."</div></div></div></div>
+      </div>
+    </div>
+  </div>
+</div><!-- /s5 -->
+
+
+<!-- ═══════════════════════════════════════════
+     STATION 6 — Gas Pressure Regulators
+════════════════════════════════════════════ -->
+<div class="page" id="s6">
+  <div class="station-hero">
+    <div class="station-num">Test Station 6</div>
+    <div class="station-name">Gas Pressure Regulator Setup</div>
+    <div class="station-meta">
+      <span class="badge badge-amber">Random Selection</span>
+      <span class="badge badge-blue">/40 Marks</span>
+    </div>
+  </div>
+  <div class="scenario-block">
+    <div class="scenario-label">📋 Scenario</div>
+    <div class="scenario-text">Explain the purpose of gas pressure regulators. Identify the main components of a natural gas service regulator and explain their function. Demonstrate correct adjustment of: (a) natural gas service regulator to 7" WC using NG Supply Simulation Board; (b) appliance regulator to 3.5" WC using NG Supply Simulation Board; (c) propane first stage regulator to 10 PSIG using Propane Supply Simulation Board; (d) propane second stage regulator to 11" WC using Propane Supply Simulation Board. Clock burner input and indicate input in BTU/h using imperial gas meter. Identify various wire types/applications NMD/NMW BX, thermostat wire, AWG sizes, fuse requirements.</div>
+  </div>
+
+  <div class="criteria-section open">
+    <div class="criteria-header" onclick="tog(this)">
+      <div class="criteria-icon ci-amber">⚙️</div>
+      <div><div class="criteria-title">Regulator Components — Identify &amp; Explain Function</div><div class="criteria-cn">调节器五大组件 — 识别 + 功能</div></div>
+      <div class="criteria-arrow">▶</div>
+    </div>
+    <div class="criteria-body">
+      <div class="comp-grid">
+        <div class="comp"><div class="comp-name">Loading Element (Spring)</div><div class="comp-cn">负载弹簧</div><div class="comp-fn">Provides the reference set-point force. Clockwise = compress spring = increase outlet pressure. Counter-clockwise = reduce pressure.</div>
+        <div class="speak-box" style="margin-top:6px"><div class="speak-label">Say this</div><div class="speak-text">"The loading element is the spring. Turning the adjustment screw clockwise compresses the spring and increases outlet pressure."</div></div></div>
+        <div class="comp"><div class="comp-name">Measuring Element (Diaphragm)</div><div class="comp-cn">测量膜片</div><div class="comp-fn">Flexible membrane that senses outlet pressure. Moves upward when outlet pressure increases (restricting orifice), downward when outlet pressure drops (opening orifice).</div>
+        <div class="speak-box" style="margin-top:6px"><div class="speak-label">Say this</div><div class="speak-text">"The diaphragm is the measuring element. It senses changes in outlet pressure and moves to balance against the spring force, modulating the restricting element."</div></div></div>
+        <div class="comp"><div class="comp-name">Restricting Element (Orifice / Valve Seat)</div><div class="comp-cn">节流元件（孔板/阀座）</div><div class="comp-fn">Disk, valve seat, or plug that physically controls gas flow. Diaphragm movement opens or closes this element to maintain set pressure.</div>
+        <div class="speak-box" style="margin-top:6px"><div class="speak-label">Say this</div><div class="speak-text">"The restricting element — a disk or valve seat — controls the actual gas flow. The diaphragm opens or closes it to maintain the set outlet pressure."</div></div></div>
+        <div class="comp"><div class="comp-name">Atmospheric Vent</div><div class="comp-cn">大气排气口</div><div class="comp-fn">Allows the space below the diaphragm to communicate with atmosphere, enabling the diaphragm to move freely in response to pressure changes. If blocked — by ice, insects, or debris — the regulator cannot regulate correctly.</div>
+        <div class="speak-box" style="margin-top:6px"><div class="speak-label">Say this</div><div class="speak-text">"The atmospheric vent allows the underside of the diaphragm to reference atmospheric pressure, so it can accurately sense and respond to outlet pressure variations."</div></div></div>
+      </div>
+      <div class="speak-box"><div class="speak-label">Purpose of Regulator — Say this first</div><div class="speak-text">"The purpose of a gas pressure regulator is to reduce a higher, varying upstream supply pressure to a lower, constant downstream delivery pressure — regardless of variations in supply pressure or gas flow rate — ensuring safe and efficient appliance operation."</div></div>
+    </div>
+  </div>
+
+  <div class="criteria-section">
+    <div class="criteria-header" onclick="tog(this)">
+      <div class="criteria-icon ci-blue">📊</div>
+      <div><div class="criteria-title">Demonstrate Correct Adjustment — All Four Regulators</div><div class="criteria-cn">四种调节器调压演示</div></div>
+      <div class="criteria-arrow">▶</div>
+    </div>
+    <div class="criteria-body">
+      <div class="warn amber"><div class="warn-icon">⚡</div><div>Note: Propane first stage supply pressure is 30–40 PSIG — do NOT use a water column manometer (WC gauge). Use a PSIG pressure gauge.</div></div>
+
+      <div class="sh">Manometer — Zeroing and Scale</div>
+      <div class="steps">
+        <div class="step"><div class="step-n">1</div><div>Connect manometer hose to test port — gas supply OFF.</div></div>
+        <div class="step"><div class="step-n">2</div><div>Zero the manometer with no pressure applied.</div></div>
+        <div class="step"><div class="step-n">3</div><div>Select correct scale (WC for low pressure; PSIG gauge for propane 1st stage).</div></div>
+        <div class="step"><div class="step-n">4</div><div>Open gas — read pressure — adjust regulator — replace cap before taking final reading.</div></div>
+      </div>
+      <div class="speak-box"><div class="speak-label">Say this</div><div class="speak-text">"Before taking any pressure readings, I'm zeroing the manometer with no gas pressure applied to ensure accurate readings. I'll select the correct scale for this measurement."</div></div>
+
+      <table class="tbl" style="margin-top:10px">
+        <tr><th>Regulator</th><th>Supply Pressure (Input)</th><th>Target Outlet</th><th>Tool</th></tr>
+        <tr><td>NG Service Regulator</td><td>2–5 PSIG (set by instructor)</td><td class="tbl-val">7" WC</td><td>WC Manometer</td></tr>
+        <tr><td>NG Appliance Regulator</td><td>7" WC</td><td class="tbl-val">3.5" WC</td><td>WC Manometer</td></tr>
+        <tr><td>Propane 1st Stage</td><td>30–40 PSIG (high pressure)</td><td class="tbl-val">10 PSIG</td><td>PSIG gauge (NOT manometer)</td></tr>
+        <tr><td>Propane 2nd Stage</td><td>10 PSIG</td><td class="tbl-val">11" WC</td><td>WC Manometer</td></tr>
+      </table>
+
+      <div class="sh">Adjustment Procedure</div>
+      <div class="steps">
+        <div class="step"><div class="step-n">1</div><div>Remove the regulator adjustment cover cap.</div></div>
+        <div class="step"><div class="step-n">2</div><div>Turn adjusting screw: <strong>clockwise = increase pressure</strong> / <strong>counter-clockwise = decrease pressure</strong>.</div></div>
+        <div class="step"><div class="step-n">3</div><div>Make small incremental adjustments — monitor manometer.</div></div>
+        <div class="step"><div class="step-n">4</div><div>Replace cover cap before taking the final pressure reading.</div></div>
+      </div>
+      <div class="speak-box"><div class="speak-label">Say this</div><div class="speak-text">"I'm removing the regulator adjustment cover cap. Turning the screw clockwise increases outlet pressure; counter-clockwise decreases it. I'll replace the cap before taking the final reading, as the cap can affect the reading on some regulators."</div></div>
+
+      <div class="sh">Block Vent Effect</div>
+      <div class="speak-box"><div class="speak-label">Say this</div><div class="speak-text">"If the atmospheric vent on a service regulator becomes blocked — by an insect nest, ice, or debris — the diaphragm cannot reference atmospheric pressure correctly. The outlet pressure will typically rise uncontrolled, potentially over-pressurizing appliances and causing over-firing, heat exchanger failure, or a hazardous condition."</div></div>
+
+      <div class="sh">Leak Limiting Orifice</div>
+      <div class="speak-box"><div class="speak-label">Say this</div><div class="speak-text">"A leak limiting orifice is a small fixed orifice in an appliance regulator that limits gas escape if the diaphragm ruptures. It can only be used where gas supply pressure does not exceed the limits specified in the Gas Code — generally not more than 2 PSIG for natural gas applications at the appliance. The allowable leakage rate is defined by CAN/CSA B149.1."</div></div>
+    </div>
+  </div>
+</div><!-- /s6 -->
+
+
+<!-- ═══════════════════════════════════════════
+     STATION 7 — Purging, Leak Testing, Clocking
+════════════════════════════════════════════ -->
+<div class="page" id="s7">
+  <div class="station-hero">
+    <div class="station-num">Test Station 7</div>
+    <div class="station-name">Purging, Leak Testing &amp; Safe Start Up — High Efficiency Furnace</div>
+    <div class="station-meta">
+      <span class="badge badge-amber">Random Selection</span>
+      <span class="badge badge-blue">/40 Marks</span>
+    </div>
+  </div>
+  <div class="scenario-block">
+    <div class="scenario-label">📋 Scenario</div>
+    <div class="scenario-text">Demonstrate purging of gas line to High Efficiency furnace using approved purging tool in accordance with Gas Code. Demonstrate conducting of soap test and gas meter dial test following purging procedure. Demonstrate safe start up procedure. Demonstrate correctly clocking appliance input to furnace using metric meter. Calculate rate of flow in metres per hour and explain how to convert gas flow from cubic metres per hour to BTU/h. Calculate BTU/h and compare with indicated BTU/h input rating plate. Indicate if input is acceptable.</div>
+  </div>
+
+  <div class="criteria-section open">
+    <div class="criteria-header" onclick="tog(this)">
+      <div class="criteria-icon ci-red">⚠️</div>
+      <div><div class="criteria-title">Purging — Code Requirements &amp; Correct Use of Purging Tool</div><div class="criteria-cn">清管 — Gas Code规定 + 清管工具使用</div></div>
+      <div class="criteria-arrow">▶</div>
+    </div>
+    <div class="criteria-body">
+      <div class="speak-box"><div class="speak-label">Say this — Code requirements on purging tool</div><div class="speak-text">"Per CAN/CSA B149.1, a purging tool — also called a purging device — may only be used when the purge volume does not exceed the limits specified in the code. Before beginning, I must verify there are absolutely no sources of ignition in the area — no open flames, no electrical switches being operated, no smoking. I must never purge gas directly into a combustion chamber."</div></div>
+
+      <div class="warn danger"><div class="warn-icon">⚠️</div><div>Never purge a gas line into a combustion chamber. Never test for gas leaks with an open flame. Use only commercially available soap solution. (Carrier manual p.53 — WARNING: "Never purge a gas line into a combustion chamber.")</div></div>
+
+      <div class="sh">Purging Procedure</div>
+      <div class="steps">
+        <div class="step"><div class="step-n">1</div><div>Confirm no sources of ignition in the area.</div></div>
+        <div class="step"><div class="step-n">2</div><div>Connect approved purging tool to gas line.</div></div>
+        <div class="step"><div class="step-n">3</div><div>Purge air from line until gas is present (confirmed by smell or detector).</div></div>
+        <div class="step"><div class="step-n">4</div><div>Close purging tool. Proceed to leak testing.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="criteria-section">
+    <div class="criteria-header" onclick="tog(this)">
+      <div class="criteria-icon ci-amber">🧼</div>
+      <div><div class="criteria-title">Soap Test &amp; Dial Test — Following Purging Procedure</div><div class="criteria-cn">皂液测试 + 拨盘测试</div></div>
+      <div class="criteria-arrow">▶</div>
+    </div>
+    <div class="criteria-body">
+      <div class="sh">Soap Test</div>
+      <div class="speak-box"><div class="speak-label">Say this</div><div class="speak-text">"I'm applying a commercially available leak detection solution to all gas connections and fittings after purging. I'll inspect each joint for bubble formation — any bubbles indicate a gas leak that must be corrected before startup. I will never use an open flame to test for leaks."</div></div>
+
+      <div class="sh">Gas Meter Dial Test</div>
+      <div class="speak-box"><div class="speak-label">Say this</div><div class="speak-text">"For the dial test, I close all gas appliances and burners. I locate the smallest test dial on the meter. I tape-mark the current pointer position and wait 10 minutes. If the pointer moves — even slightly — gas is flowing, indicating a leak in the system. Per the Gas Code, this test can only be conducted when the system pressure is at or below the normal operating supply pressure."</div></div>
+      <div class="steps">
+        <div class="step"><div class="step-n">1</div><div>Close ALL gas appliances — ensure zero gas demand.</div></div>
+        <div class="step"><div class="step-n">2</div><div>Find the smallest dial on the meter (use the ½ or 1 cubic foot test dial).</div></div>
+        <div class="step"><div class="step-n">3</div><div>Mark the pointer with tape.</div></div>
+        <div class="step"><div class="step-n">4</div><div>Wait 10 minutes.</div></div>
+        <div class="step"><div class="step-n">5</div><div>If pointer moved → leak present → locate and repair before startup.</div></div>
+      </div>
+      <div class="warn info"><div class="warn-icon">📌</div><div>Dial test can be conducted when: system is at normal operating pressure (≤ ½ PSIG / 14" WC). Cannot be performed during high-pressure pipe testing.</div></div>
+    </div>
+  </div>
+
+  <div class="criteria-section">
+    <div class="criteria-header" onclick="tog(this)">
+      <div class="criteria-icon ci-green">▶️</div>
+      <div><div class="criteria-title">Safe Start Up — High Efficiency Furnace</div><div class="criteria-cn">高效炉安全启动程序</div></div>
+      <div class="criteria-arrow">▶</div>
+    </div>
+    <div class="criteria-body">
+      <div class="speak-box"><div class="speak-label">Say this — Before startup</div><div class="speak-text">"Before conducting safe startup of this high efficiency furnace, I'll confirm: the furnace 120-volt ON/OFF switch is in the open — OFF — position, the gas valve is turned to the ON position, and the thermostat is set to call for heat."</div></div>
+      <div class="steps">
+        <div class="step"><div class="step-n">1</div><div>120V ON/OFF switch: in the OFF (open/down) position. (Carrier manual p.51 — "Furnace 120v ON/OFF switch must be in the open (off) position — switch down.")</div></div>
+        <div class="step"><div class="step-n">2</div><div>Gas valve: turn to ON position.</div></div>
+        <div class="step"><div class="step-n">3</div><div>Thermostat: set to call for heat.</div></div>
+        <div class="step"><div class="step-n">4</div><div>Turn ON/OFF switch to ON position.</div></div>
+        <div class="step"><div class="step-n">5</div><div>Observe for smooth light-off within a few seconds.</div></div>
+        <div class="step"><div class="step-n">6</div><div>If furnace does not light smoothly: IMMEDIATELY turn ON/OFF switch to OFF, then turn gas valve to OFF. Investigate before retrying.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="criteria-section">
+    <div class="criteria-header" onclick="tog(this)">
+      <div class="criteria-icon ci-blue">⏱️</div>
+      <div><div class="criteria-title">Clocking the Gas Meter — Metric &amp; BTU/h Calculation</div><div class="criteria-cn">气表计时 + BTU/h计算</div></div>
+      <div class="criteria-arrow">▶</div>
+    </div>
+    <div class="criteria-body">
+      <div class="speak-box"><div class="speak-label">Say this — procedure</div><div class="speak-text">"To clock the appliance input, I turn off all other gas appliances served by this meter. I run this furnace in full heating mode. I use the smallest test dial — or if metric, the 0.05 m³ or 0.02 m³ dial. I time how long it takes for the test dial needle to complete one full revolution. I'll clock it 3 times and take the average for accuracy."</div></div>
+
+      <div class="formula">Gas Rate (m³/h) = 3600 ÷ Seconds per revolution × Dial size (m³)<br><br>BTU/h = Gas Rate (m³/h) × 35,310<div class="formula-note">Alternatively: Gas Rate (ft³/h) = 3600 ÷ seconds × dial size (ft³) &nbsp;|&nbsp; BTU/h = ft³/h × Heating Value (approx. 1,000 BTU/ft³ for NG)</div></div>
+
+      <div class="steps">
+        <div class="step"><div class="step-n">1</div><div>Shut off all other gas appliances and pilots on the meter.</div></div>
+        <div class="step"><div class="step-n">2</div><div>Run furnace in heating mode.</div></div>
+        <div class="step"><div class="step-n">3</div><div>Use the 2-cubic-foot test dial (or smallest available metric dial).</div></div>
+        <div class="step"><div class="step-n">4</div><div>Time 3 complete needle revolutions — record each time in seconds. Take average.</div></div>
+        <div class="step"><div class="step-n">5</div><div>Apply formula: <span class="code">Rate = 3600 ÷ avg_seconds × dial_size</span></div></div>
+        <div class="step"><div class="step-n">6</div><div>Multiply rate by heating value to get BTU/h. Compare to furnace rating plate.</div></div>
+        <div class="step"><div class="step-n">7</div><div>Acceptable: within ±2% of nameplate BTU/h rating.</div></div>
+      </div>
+
+      <div class="speak-box"><div class="speak-label">Say this — over-firing vs under-firing</div><div class="speak-text">"If the actual input is higher than the nameplate rating, the furnace is over-fired — this causes excessive heat exchanger temperature, shortened component life, and potentially incomplete combustion. If the actual input is lower than rated, the furnace is under-fired — this results in inadequate heat output and potential condensate problems. Acceptable input is within plus or minus 2 percent of the rated input."</div></div>
+    </div>
+  </div>
+</div><!-- /s7 -->
+
+
+<!-- ═══════════════════════════════════════════
+     STATION 8 — Fan/Limit & Gas Pressure
+════════════════════════════════════════════ -->
+<div class="page" id="s8">
+  <div class="station-hero">
+    <div class="station-num">Test Station 8</div>
+    <div class="station-name">Adjust Fan/Limit Control &amp; Measure Gas Supply &amp; Manifold Pressure</div>
+    <div class="station-meta">
+      <span class="badge badge-amber">Random Selection</span>
+      <span class="badge badge-blue">/40 Marks</span>
+    </div>
+  </div>
+  <div class="scenario-block">
+    <div class="scenario-label">📋 Scenario</div>
+    <div class="scenario-text">Demonstrate correctly adjusting fan/limit control switch installed on a functioning furnace to an acceptable "fan on", "fan off" and high limit setting. Demonstrate how to correctly test high limit on natural draft forced warm air furnace. Demonstrate correctly measuring natural gas supply and manifold pressure associated with a furnace. Demonstrate correctly adjusting manifold pressure to pressure indicated on rating plate.</div>
+  </div>
+
+  <div class="criteria-section open">
+    <div class="criteria-header" onclick="tog(this)">
+      <div class="criteria-icon ci-amber">🌡️</div>
+      <div><div class="criteria-title">Adjusting Fan/Limit Control — Fan On, Fan Off, High Limit Settings</div><div class="criteria-cn">风机/限位控制器设定</div></div>
+      <div class="criteria-arrow">▶</div>
+    </div>
+    <div class="criteria-body">
+      <table class="tbl">
+        <tr><th>Setting</th><th>Typical Value</th><th>Function</th></tr>
+        <tr><td>Fan ON</td><td class="tbl-val">~130°F (54°C)</td><td>Temperature at which blower starts — allows exchanger to warm before blowing</td></tr>
+        <tr><td>Fan OFF</td><td class="tbl-val">~90–100°F (32–38°C)</td><td>Temperature at which blower stops after burners shut off</td></tr>
+        <tr><td>High Limit</td><td class="tbl-val">200°F (93°C)</td><td>Over-temperature cutoff — opens limit switch, shuts off gas valve</td></tr>
+      </table>
+      <div class="speak-box"><div class="speak-label">Say this</div><div class="speak-text">"I'm adjusting the fan/limit control. The FAN ON pointer is set at approximately 130°F — this allows the heat exchanger to warm up before the blower starts, preventing cold air delivery. The FAN OFF is set at approximately 90°F — the blower continues to run after burners shut off to extract residual heat. The HIGH LIMIT is set at 200°F — if the heat exchanger exceeds this temperature, the limit switch opens and shuts off the gas valve."</div></div>
+    </div>
+  </div>
+
+  <div class="criteria-section">
+    <div class="criteria-header" onclick="tog(this)">
+      <div class="criteria-icon ci-red">🧪</div>
+      <div><div class="criteria-title">Correctly Test High Limit — Natural Draft Forced Warm Air Furnace</div><div class="criteria-cn">高限位测试 — 强制送风炉</div></div>
+      <div class="criteria-arrow">▶</div>
+    </div>
+    <div class="criteria-body">
+      <div class="warn danger"><div class="warn-icon">⚠️</div><div>Do NOT manually move the high limit temperature dial. Do NOT jumper the limit switch. Remove the blower motor wire or belt — do NOT block airflow from outside; let the furnace heat naturally. The temperature dial must be watched as it moves toward 200°F. The furnace MUST shut down on limit at 200°F.</div></div>
+
+      <div class="speak-box"><div class="speak-label">Say this</div><div class="speak-text">"To test the high limit, I'll remove the blower motor wire — or belt on a belt-drive unit — to prevent air circulation. This allows the heat exchanger temperature to rise naturally toward the high limit set point. I will watch the temperature dial move toward 200°F and confirm the furnace shuts down on limit at that point. If the furnace does not shut down at the limit setting, the limit control has failed and must be replaced immediately."</div></div>
+
+      <div class="steps">
+        <div class="step"><div class="step-n">1</div><div>Run furnace for at least 5 minutes.</div></div>
+        <div class="step"><div class="step-n">2</div><div>Disconnect blower motor wire (or remove belt on belt-drive unit).</div></div>
+        <div class="step"><div class="step-n">3</div><div>Watch temperature dial move toward 200°F. Must not manually move dial.</div></div>
+        <div class="step"><div class="step-n">4</div><div>Furnace must shut off at 200°F — gas valve closes.</div></div>
+        <div class="step"><div class="step-n">5</div><div>If limit does NOT trip — limit switch has failed — shut down furnace immediately.</div></div>
+        <div class="step"><div class="step-n">6</div><div>After test: turn off power, reconnect blower wire or belt, then restart furnace to return to normal operation.</div></div>
+      </div>
+
+      <div class="speak-box"><div class="speak-label">Restarting after test — Say this</div><div class="speak-text">"After the high limit test, I'll turn off power, reconnect the blower motor wire, then turn power back on to return the furnace to normal operation."</div></div>
+    </div>
+  </div>
+
+  <div class="criteria-section">
+    <div class="criteria-header" onclick="tog(this)">
+      <div class="criteria-icon ci-blue">📊</div>
+      <div><div class="criteria-title">Measure Gas Supply &amp; Manifold Pressure — Manometer, Correct Procedure</div><div class="criteria-cn">供气压力 + 歧管压力测量</div></div>
+      <div class="criteria-arrow">▶</div>
+    </div>
+    <div class="criteria-body">
+      <div class="sh">Supply Pressure Measurement</div>
+      <div class="speak-box"><div class="speak-label">Say this</div><div class="speak-text">"To measure supply pressure, I'll turn fuel supply OFF before attaching the manometer. I'll remove the cap on the dirt pocket — or loosen the 1/8-inch NPT inlet pressure tap set screw on the gas valve no more than one full turn with a 3/32-inch hex wrench. I connect the manometer, zero it, then turn supply ON and operate the furnace in maximum heat to read the inlet supply pressure."</div></div>
+      <div class="steps">
+        <div class="step"><div class="step-n">1</div><div>Fuel supply OFF. (Carrier manual p.53: "Make sure the gas supply is turned off to the furnace and at the electric switch on the gas valve.")</div></div>
+        <div class="step"><div class="step-n">2</div><div>Remove cap on dirt pocket, or loosen inlet pressure tap set screw (max one full turn).</div></div>
+        <div class="step"><div class="step-n">3</div><div>Connect manometer hose. Zero manometer.</div></div>
+        <div class="step"><div class="step-n">4</div><div>Turn supply ON. Operate furnace at maximum heat. Read supply pressure.</div></div>
+        <div class="step"><div class="step-n">5</div><div>Natural gas supply pressure: must be 4.5–14" WC (min–max, Carrier manual p.53).</div></div>
+        <div class="step"><div class="step-n">6</div><div>Turn supply OFF. Remove manometer. Tighten set screw / reinstall cap — apply pipe dope.</div></div>
+      </div>
+
+      <div class="sh">Manifold Pressure Measurement &amp; Adjustment</div>
+      <div class="speak-box"><div class="speak-label">Say this</div><div class="speak-text">"To measure manifold pressure, I place the manual gas control valve off, or on the Pilot position, before attaching the manometer. I loosen the manifold pressure tap set screw on the gas valve no more than one turn with a 3/32-inch hex wrench, or remove the 1/8-inch NPT plug. I connect the water-column manometer, zero it, then turn gas valve ON, operate the furnace, and read the manifold pressure. For natural gas on this furnace, the correct manifold pressure is 3.5 inches WC — as indicated on the rating plate."</div></div>
+      <div class="steps">
+        <div class="step"><div class="step-n">1</div><div>Manual gas control valve: OFF or PILOT position — before connecting manometer.</div></div>
+        <div class="step"><div class="step-n">2</div><div>Remove manifold pressure tap hex screw with 3/32" hex — no more than one turn.</div></div>
+        <div class="step"><div class="step-n">3</div><div>Connect manometer hose to pressure tap. Zero manometer.</div></div>
+        <div class="step"><div class="step-n">4</div><div>Gas valve ON. Furnace operating. Read manifold pressure.</div></div>
+        <div class="step"><div class="step-n">5</div><div>Compare to rating plate: NG = 3.5" WC. (Carrier manual Table 21 — standard for NG at sea level.)</div></div>
+        <div class="step"><div class="step-n">6</div><div>Adjust if needed: remove regulator cap → clockwise = increase / CCW = decrease. Replace cap before final reading.</div></div>
+        <div class="step"><div class="step-n">7</div><div>Replace cap. Re-tighten hex screw. Check for leaks.</div></div>
+      </div>
+
+      <div class="kv-grid">
+        <div class="kv"><span class="kv-val">3.5"</span><span class="kv-lbl">NG Manifold Pressure (WC)</span></div>
+        <div class="kv"><span class="kv-val">10"</span><span class="kv-lbl">LP Manifold Pressure (WC)</span></div>
+        <div class="kv"><span class="kv-val">4.5–14"</span><span class="kv-lbl">NG Supply Pressure Range (WC)</span></div>
+        <div class="kv"><span class="kv-val">11"</span><span class="kv-lbl">LP 2nd Stage Outlet (WC)</span></div>
+      </div>
+
+      <div class="speak-box"><div class="speak-label">Say this — high vs low manifold pressure effect</div><div class="speak-text">"High manifold pressure causes over-firing — input exceeds the nameplate rating — leading to heat exchanger overheating, shortened component life, and potential carbon monoxide production from incomplete combustion. Low manifold pressure causes under-firing — insufficient heat output — and can result in delayed ignition, rough lighting, or flame instability."</div></div>
+    </div>
+  </div>
+</div><!-- /s8 -->
+
+
+<!-- ═══════════════════════════════════════════
+     STATION 9 — Gas Pipe Install & Breaker Panel
+════════════════════════════════════════════ -->
+<div class="page" id="s9">
+  <div class="station-hero">
+    <div class="station-num">Test Station 9</div>
+    <div class="station-name">Gas Pipe Installation &amp; Breaker Panel Installation</div>
+    <div class="station-meta">
+      <span class="badge badge-amber">Random Selection</span>
+      <span class="badge badge-blue">/40 Marks</span>
+    </div>
+  </div>
+  <div class="scenario-block">
+    <div class="scenario-label">📋 Scenario</div>
+    <div class="scenario-text">Demonstrate correct installation of a schedule 40 steel piping or copper tubing system to gas fired appliance. Install breaker in residential electrical distribution panel and wire receptacle.</div>
+  </div>
+
+  <div class="criteria-section open">
+    <div class="criteria-header" onclick="tog(this)">
+      <div class="criteria-icon ci-blue">🔧</div>
+      <div><div class="criteria-title">Identify Tools — Schedule 40 Steel Piping &amp; Copper Tubing Systems</div><div class="criteria-cn">工具识别 — 钢管系统 + 铜管系统</div></div>
+      <div class="criteria-arrow">▶</div>
+    </div>
+    <div class="criteria-body">
+      <div class="sh">Steel Pipe Tools (Schedule 40 / Black Iron)</div>
+      <div class="comp-grid">
+        <div class="comp"><div class="comp-name">Hand Threader / Die Stock</div><div class="comp-cn">手动套丝器</div><div class="comp-fn">Used to cut NPT (National Pipe Taper) threads on steel pipe manually. Dies selected by pipe nominal size.</div></div>
+        <div class="comp"><div class="comp-name">Power Threader</div><div class="comp-cn">电动套丝机</div><div class="comp-fn">Motor-driven threading machine — more efficient for multiple fittings. Uses same die sets as hand threader.</div></div>
+        <div class="comp"><div class="comp-name">Pipe Reamer</div><div class="comp-cn">铰刀/内径去毛刺器</div><div class="comp-fn">Removes burrs from the inside edge of cut pipe to prevent flow restriction.</div></div>
+        <div class="comp"><div class="comp-name">Pipe Vise</div><div class="comp-cn">管道虎钳</div><div class="comp-fn">Secures pipe during cutting, reaming, and threading operations. Chain-type or yoke-type.</div></div>
+        <div class="comp"><div class="comp-name">Pipe Wrenches (2 required)</div><div class="comp-cn">管钳（两把）</div><div class="comp-fn">One wrench holds the pipe or fitting (back-up wrench); the second turns the connecting piece. Two wrenches prevent torque damage to gas valve or existing piping.</div></div>
+        <div class="comp"><div class="comp-name">Pipe Cutter</div><div class="comp-cn">管道切割器</div><div class="comp-fn">Score-and-rotate cutter for clean square cut on steel pipe — preferred over hacksaw for squareness.</div></div>
+      </div>
+
+      <div class="sh">Copper Tubing Tools</div>
+      <div class="comp-grid">
+        <div class="comp"><div class="comp-name">Tubing Cutter</div><div class="comp-cn">铜管切割器</div><div class="comp-fn">Wheel-type cutter — rotate around tube while tightening. Produces clean, square cut. Must deburr inside with reaming blade.</div></div>
+        <div class="comp"><div class="comp-name">Flaring Tool</div><div class="comp-cn">胀口工具</div><div class="comp-fn">Creates a 45° flare at the end of copper tubing for flare fittings. Tube must be fully annealed for proper flare.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="criteria-section">
+    <div class="criteria-header" onclick="tog(this)">
+      <div class="criteria-icon ci-amber">⚙️</div>
+      <div><div class="criteria-title">Proper Use of Piping Tools — Assemble Piping System per Gas Code, Piping Sealant</div><div class="criteria-cn">管道工具使用规范 + 密封剂涂抹</div></div>
+      <div class="criteria-arrow">▶</div>
+    </div>
+    <div class="criteria-body">
+      <div class="steps">
+        <div class="step"><div class="step-n">1</div><div>Measure and cut pipe to required length.</div></div>
+        <div class="step"><div class="step-n">2</div><div>Ream the inside of the cut end to remove burrs.</div></div>
+        <div class="step"><div class="step-n">3</div><div>Thread the pipe with the correct die for the nominal pipe size.</div></div>
+        <div class="step"><div class="step-n">4</div><div>Apply pipe sealant (pipe dope) SPARINGLY to male threads ONLY — never on female threads or socket. (Carrier manual p.24: "Joint compound (pipe dope) should be applied sparingly and only to male threads.")</div></div>
+        <div class="step"><div class="step-n">5</div><div>Assemble fittings hand-tight then wrench-tight. Use back-up wrench to prevent torque damage.</div></div>
+        <div class="step"><div class="step-n">6</div><div>Support piping: minimum one hanger every 6 ft (2 M) per CAN/CSA B149.1.</div></div>
+        <div class="step"><div class="step-n">7</div><div>Install manual equipment shutoff valve external to furnace casing, within 6 ft (2 M).</div></div>
+        <div class="step"><div class="step-n">8</div><div>Install sediment trap (dirt pocket) in the riser at each appliance (see below).</div></div>
+      </div>
+      <div class="speak-box"><div class="speak-label">Say this — pipe dope</div><div class="speak-text">"I'm applying pipe dope sparingly to the male threads only. Applying sealant to female threads can push compound into the gas valve, causing contamination. The sealant must be approved for use with the gas being piped — a propane-resistant compound is required for propane systems. PTFE tape is not recommended as it can fray and enter the gas valve."</div></div>
+
+      <div class="sh">Sediment Trap / Dirt Pocket — Code Requirement</div>
+      <div class="speak-box"><div class="speak-label">Say this</div><div class="speak-text">"A sediment trap — also called a dirt pocket — is required by CAN/CSA B149.1 immediately upstream of each appliance gas control valve. It is constructed by installing a tee in the supply riser and extending a capped nipple downward below the tee. Any scale, moisture, or debris settles into the trap rather than entering the gas valve, which could cause it to stick open or closed."</div></div>
+
+      <div class="sh">Code Requirements — Pipe Size &amp; Dirt Pockets (Carrier manual p.24)</div>
+      <table class="tbl">
+        <tr><th>Nominal Pipe Size</th><th>Max Capacity (ft³/hr) — 10 ft run</th><th>Max Capacity — 20 ft run</th></tr>
+        <tr><td>½" (13mm)</td><td class="tbl-val">175</td><td class="tbl-val">120</td></tr>
+        <tr><td>¾" (19mm)</td><td class="tbl-val">360</td><td class="tbl-val">250</td></tr>
+        <tr><td>1" (25mm)</td><td class="tbl-val">680</td><td class="tbl-val">465</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="criteria-section">
+    <div class="criteria-header" onclick="tog(this)">
+      <div class="criteria-icon ci-green">🔌</div>
+      <div><div class="criteria-title">Breaker Panel Install &amp; Wire Receptacle — 240V / 120V, Grounding &amp; Bonding, Wire Size &amp; Fuse Ratings</div><div class="criteria-cn">断路器安装 + 接线 + 接地与等电位</div></div>
+      <div class="criteria-arrow">▶</div>
+    </div>
+    <div class="criteria-body">
+      <div class="speak-box"><div class="speak-label">Say this — 120V vs 240V</div><div class="speak-text">"To obtain 240 volts, I connect to two hot legs from the panel — each 120 volts relative to neutral, 180° out of phase — giving 240 volts between them. To obtain 120 volts, I connect to one hot leg and the neutral. The furnace is a 115-volt single-phase load: one hot leg, one neutral, and an equipment ground."</div></div>
+
+      <table class="tbl">
+        <tr><th>Wire Gauge</th><th>Max Breaker</th><th>Typical Application</th></tr>
+        <tr><td class="tbl-val">14 AWG</td><td class="tbl-val">15 A</td><td>General lighting, 120V outlets</td></tr>
+        <tr><td class="tbl-val">12 AWG</td><td class="tbl-val">20 A</td><td>Kitchen, bathroom, heavy 120V circuits</td></tr>
+        <tr><td class="tbl-val">10 AWG</td><td class="tbl-val">30 A</td><td>Electric dryer, A/C, large loads</td></tr>
+        <tr><td class="tbl-val">8 AWG</td><td class="tbl-val">40 A</td><td>Electric range, large HVAC equipment</td></tr>
+      </table>
+
+      <div class="speak-box"><div class="speak-label">Say this — Grounding and Bonding</div><div class="speak-text">"Grounding connects the electrical system to earth ground at the main panel — providing a path for fault current and protection against lightning. Bonding connects all metallic components — gas piping, electrical panel, ductwork, water piping — together so they are at the same electrical potential. This prevents dangerous voltage differences that could cause shock or sparks near gas piping. Per CSA C22.1, the furnace cabinet must have an uninterrupted equipment ground. (Carrier manual p.25: 'The cabinet MUST have an uninterrupted or unbroken ground.')"</div></div>
+
+      <div class="sh">Breaker Installation Steps</div>
+      <div class="steps">
+        <div class="step"><div class="step-n">1</div><div>Turn off main breaker before working in panel.</div></div>
+        <div class="step"><div class="step-n">2</div><div>Select correct breaker size for wire gauge and circuit load.</div></div>
+        <div class="step"><div class="step-n">3</div><div>Strip wire insulation to correct length — no scoring of conductors.</div></div>
+        <div class="step"><div class="step-n">4</div><div>Connect: hot (black) → breaker terminal; neutral (white) → neutral bus bar; ground (green/bare) → ground bus bar.</div></div>
+        <div class="step"><div class="step-n">5</div><div>Snap breaker into panel bus. Verify firm seating.</div></div>
+        <div class="step"><div class="step-n">6</div><div>For receptacle: connect black (hot) → brass screw; white (neutral) → silver screw; bare/green → green ground screw.</div></div>
+        <div class="step"><div class="step-n">7</div><div>Tug test all connections. No bare conductor exposed beyond terminals.</div></div>
+      </div>
+
+      <div class="warn danger"><div class="warn-icon">⚠️</div><div>Carrier manual p.25: "Do not connect aluminum wire between disconnect switch and furnace. Use only copper wire." CSA C22.1 prohibits aluminum wire on 15A and 20A branch circuits.</div></div>
+
+      <div class="sh">Leak Testing &amp; Purging — Code Reference</div>
+      <div class="speak-box"><div class="speak-label">Say this — pressure testing above ½ PSIG</div><div class="speak-text">"For pressure testing above one-half PSIG — 14 inches WC — the furnace and its individual manual shutoff valve must be completely disconnected from the gas supply piping. This is because the gas valve is not rated for high-pressure testing and could be damaged or allow gas to pass. The pipe ends are capped, pressure is applied, and the system is checked with soap solution for leaks."</div></div>
+    </div>
+  </div>
+
+  <div class="criteria-section">
+    <div class="criteria-header" onclick="tog(this)">
+      <div class="criteria-icon ci-purple">🔍</div>
+      <div><div class="criteria-title">Leak Testing &amp; Purging Procedures</div><div class="criteria-cn">漏气测试 + 清管程序</div></div>
+      <div class="criteria-arrow">▶</div>
+    </div>
+    <div class="criteria-body">
+      <div class="steps">
+        <div class="step"><div class="step-n">High pressure (&gt; ½ PSIG)</div><div>Disconnect furnace from gas supply piping. Cap pipe ends. Pressurize system. Check all joints with soap solution. If pointer on meter dial moves after tape-marking → leak present.</div></div>
+        <div class="step"><div class="step-n">Low pressure (≤ ½ PSIG)</div><div>Close manual shutoff valve at furnace (no need to disconnect). Apply test pressure. Check all joints with soap solution and/or dial test.</div></div>
+        <div class="step"><div class="step-n">Purging</div><div>After pressure test passes: purge air from new piping using approved purging tool — no ignition sources present. Confirm gas presence by detector or smell. Perform final soap test at all joints with system at operating pressure.</div></div>
+      </div>
+    </div>
+  </div>
+</div><!-- /s9 -->
+
+
+<script>
+// Tab switching
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    const id = tab.dataset.tab;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(id).classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    tab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  });
+});
+
+// Section toggle
+function tog(header) {
+  const sec = header.parentElement;
+  sec.classList.toggle('open');
+}
+
+// Checkbox + done style
+document.querySelectorAll('.cl-item input').forEach(cb => {
+  cb.addEventListener('change', () => {
+    cb.closest('.cl-item').classList.toggle('done', cb.checked);
+  });
+});
+
+// Scroll progress
+window.addEventListener('scroll', () => {
+  const total = document.body.scrollHeight - window.innerHeight;
+  const pct = total > 0 ? (window.scrollY / total) * 100 : 0;
+  document.getElementById('prog').style.width = pct + '%';
+});
+</script>
+</body>
+</html>
