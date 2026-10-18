@@ -1,0 +1,2227 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>CNTL-3004 期中练习</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: one-screen study tool. Sticky top bar (progress + filters), centred question card styled like an equipment rating plate, fixed bottom nav sized for thumbs. */
+:root{
+  --bg:#e9edf0; --surface:#ffffff; --surface-2:#f4f6f8; --ink:#16212c; --muted:#596876; --line:#cfd7de;
+  --accent:#1d5bc9; --accent-ink:#ffffff; --accent-soft:#e2ebfb;
+  --ok:#1d7f48; --ok-soft:#e1f3e8; --bad:#c2362b; --bad-soft:#fbe5e2; --warn:#9a5a00; --warn-soft:#fdf1dc; --star:#c98a00;
+  --shadow:0 1px 2px rgba(22,33,44,.06),0 4px 16px rgba(22,33,44,.06);
+  --f-display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --f-body:"IBM Plex Sans","PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  --fs:1;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e1419; --surface:#161f27; --surface-2:#1c2731; --ink:#e4eaf0; --muted:#94a3b1; --line:#2a3743;
+  --accent:#6ea3ff; --accent-ink:#0b1420; --accent-soft:#1a2b45;
+  --ok:#4cc184; --ok-soft:#12301f; --bad:#ff8074; --bad-soft:#3a1916; --warn:#e7a94a; --warn-soft:#33240c; --star:#f0b72f;
+  --shadow:0 1px 2px rgba(0,0,0,.3); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1419; --surface:#161f27; --surface-2:#1c2731; --ink:#e4eaf0; --muted:#94a3b1; --line:#2a3743;
+  --accent:#6ea3ff; --accent-ink:#0b1420; --accent-soft:#1a2b45;
+  --ok:#4cc184; --ok-soft:#12301f; --bad:#ff8074; --bad-soft:#3a1916; --warn:#e7a94a; --warn-soft:#33240c; --star:#f0b72f;
+  --shadow:0 1px 2px rgba(0,0,0,.3); color-scheme:dark}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:calc(15px * var(--fs));line-height:1.55;-webkit-text-size-adjust:100%}
+button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+button:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:760px;margin:0 auto;padding-inline:16px}
+
+/* top bar */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.top-row{display:flex;align-items:center;gap:10px;padding-block:10px 6px}
+.brand{font-family:var(--f-display);font-weight:700;font-size:1.35rem;letter-spacing:.02em;line-height:1;margin:0;white-space:nowrap}
+.brand small{display:block;font-family:var(--f-body);font-weight:500;font-size:.72rem;color:var(--muted);letter-spacing:.04em;margin-top:3px}
+.spacer{flex:1}
+.seg{display:inline-flex;flex:none;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:2px}
+.seg button{border:0;background:none;padding:6px 10px;border-radius:6px;font-size:.85rem;font-weight:500;color:var(--muted);white-space:nowrap}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.icon-btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;width:38px;height:38px;display:grid;place-items:center;flex:none}
+.icon-btn svg{width:18px;height:18px}
+.topics{padding-top:12px}
+.topics-head{display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--muted);margin-bottom:8px}
+.topics-head b{color:var(--ink);font-weight:600}
+.topics-head button{margin-left:auto;border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:3px 10px;font-size:.78rem;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips .grp{flex-basis:100%;height:0}
+/* 收起时：所有主题挤成一行，左右滑动查看 */
+.chips.collapsed{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;scrollbar-width:thin}
+.chips.collapsed .grp{display:none}
+.chips.collapsed .chip{flex:none;white-space:nowrap}
+[hidden]{display:none!important}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:.82rem;color:var(--muted);text-align:left;max-width:100%}
+.chip b{font-family:var(--f-mono);font-weight:500;margin-left:4px;font-size:.75rem}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.prog{display:flex;align-items:center;gap:10px;padding-bottom:10px;font-size:.78rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.bar{flex:1;height:6px;background:var(--surface-2);border-radius:3px;overflow:hidden;display:flex;border:1px solid var(--line)}
+.bar i{display:block;height:100%}
+.bar .b-ok{background:var(--ok)} .bar .b-bad{background:var(--bad)}
+
+/* main */
+main{padding-block:12px calc(110px + env(safe-area-inset-bottom,0px))}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);overflow:hidden}
+.plate{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px dashed var(--line);background:var(--surface-2);font-family:var(--f-mono);font-size:.75rem;color:var(--muted)}
+.plate .qn{font-family:var(--f-display);font-size:1.15rem;font-weight:700;color:var(--ink);letter-spacing:.03em}
+.tag{border:1px solid var(--line);border-radius:4px;padding:1px 6px;background:var(--surface);white-space:nowrap}
+.tag.tf{border-color:var(--accent);color:var(--accent)}
+.star{margin-left:auto;border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:4px 8px;display:inline-flex;gap:5px;align-items:center;font-family:var(--f-body);font-size:.78rem;color:var(--muted)}
+.star svg{width:15px;height:15px}
+.star[aria-pressed="true"]{color:var(--star);border-color:var(--star)}
+.star[aria-pressed="true"] svg{fill:var(--star)}
+.qbody{padding:16px 16px 6px}
+.qtext{font-size:1.12em;font-weight:500;margin:0;text-wrap:pretty}
+.qtext.tap{cursor:pointer}
+.qzh{margin:8px 0 0;color:var(--muted);font-size:.92em}
+.ztip{display:inline-block;margin-top:8px;font-size:.75rem;color:var(--accent);border:1px dashed var(--accent);border-radius:4px;padding:1px 7px;background:none}
+.opt .zh{display:block;margin-top:4px;font-size:.88em;color:var(--muted)}
+.opt.right .zh,.opt.wrong .zh{color:inherit;opacity:.85}
+.reveal{padding:0 16px 14px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:.78rem;color:var(--muted)}
+.reveal .btn{padding:6px 12px;font-size:.82rem}
+.opts{display:grid;gap:10px;padding:14px 16px 16px}
+.opt{display:flex;align-items:flex-start;gap:12px;text-align:left;width:100%;min-height:52px;padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;background:var(--surface);transition:border-color .15s,background .15s}
+.opt:hover:not([disabled]){border-color:var(--accent)}
+.opt .k{flex:none;width:26px;height:26px;border-radius:6px;display:grid;place-items:center;font-family:var(--f-mono);font-weight:500;font-size:.85rem;background:var(--surface-2);border:1px solid var(--line)}
+.opt .t{flex:1;min-width:0;padding-top:1px}
+.opt .m{flex:none;font-weight:600;font-size:.8rem;padding-top:3px}
+.opt.sel{border-color:var(--accent);background:var(--accent-soft)}
+.opt.sel .k{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.opt.right{border-color:var(--ok);background:var(--ok-soft)}
+.opt.right .k{background:var(--ok);color:var(--surface);border-color:var(--ok)}
+.opt.right .m{color:var(--ok)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.opt.wrong .k{background:var(--bad);color:var(--surface);border-color:var(--bad)}
+.opt.wrong .m{color:var(--bad)}
+.opt.dim{opacity:.55}
+.opt.tried-wrong{border-color:var(--bad);background:var(--bad-soft)}
+.opt.tried-wrong .k{background:var(--bad);color:var(--surface);border-color:var(--bad)}
+.opt.tried-wrong .m{color:var(--bad)}
+.opt[disabled]{cursor:default}
+.hint{padding:0 16px 14px;font-size:.78rem;color:var(--muted)}
+
+.exp{border-top:1px solid var(--line);padding:14px 16px 16px;display:grid;gap:12px}
+.verdict{display:flex;align-items:center;gap:8px;font-weight:600}
+.verdict.ok{color:var(--ok)} .verdict.bad{color:var(--bad)}
+.verdict .redo{margin-left:auto;font-weight:500;font-size:.8rem;border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:4px 10px;color:var(--muted)}
+.exp p{margin:0}
+.src{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.pg{font-family:var(--f-mono);font-size:.8rem;font-weight:500;background:var(--ink);color:var(--surface);border-radius:4px;padding:2px 8px}
+.badge{font-size:.75rem;border-radius:4px;padding:2px 8px;border:1px solid var(--line);color:var(--muted)}
+.badge.cls{border-color:var(--accent);color:var(--accent)}
+blockquote{margin:0;padding:10px 12px;border-left:3px solid var(--ink);background:var(--surface-2);border-radius:0 6px 6px 0;font-family:var(--f-mono);font-size:.82em;line-height:1.6;overflow-wrap:anywhere}
+blockquote .tr{display:block;margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);font-family:var(--f-body);font-size:1.05em;color:var(--ink)}
+blockquote cite{display:block;font-style:normal;color:var(--muted);font-family:var(--f-body);font-size:.75rem;margin-bottom:4px}
+.flag{background:var(--warn-soft);color:var(--warn);border-radius:6px;padding:8px 10px;font-size:.85em}
+
+/* bottom nav */
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);padding:10px 0 calc(10px + env(safe-area-inset-bottom,0px))}
+.nav .wrap{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center}
+.nbtn{height:48px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px}
+.nbtn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.nbtn[disabled]{opacity:.4;cursor:default}
+.nbtn svg{width:18px;height:18px}
+.gridbtn{height:48px;min-width:84px;padding:0 12px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface-2);font-family:var(--f-mono);font-size:.85rem;font-variant-numeric:tabular-nums}
+.kbd{max-width:760px;margin:6px auto 0;padding-inline:16px;font-size:.72rem;color:var(--muted);text-align:center}
+.brand{min-width:0;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:560px){.kbd{display:none}.seg button{padding:6px 8px}.brand small{display:none}.brand{font-size:1.15rem}.top-row{gap:8px}}
+@media (max-width:360px){.brand{font-size:1rem}}
+
+/* sheets */
+.scrim{position:fixed;inset:0;background:rgba(10,16,22,.45);z-index:40}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:41;background:var(--surface);border-radius:14px 14px 0 0;max-height:82vh;display:flex;flex-direction:column;padding-bottom:env(safe-area-inset-bottom,0px);box-shadow:0 -8px 30px rgba(0,0,0,.2)}
+.sheet-inner{max-width:760px;width:100%;margin:0 auto;display:flex;flex-direction:column;min-height:0}
+.sheet-head{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.sheet-head h2{margin:0;font-family:var(--f-display);font-size:1.3rem;letter-spacing:.02em}
+.sheet-body{overflow-y:auto;padding:14px 16px 18px;display:grid;gap:16px}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:.75rem;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.legend i{width:12px;height:12px;border-radius:3px;border:1px solid var(--line);display:inline-block}
+.secblock h3{margin:0 0 8px;font-size:.82rem;color:var(--muted);font-weight:600}
+.cells{display:grid;grid-template-columns:repeat(auto-fill,minmax(42px,1fr));gap:6px}
+.cell{height:40px;border-radius:7px;border:1px solid var(--line);background:var(--surface);font-family:var(--f-mono);font-size:.8rem;position:relative;font-variant-numeric:tabular-nums}
+.cell.c-ok{background:var(--ok-soft);border-color:var(--ok);color:var(--ok)}
+.cell.c-bad{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+.cell.c-ans{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.cell.cur{outline:2px solid var(--ink);outline-offset:1px}
+.cell .mk{position:absolute;top:2px;right:3px;width:6px;height:6px;border-radius:50%;background:var(--star)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:8px 12px;padding-block:6px;flex-wrap:wrap}
+.row label{flex:1 1 180px;min-width:0}
+.row label{font-weight:500}
+.row .sub{display:block;font-size:.78rem;color:var(--muted);font-weight:400}
+.switch{width:46px;height:28px;border-radius:999px;border:1px solid var(--line);background:var(--surface-2);position:relative;flex:none}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--muted);transition:left .15s}
+.switch[aria-checked="true"]{background:var(--accent);border-color:var(--accent)}
+.switch[aria-checked="true"]::after{left:21px;background:var(--accent-ink)}
+.btn{border:1.5px solid var(--line);background:var(--surface);border-radius:8px;padding:9px 14px;font-weight:600}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.stat{background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:10px}
+.stat b{display:block;font-family:var(--f-display);font-size:1.7rem;line-height:1;font-variant-numeric:tabular-nums}
+.stat span{font-size:.75rem;color:var(--muted)}
+.sectbl{width:100%;border-collapse:collapse;font-size:.85rem;font-variant-numeric:tabular-nums}
+.sectbl td,.sectbl th{padding:6px 4px;border-bottom:1px solid var(--line);text-align:left}
+.sectbl td:last-child,.sectbl th:last-child{text-align:right}
+.empty{padding:40px 16px;text-align:center;color:var(--muted)}
+.empty h2{font-family:var(--f-display);color:var(--ink);margin:0 0 6px}
+
+.modal{position:fixed;inset:0;display:grid;place-items:center;z-index:50;padding:16px}
+.modal .box{background:var(--surface);border:1px solid var(--line);border-radius:12px;max-width:380px;width:100%;padding:18px;display:grid;gap:12px;box-shadow:var(--shadow)}
+.modal h3{margin:0;font-size:1.05rem}
+.modal p{margin:0;color:var(--muted);font-size:.9rem}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(90px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--surface);padding:8px 14px;border-radius:8px;font-size:.85rem;z-index:60}
+.timer{font-family:var(--f-mono);font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <div class="top-row">
+      <h1 class="brand">CNTL-3004 期中练习<small>Unit 13 Controls · Ch.1–2</small></h1>
+      <span class="spacer"></span>
+      <div class="seg" role="group" aria-label="模式">
+        <button id="m-practice" aria-pressed="true">练习</button>
+        <button id="m-exam" aria-pressed="false">模拟考</button>
+      </div>
+      <button class="icon-btn" id="btn-settings" aria-label="设置">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>
+      </button>
+    </div>
+    <div class="prog"><span id="prog-text"></span><div class="bar" id="bar"></div><span id="timer" class="timer" hidden></span></div>
+  </div>
+</header>
+
+<section class="wrap topics" id="topics"><div class="topics-head"><span>主题：<b id="cur-topic"></b></span><button id="topics-toggle"></button></div><div class="chips" id="chips"></div></section>
+<main class="wrap" id="main"></main>
+
+<nav class="nav">
+  <div class="wrap">
+    <button class="nbtn" id="btn-prev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15 5l-7 7 7 7"/></svg>上一题</button>
+    <button class="gridbtn" id="btn-grid" aria-label="题目列表"></button>
+    <button class="nbtn primary" id="btn-next">下一题<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></button>
+  </div>
+  <div class="kbd">键盘：A–D 或 1–4 选答案 · Z 题干中文 · ← → 翻题 · Enter 下一题 · M 标记</div>
+</nav>
+
+<div id="layer"></div>
+
+<script>
+const SECTIONS = [
+  {id:1, name:"阀组与调压器", en:"Valve train & regulators"},
+  {id:2, name:"电路图与符号", en:"Diagrams & symbols"},
+  {id:3, name:"继电器·极性·相位", en:"Relays, polarity, phasing"},
+  {id:4, name:"点火控制与时序", en:"Ignition & sequence"},
+  {id:5, name:"温控·限温·压控", en:"Operating & limit controls"},
+  {id:6, name:"火焰保护·燃气压力开关", en:"Flame safeguard & gas pressure"},
+  {id:7, name:"水阀与特殊燃气阀", en:"Water & specialty valves"}
+];
+
+/* a[0] is always the correct answer for MC; options are shuffled at runtime.
+   TF questions: a = ["True","False"], c = index of correct, never shuffled.
+   src: book = in textbook, class = teacher only, both = teacher + textbook */
+const QUESTIONS = [
+/* ---------- 1 ---------- */
+{s:1, q:"The series of controls and components from the appliance main shut-off valve to the appliance burner is called the:",
+ zh:"从器具主关断阀到燃烧器之间的一系列控制器和部件叫什么？",
+ a:["Valve train (manifold assembly)","Service line","Branch line","Drip leg assembly"],
+ e:"阀组（valve train，也叫 manifold assembly）就是从器具主关断阀到燃烧器之间的所有阀、控制器和管件。老师引用 B149.1 的定义：手动关断阀下游到燃烧器入口为止。",
+ p:"83", qt:"The series of controls and components from the appliance main shut-off valve to the appliance burner is called the valve-train or manifold assembly.", src:"both"},
+
+{s:1, q:"A building has a 2 psig gas service. The furnace appliance regulator is rated for a maximum inlet of 0.5 psig. What must be installed between them?",
+ zh:"2 psi 进户，炉子调压器最大进口 0.5 psi，中间必须装什么？",
+ a:["A line pressure regulator","A second appliance regulator","A service regulator","An overpressure relief valve only"],
+ e:"必须装 line pressure regulator（或工业调压器）把 2 psi 降到 0.5 psi 以下。老师给的条款：B149.1 cl. 5.2.1.2；理由是 cl. 5.2.1.1，供气压力必须在铭牌范围内。service regulator 是燃气公司在表前装的，不是这个用途。",
+ p:"90", qt:"The use of a line pressure regulator is generally for reducing the building-line pressure accordingly. For example, a 2-psig service needs to be reduced to a maximum of 0.5 psig as that is the maximum inlet pressure to most appliance regulators.", src:"both"},
+
+{s:1, q:"What is the maximum inlet pressure for most appliance regulators?",
+ zh:"大多数器具调压器的最大进口压力是多少？",
+ a:["0.5 psig","2 psig","5 psig","7 inches w.c."],
+ e:"大多数器具调压器最大进口是 0.5 psig（约 14 in w.c.）。7 in w.c. 是天然气常见的进口工作压力，不是上限。",
+ p:"90", qt:"...a 2-psig service needs to be reduced to a maximum of 0.5 psig as that is the maximum inlet pressure to most appliance regulators.", src:"both"},
+
+{s:1, q:"The line pressure regulator feeding an appliance must be of which type (B149.1 cl. 5.2.1.6)?",
+ zh:"给器具供气的 line pressure regulator 必须是哪种类型？",
+ a:["Lock-up (positive shut-off) type","Vent-limiting type only","Adjustable bypass type","Pilot-loaded relief type"],
+ e:"老师强调：调压器必须是 lock-up（positive shut-off）型，cl. 5.2.1.6。这一条在 Unit 13 教材里没有展开，属于 Unit 11 和规范内容。",
+ p:"", qt:"", src:"class", flag:"条款号来自课堂录音，考前用 Code Compass 或 B149.1 核对。"},
+
+{s:1, q:"What does 'lock-up type' mean for a gas pressure regulator?",
+ zh:"调压器的 lock-up 是什么意思？",
+ a:["It holds the reduced outlet pressure when no gas is flowing, with no creep","It vents gas to atmosphere whenever outlet pressure rises","It opens fully when inlet pressure drops","It bypasses gas around the diaphragm at high demand"],
+ e:"Lock-up：没有用气时，出口压力被锁在设定值，不会慢慢爬升（no creep）。这样下游阀门的膜片不会被高压冲坏。",
+ p:"", qt:"", src:"class"},
+
+{s:1, tf:true, q:"A pressure regulator may be bypassed temporarily if the appliance is short of gas pressure.",
+ zh:"燃气压力不够时，可以临时把调压器旁通。",
+ a:["True","False"], c:1,
+ e:"错。B149.1 cl. 5.2.1.5：pressure regulator shall not be bypassed，任何情况都不行。",
+ p:"", qt:"", src:"class"},
+
+{s:1, q:"Where does the Code require the readily accessible manual gas shut-off valve for each appliance?",
+ zh:"规范要求每台器具的手动关断阀装在哪里？",
+ a:["Upstream and external to the valve train assembly","Inside the combination gas valve","Downstream of the appliance regulator","At the gas meter only"],
+ e:"每台器具都要有一个容易够到的手动关断阀，装在阀组上游、阀组外面。阀组内部另有 A-cock 和 B-cock，分别控制主燃烧器和长明火。",
+ p:"84", qt:"The Code clearly requires that a readily accessible gas shut-off valve for each appliance be installed upstream and external to the valve train assembly.", src:"book"},
+
+{s:1, q:"In a diaphragm or servo gas valve, what provides the main force that lifts the diaphragm open?",
+ zh:"膜片阀/伺服阀里，真正把膜片顶开的主要力量是什么？",
+ a:["Upstream (inlet) gas pressure","The coil pulling the seat directly","The return spring","Thermocouple millivolts"],
+ e:"线圈只是移动一个很小的先导机构，真正顶开膜片的是进口燃气压力。所以线圈好、电压好、进口压力低，阀照样不开。这也是为什么膜片阀可以用很低的电压（甚至毫伏）驱动。",
+ p:"95", qt:"The diaphragm gas valve is a pilot operated solenoid valve in that it uses available gas pressure as the primary force to open or close the valve.", src:"both"},
+
+{s:1, q:"You measure 24 V at the gas valve but there is no gas at the burner. What should you do before condemning the valve?",
+ zh:"燃气阀上有 24 V，但燃烧器没气。判阀坏之前先做什么？",
+ a:["Put a manometer on the inlet pressure tap","Replace the transformer","Jumper out the high limit","Replace the ignition module"],
+ e:"老师的 trade tip：24 V at the valve 不等于 gas at the burner。先在进口测压点接压力计，最好在满负荷、其他燃气设备都开着时测。老师举例：换了阀还是不行，原因是燃气公司因欠费把表关了。",
+ p:"", qt:"", src:"class"},
+
+{s:1, q:"Natural gas furnace: inlet pressure reads about 7 in w.c., but outlet (manifold) pressure reads 1.6 in w.c. What does this tell you?",
+ zh:"天然气炉进口 7 in w.c.，出口只有 1.6 in w.c.，说明什么？",
+ a:["There is a problem at the valve, such as a restriction or a failing valve","The appliance is operating normally","The appliance is converted to propane","The inlet pressure is too high"],
+ e:"进口正常、出口偏低，问题在阀本身或阀内：干掉的管道密封胶、杂物堵塞，或阀/线圈在老化。老师说出口应在 3.5 in w.c. 左右；教材写天然气约 3 in w.c.、丙烷约 10 in w.c.，以铭牌为准。所以进出口都要测。",
+ p:"90", qt:"Appliance regulators are necessary to reduce the building-line pressure to that required for the proper performance of the appliances (e.g., approximately 3 inches w.c. for natural gas and 10-inches w.c. for propane gas).", src:"both"},
+
+{s:1, q:"What does the Canadian Code Compass app give you when you type in a problem?",
+ zh:"Code Compass 这个工具输入问题后会给你什么？",
+ a:["A clause number and a plain-language summary; you still read the actual Code wording","The official Code text, so the book is not needed","A pass/fail inspection result","Manufacturer installation instructions"],
+ e:"老师介绍的本周工具：输入问题，返回条款号和白话总结，可按 B149.1（天然气）/ B149.2（丙烷）筛选，离线可用。它只是帮你找条款，被开罚单看的是规范原文。",
+ p:"", qt:"", src:"class"},
+
+/* ---------- 2 ---------- */
+{s:2, q:"Which electrical drawing is considered a map of an electrical circuit, showing where the wires go?",
+ zh:"哪种电气图被看作电路的“地图”，显示线接在哪？",
+ a:["Wiring diagram","Schematic diagram","Ladder diagram","Block diagram"],
+ e:"Wiring diagram 是地图，告诉你每根线接到哪里，适合接线和查线；但看不出系统怎么工作。",
+ p:"115", qt:"Wiring diagrams are maps of electrical circuits. They are very useful for initially wiring a circuit and for tracing wires when you are troubleshooting.", src:"both"},
+
+{s:2, q:"Which drawing is best used to determine how current flows through the various parts of a circuit?",
+ zh:"想知道电流怎么流过电路各部分，最好看哪种图？",
+ a:["Schematic diagram","Wiring diagram","Pictorial diagram","Block diagram"],
+ e:"Schematic 显示两件事：电源，以及电流怎么流过触点、线圈等。排查故障要用它。",
+ p:"116", qt:"The schematic diagram shows basically two things: the power source; and how current flows through the various parts of the circuit such as contacts, coils, and overloads.", src:"both"},
+
+{s:2, q:"A schematic diagram is also known as a:",
+ zh:"Schematic diagram 的另一个名字是？",
+ a:["Ladder diagram","Connection diagram","Component layout","P&C drawing"],
+ e:"Schematic 也叫 ladder diagram（梯形图），左右两根“立柱”，中间一根根“横档”就是各条回路。",
+ p:"116", qt:"This schematic is also called a ladder diagram.", src:"both"},
+
+{s:2, tf:true, q:"The left-hand side of the ladder diagram represents the incoming voltage.",
+ zh:"梯形图左边代表进线电压。",
+ a:["True","False"], c:0,
+ e:"对。左边 = 进线电压（hot），开关都画在左边；右边 = 流出电流（neutral），负载靠右。",
+ p:"116", qt:"Left-hand side of the ladder: Represents the incoming voltage. Right-hand side of the ladder: Represents the outgoing current.", src:"both"},
+
+{s:2, q:"Why are switches placed on the hot (left) side of a circuit rather than on the neutral side?",
+ zh:"为什么开关要装在火线一侧，不装在零线一侧？",
+ a:["When the switch opens, the load has no power and is safe to service","It reduces voltage drop across the load","It is required for motor rotation direction","It uses less wire"],
+ e:"开关在零线上，断开后负载停了，但负载仍然连着火线，拆的时候会触电。开关在火线上，断开后负载没电，可以安全拆装。",
+ p:"129", qt:"Switches connected to loads are normally located on the hot line — never in the neutral line.", src:"both"},
+
+{s:2, q:"Which statement about series and parallel circuits is correct?",
+ zh:"关于串联和并联，哪句是对的？",
+ a:["A parallel circuit has more than one path for current flow","A series circuit has more than one path for current flow","In a parallel circuit, current must pass through each component in sequence","Several motors in series each receive full line voltage"],
+ e:"串联只有一条路径，电流依次流过每个元件，电压被分掉；并联有多条路径，每条支路电压相同。所以多个电机要并联，串联的话后面的电机电压不够。",
+ p:"117", qt:"Series circuits: The components are connected in such a way that the electric current must pass through each one in sequence. Parallel circuits: More than one path is available for current flow.", src:"both"},
+
+{s:2, q:"On a wiring diagram, two wires cross and there is NO dot at the crossing. What does this mean?",
+ zh:"接线图上两根线交叉，交叉处没有点，表示什么？",
+ a:["The wires cross but are not electrically connected","The wires are connected","The wires are field wiring","One wire is a ground"],
+ e:"有点 = 相连；没点 = 只是交叉，不相连。",
+ p:"116", qt:"When the wires cross, a dot means that the two wires are connected. If a dot is not shown, the wires cross each other but do not connect electrically.", src:"book"},
+
+{s:2, q:"On a commercial unit drawing, the disconnect symbol shows three poles switched together. Why?",
+ zh:"商用设备图上隔离开关画成三极联动，为什么？",
+ a:["The unit has a three-phase supply, so three lines are switched at once","There are three fuses in series","There are three separate 24 V control circuits","It is a time-delay disconnect"],
+ e:"老师讲：单相只控制一根火线就画一极；两根火线画两极；三相大设备三根线一起断，就画三极。图上极数不同不要慌，看进来几根火线。",
+ p:"118", qt:"", src:"class"},
+
+{s:2, q:"In what position are all switch symbols shown on a diagram?",
+ zh:"图上所有开关符号画的是什么状态？",
+ a:["The resting position (medium has not acted on it)","The energized position","The closed position","Whatever position the installer chooses"],
+ e:"开关一律画在“静止”状态，即温度、压力等介质还没让它动作的状态。所以继电器通电后，NO 变闭合、NC 变断开。",
+ p:"118", qt:"All switch symbols in a wiring diagram are shown in the “resting” position. Resting means that the medium (heat, pressure, etc.) has not caused the switch to change positions.", src:"both"},
+
+{s:2, q:"A normally open switch symbol is drawn BELOW the line. When will it close?",
+ zh:"常开开关符号画在线的下方，它在什么时候闭合？",
+ a:["On an increase in the activating medium","On a decrease in the activating medium","Only when manually reset","It never changes state"],
+ e:"教材表格：NO 符号画在线下方 → 介质（热、压力等）增加时闭合；画在线上方 → 介质减少时闭合。老师说“怎么画的很重要”，看开关刀片会往哪边倒。",
+ p:"119", qt:"If the NO switch symbol is shown below the line: The switch will close on an increase in the activating medium.", src:"both"},
+
+{s:2, q:"A normally open switch symbol is drawn ABOVE the line. When will it close?",
+ zh:"常开开关符号画在线的上方，它在什么时候闭合？",
+ a:["On a decrease in the activating medium","On an increase in the activating medium","Only when energized by a relay","On a short to ground"],
+ e:"画在线上方的 NO 开关，介质减少时闭合。和上一题对照记。",
+ p:"119", qt:"If the NO switch symbol is shown above the line: The switch will close on a decrease in the activating medium (heat, pressure, etc.).", src:"book"},
+
+{s:2, q:"Limit switches are typically in which position?",
+ zh:"限位（limit）开关一般是什么状态？",
+ a:["Normally closed (NC)","Normally open (NO)","SPDT with no common","Always open until reset"],
+ e:"Limit 开关一般是 NC，出现不安全状况时断开；动作类开关（actuating）一般是 NO。",
+ p:"119", qt:"Switches are designated normally closed (NC) when the resting position of the switch is closed. Typically, limit switches are in the NC position.", src:"both"},
+
+{s:2, q:"An SPDT switch is to be wired in the normally open position. Which terminals are used?",
+ zh:"SPDT 开关接成常开，用哪两个端子？",
+ a:["The NO terminal and the common terminal","The NC terminal and the common terminal","The NO and NC terminals","All three terminals"],
+ e:"SPDT 有三个端子，一般只用两个：接成 NO 用 NO + C；接成 NC 用 NC + C。燃气阀在控制板上就是接 NO + common。",
+ p:"119", qt:"If wired in NO position, the wire will be connected to the NO terminal and the common terminal.", src:"both"},
+
+{s:2, q:"On the furnace door diagram (Figure 2-19), what is the drawing on the left that reads top to bottom like a ladder?",
+ zh:"炉门内侧的图（Figure 2-19），左边那张像梯子一样从上到下的是什么？",
+ a:["The schematic (ladder) diagram, laid out to follow the sequence of operation","The wiring diagram","A pictorial diagram","The factory test record"],
+ e:"打开面板看到的是两张图，不是一张：左边是 schematic（梯形图），用来跟踪动作顺序；右边是 wiring diagram，显示线怎么接。",
+ p:"129", qt:"The wiring diagram on the right shows the electrical connections between the switches and loads. The schematic diagram (ladder diagram) on the left is laid out in order to follow the electrical sequence of operation.", src:"both"},
+
+{s:2, q:"How is field wiring identified on a wiring schematic?",
+ zh:"接线图上现场接线（field wiring）怎么表示？",
+ a:["Dotted (dashed) lines","Solid bold lines","Highlighted lines","Red lines"],
+ e:"虚线 = 现场接线，比如接到别的房间的温控器线，可能有几十英尺长。IFC 上唯一需要现场接的通常就是温控器线。",
+ p:"69", qt:"The field wiring is always identified on wiring schematics with dotted lines.", src:"both"},
+
+/* ---------- 3 ---------- */
+{s:3, q:"What are the most common auxiliary devices found in control systems?",
+ zh:"控制系统里最常见的辅助装置是什么？",
+ a:["Switches","Relays","Contactors","Protective devices"],
+ e:"辅助装置包括开关、继电器、接触器和保护装置，其中最常见的是开关。",
+ p:"118", qt:"Auxiliary devices include switches, relays, contactors, and protective devices. Switches are the most common auxiliary device found in control systems; they are used to start or stop a system.", src:"both"},
+
+{s:3, q:"It is common for a relay coil to be powered by 24 V while its contacts close a 120 V circuit. What is the advantage?",
+ zh:"继电器线圈用 24 V、触点控制 120 V，好处是什么？",
+ a:["The control circuit can operate on safer, lower voltage wiring","The relay contacts never wear out","No transformer is needed","The load draws less current"],
+ e:"控制回路用低压，更安全。但继电器线圈电压有很多种，换件时要核对线圈电压。",
+ p:"120", qt:"It is quite common for relays to be powered by 24 V, but they close a 120 V circuit. This way, the control circuit can operate on safer lower voltage wiring.", src:"both"},
+
+{s:3, q:"On a relay rating chart, what does AFL stand for?",
+ zh:"继电器额定值表上的 AFL 是什么意思？",
+ a:["Amps full load","Amps fault limit","Allowable field load","Amps for lock rotor"],
+ e:"AFL = Amps Full Load，触点能反复接通和断开而不过热、不打火的满载电流。ALR 才是锁转电流（Amps Locked Rotor）。",
+ p:"121", qt:"For example, the NO contacts when connected to a 120 VAC circuit are rated for: 1 horsepower (HP); 16 Amps full load (AFL); 96 Amps lock rotor (ALR); and 16 Ohms contact resistance (RES).", src:"both"},
+
+{s:3, q:"Using the relay chart (NO 120 V: 16-96; NO 240 V: 8-48; NC 120 V: 13.8-82.8; NC 240 V: 8.9-41.4), what is the AFL rating of the normally closed contacts on a 120 V circuit?",
+ zh:"按继电器额定值表，120 V 回路上常闭触点的 AFL 是多少？",
+ a:["13.8 A","8.9 A","16 A","82.8 A"],
+ e:"找 NC 行、120 V 那一格，AFL-ALR 写的是 13.8-82.8，前面的 13.8 是 AFL，后面的 82.8 是 ALR。这是 Chapter 2 作业第 6 题的原型。",
+ p:"135", qt:"NC 120 | 3/4 | 13.8-82.8 | 14", src:"both"},
+
+{s:3, q:"Using the same relay chart, what is the AFL rating of the normally open contacts on a 240 V circuit?",
+ zh:"同一张表，240 V 回路上常开触点的 AFL 是多少？",
+ a:["8 A","16 A","48 A","8.9 A"],
+ e:"NO 行、240 V：8-48，AFL 是 8 A。8.9 A 是 NC 在 240 V 的值，别看串行。",
+ p:"122", qt:"NO 240 | 1 | 8-48 | 8", src:"both"},
+
+{s:3, q:"What are heavy-duty contactors used for?",
+ zh:"重型接触器用来做什么？",
+ a:["Switching large currents and high voltages, such as a three-phase motor","Sensing flame current","Providing a time delay for the blower","Reducing 120 V to 24 V"],
+ e:"接触器就是大号继电器，用电磁铁带动横杆同时闭合几组触点，控制大电流、高电压设备，比如大锅炉上的三相电机。",
+ p:"123", qt:"Heavy duty contactors are solenoid/armature operators for switching heavy-duty electrical contacts. They are used to control the large amounts of current and high voltages required by industrial equipment.", src:"book"},
+
+{s:3, tf:true, q:"Integrated electronic control boards have replaced most time-delay relays.",
+ zh:"集成电子控制板已经取代了大多数延时继电器。",
+ a:["True","False"], c:0,
+ e:"对。现在的新设备大多用集成控制板，里面已经包含所有需要的延时功能。",
+ p:"123", qt:"Most of the new equipment manufactured today have integrated control boards that include all the time-delay functions needed to operate the equipment.", src:"book"},
+
+{s:3, q:"For AC circuits, the differentiation between the hot, neutral and ground wires is described as:",
+ zh:"交流电路中，区分火线、零线和地线叫什么？",
+ a:["Polarization (polarity)","Phasing","Sequencing","Modulation"],
+ e:"直流电路里 polarity 指电流方向；交流电路里指区分 hot、neutral、ground。Phasing 是另一个概念，指变压器一次侧和二次侧极性匹配。",
+ p:"124", qt:"In a DC circuit, polarity refers to the direction of current flow. In an AC circuit, polarity refers to the differentiation between hot, neutral, and ground.", src:"both"},
+
+{s:3, q:"Your meter reads 120 V between L1 and N at the junction box. What does this tell you about polarity?",
+ zh:"接线盒里 L1 和 N 之间测到 120 V，这能说明极性对吗？",
+ a:["Nothing yet; you must test each wire to ground","Polarity is correct","Polarity is reversed","The neutral is open"],
+ e:"火零接反也一样测到 120 V。第一步只说明两线间有电压，第二步要每根线分别对地测。",
+ p:"125", qt:"If there is a voltage potential, connect the meter from each wire to ground, as shown in Figure 2-13, to determine which is hot (120 VAC reading) and which is neutral (0 VAC reading).", src:"both"},
+
+{s:3, q:"How do you identify the hot lead with a voltmeter?",
+ zh:"用电压表怎么找火线？",
+ a:["The lead that reads 120 VAC to ground is hot","The lead that reads 0 VAC to ground is hot","The white wire is always hot","Measure resistance between the two leads"],
+ e:"对地 120 V 的是火线（通常黑色）；对地 0 V 的是零线。",
+ p:"126", qt:"The lead which shows a 120 VAC reading to ground is the hot wire and is usually black.", src:"both"},
+
+{s:3, q:"Why should neutral-to-ground read 0 V on a correctly wired circuit?",
+ zh:"接线正确时，零线对地为什么是 0 V？",
+ a:["Neutral and ground are bonded together at the panel","The neutral carries no current","The ground wire has a fuse","The transformer isolates them"],
+ e:"老师讲：配电盘里零线排和地线排都固定在金属箱上，两者在盘里是连通的，所以零对地应该是 0。如果不是 0，说明某处零线接错了。",
+ p:"125", qt:"Ground wire: Is connected to ground and only carries current when there is a short to ground in the circuit.", src:"both"},
+
+{s:3, q:"After you open the appliance disconnect switch, what should the hot lead read to ground?",
+ zh:"断开器具隔离开关后，火线对地应该读多少？",
+ a:["0 VAC","120 VAC","24 VAC","96 VAC"],
+ e:"确认隔离开关确实切断了火线：断开后火线对地应为 0 VAC。",
+ p:"126", qt:"After you have disconnected it (turned it to the off position), you must check the hot lead to ground. There should now be a 0 VAC reading.", src:"book"},
+
+{s:3, q:"On line voltage circuits, where should switches be placed?",
+ zh:"线电压回路中，开关应该放在哪？",
+ a:["In series, before the load","In parallel with the load","After the load, on the neutral","Between neutral and ground"],
+ e:"开关与负载串联，并且在负载之前（火线侧）。并联的话根本关不掉负载。",
+ p:"126", qt:"Note: On line voltage circuits, the switches should be placed in series before the load.", src:"both"},
+
+{s:3, q:"What is matching the polarity of the primary and secondary sides of a transformer called?",
+ zh:"让变压器一次侧和二次侧极性一致，叫什么？",
+ a:["Phasing","Polarization","Sequencing","Modulating"],
+ e:"Phasing（相位匹配）。注意这里不是在说单相/三相电机，而是 120 V 一次侧和 24 V 二次侧是否同相。",
+ p:"115", qt:"Phasing: Matching the polarity of the primary and secondary sides of a transformer.", src:"both"},
+
+{s:3, tf:true, q:"Primary and secondary sine waves that peak on opposite sides of the zero line are in phase.",
+ zh:"一次侧和二次侧的正弦波在零线两侧相反时，它们是同相的。",
+ a:["True","False"], c:1,
+ e:"错，这是不同相（out of phase）。同相是两条波同时到达波峰、同时到达波谷。",
+ p:"127", qt:"Where the primary and secondary are not in phase, the sine wave will appear as shown in Figure 2-16. The difference in the potential between the primary and secondary is now 144 V.", src:"both"},
+
+{s:3, q:"When checking transformer phasing between the 120 VAC hot and the ungrounded side of the secondary, what reading means they are in phase?",
+ zh:"检查变压器相位，120 V 火线到二次侧未接地端，读数多少表示同相？",
+ a:["96 VAC","144 VAC","24 VAC","120 VAC"],
+ e:"同相：120 − 24 = 96 V。不同相：120 + 24 = 144 V。这一题老师让大家划重点。",
+ p:"128", qt:"Check the voltage between the hot and the ungrounded side of the secondary. If the primary and secondary are in phase, the reading should be 96 V.", src:"both"},
+
+{s:3, q:"You read 144 V when checking transformer phasing. What should you do?",
+ zh:"测相位读到 144 V，应该怎么处理？",
+ a:["Move the ground to the other secondary terminal (or swap the primary leads) and recheck for 96 V","Replace the transformer","Nothing, 144 V is normal","Reverse the thermostat wires"],
+ e:"144 V 说明不同相。把接地移到二次侧另一个端子，再测应为 96 V；如果二次侧已标好 R 和 C，就对调一次侧的接线。",
+ p:"128", qt:"If the reading is 144 V, the primary and secondary are not in phase move the ground to the other terminal of the secondary and now the reading between L1 and the ungrounded side of the secondary will read 96 V.", src:"both"},
+
+{s:3, q:"Why does polarity matter on many newer electronic control boards?",
+ zh:"为什么很多新式电子控制板对极性有要求？",
+ a:["Boards using flame rectification will not work properly, or at all, with incorrect polarity","Reversed polarity makes the inducer run backwards","It changes the thermostat anticipator setting","It doubles the gas valve voltage"],
+ e:"带火焰整流（flame rectification）的控制板，极性不对就工作不正常甚至完全不工作。有些板还要求降压变压器相位正确。",
+ p:"124", qt:"Some of the electronics boards being used today, with flame rectification, will not function properly — or at all — unless the polarization is correct.", src:"both"},
+
+/* ---------- 4 ---------- */
+{s:4, q:"In the furnace sequence (Figure 2-19), what must be closed for the 120/24 V transformer to be powered?",
+ zh:"炉子时序里，什么闭合后 120/24 V 变压器才通电？",
+ a:["The door switch and the limit switch","The thermostat and the air proving switch","The rollout switch and vent switch","The fan switch"],
+ e:"时序第 1 步：门开关和限温开关都闭合，变压器通电。",
+ p:"130", qt:"With the door switch and the limit switch in the closed position, the 120/24 V transformer is powered.", src:"both"},
+
+{s:4, q:"When the thermostat calls for heat in Figure 2-19, what does it power first?",
+ zh:"温控器要热后，首先给什么供电？",
+ a:["The furnace relay coil, whose contacts then start the inducer","The gas valve directly","The circulating blower","The igniter"],
+ e:"温控器闭合 → 炉子继电器线圈得电 → 继电器触点闭合 → 引风机（inducer）启动。",
+ p:"130", qt:"This powers the furnace relay coil, which in turn closes the furnace relay contacts. These contacts then power the induced blower motor.", src:"both"},
+
+{s:4, q:"What follows the inducer starting in the furnace sequence?",
+ zh:"引风机启动后，下一步是什么？",
+ a:["The air proving switch closes and powers the control module","The igniter energizes immediately","The circulating blower starts","The main valve opens"],
+ e:"引风机建立压力 → 风压开关闭合 → 电经过常闭的 rollout 和 vent 开关，给控制模块供电。",
+ p:"130", qt:"The running of the induced blower will cause the air proving switch to close. This powers the control module as the flame rollout switch and vent switch are normally closed.", src:"both"},
+
+{s:4, q:"The flame rollout switch and vent safety switch in Figure 2-19 are:",
+ zh:"图中的 rollout 开关和排烟安全开关是什么状态？",
+ a:["Normally closed safeties wired in series with the control module","Normally open switches that close on a call for heat","Wired in parallel with the thermostat","Field-adjustable operating controls"],
+ e:"两者都是安全开关，常闭，与控制模块串联。出现不安全状况时断开，模块就没电。",
+ p:"130", qt:"Control circuit — 24 V: Thermostat (NO), Flame rollout switch (NC), Vent safety switch (NC), Air proving switch (NO).", src:"both"},
+
+{s:4, q:"What is the purpose of the control module's safe start check?",
+ zh:"控制模块 safe start check 的目的？",
+ a:["To confirm there is not already an existing flame","To confirm the pilot flame","To confirm the induced fan is running","To confirm the main flame"],
+ e:"点火前确认没有已经存在的火焰（或假火焰信号）。模块不连接引风机和风压开关，它只能检查火焰信号。",
+ p:"130", qt:"The control module performs safe start check to confirm there is not already an existing flame.", src:"both"},
+
+{s:4, q:"After a successful safe start check, which two things are powered at the same time?",
+ zh:"Safe start 通过后，哪两样同时通电？",
+ a:["The igniter and the pilot valve","The main valve and the blower","The inducer and the igniter","The pilot valve and the main valve"],
+ e:"点火器和长明火阀同时通电，然后通过火焰传感器证实长明火。",
+ p:"130", qt:"If safe start is indicated, the igniter and pilot valve are powered simultaneously. The pilot is proven through the flame sensor.", src:"both"},
+
+{s:4, q:"Once the pilot is proven, what happens next?",
+ zh:"长明火被证实后，接下来发生什么？",
+ a:["The main valve is powered and the igniter is de-energized","The igniter stays on for the whole cycle","The blower starts immediately","The module goes into lockout"],
+ e:"长明火证实 → 主阀通电 → 点火器断电 → 主燃烧器点燃。",
+ p:"130", qt:"If the pilot is proven, the main valve is powered, and the igniter is de-energized.", src:"both"},
+
+{s:4, q:"In a fan and limit furnace, what starts the circulating blower?",
+ zh:"带 fan/limit 控制的炉子，循环风机什么时候启动？",
+ a:["The fan control switch closes when temperature rises to its setpoint","The thermostat closes","The air proving switch closes","The pilot is proven"],
+ e:"炉内温度升到风机控制设定点，风机开关闭合，循环风机启动。",
+ p:"130", qt:"As the temperature rises to the fan control setpoint, the fan control switch will close, energizing the circulating blower motor (fan).", src:"both"},
+
+{s:4, q:"After the thermostat is satisfied, when does the circulating blower stop on a fan and limit furnace?",
+ zh:"温控器满足后，fan/limit 炉的循环风机什么时候停？",
+ a:["When the temperature drops below the fan control setpoint differential","Immediately when the burner stops","After exactly 3 minutes","When the limit switch opens"],
+ e:"燃烧器停后风机继续吹，直到温度降到风机开关设定点以下（双金属片冷却）。现在的数字控制板改用定时器倒计时。",
+ p:"130", qt:"The circulating blower motor will continue to operate after the thermostat opens until the temperature drops below the fan control switch setpoint differential.", src:"both"},
+
+{s:4, q:"A control module has terminals marked PV, MV, igniter-sensor and 25V. What type of system is it?",
+ zh:"控制模块上有 PV、MV、点火感应端子和 25V，这是什么系统？",
+ a:["Intermittent pilot","Direct spark ignition","Hot surface ignition","Standing pilot with thermocouple"],
+ e:"有 PV（pilot valve）就有长明火，是间歇长明火（intermittent pilot）。直接火花点火（DSI）没有长明火端子，只有 MV。标 25V 说明是火花点火类。",
+ p:"64", qt:"Energizes the pilot valve through terminal marked “PV”... Energizes the main gas valve through the terminal marked “MV”.", src:"both"},
+
+{s:4, q:"How does a direct spark ignition module differ from an intermittent pilot module?",
+ zh:"直接火花点火模块和间歇长明火模块有什么区别？",
+ a:["It has no pilot valve terminals; the spark lights the main burner directly","It needs line voltage for the igniter","It has no flame sensor","It never goes into lockout"],
+ e:"DSI 没有长明火，火花直接点主燃烧器，所以没有 PV 端子；如果用 redundant 阀，两个线圈并联一起通电。",
+ p:"65", qt:"Direct spark ignition does not use a pilot flame but rather directly lights the main burner with a spark. The control module, therefore, does not have the terminals for pilot valves.", src:"book"},
+
+{s:4, q:"Why is a hot surface igniter connected to the line voltage supply?",
+ zh:"热表面点火器（HSI）为什么接线电压？",
+ a:["It needs line voltage to heat the surface hot enough to ignite the gas","It uses line voltage to sense flame","Code requires all igniters on 120 V","It replaces the transformer"],
+ e:"HSI 要靠线电压把表面烧到足以点燃燃气（约预热 30 秒），所以模块上有 L1、L2 和 HSI 端子。",
+ p:"67", qt:"The hot surface igniter requires line voltage to heat the surface hot enough to ignite gas on contact. It is therefore directly connected to the line voltage supply.", src:"book"},
+
+{s:4, q:"Which describes the operation of a flame rollout switch?",
+ zh:"火焰回卷开关（rollout switch）怎么工作？",
+ a:["A normally closed switch that opens on flame rollout","A normally open switch that closes on flame rollout","A normally open switch that closes when the inducer runs","A normally closed switch that closes when the inducer stops"],
+ e:"常闭，火焰回卷时断开。多数是带手动复位按钮的 snap disc 开关。",
+ p:"50", qt:"The snap disc type of high-limit switch is often used as a flame roll-out switch for various applications. It also includes a small manual reset button between the electrical connections.", src:"both"},
+
+{s:4, q:"What is the difference between an integrated furnace control (IFC) and an ignition control module?",
+ zh:"IFC 和点火控制模块（ICM）有什么区别？",
+ a:["An IFC manages the entire furnace (ignition, inducer, blower, staging); an ICM handles ignition and flame monitoring","An ICM controls the blower; an IFC does not","They are the same device","An IFC has no flame sensing"],
+ e:"IFC 管整台炉子：点火、引风机、风机、两段火、空气净化器、加湿器等。非集成的点火模块只管安全点火和监视火焰。",
+ p:"131", qt:"An integrated furnace control (IFC) manages the entire operation of a furnace, besides the ignition control, this can include two-stage burner operation, variable fan speed, electronic air cleaner, and humidifier depending on the furnace model.", src:"both"},
+
+{s:4, tf:true, q:"You can determine the sequence of operation for all components connected to an IFC from the wiring diagram.",
+ zh:"从接线图可以看出 IFC 上所有部件的动作顺序。",
+ a:["True","False"], c:1,
+ e:"错。接线图看不出模块内部的顺序，要看厂家的操作说明（有的给时序图）。",
+ p:"131", qt:"Just as you could not determine the sequence of events for the ignition control module from the previous wiring diagram, you now cannot determine the sequence for any load shown connected to the IFC.", src:"both"},
+
+{s:4, q:"Where do you get the internal sequence of operation of an ignition module or IFC?",
+ zh:"点火模块或 IFC 的内部时序从哪里查？",
+ a:["The manufacturer's operating instructions","The wiring diagram","The appliance rating plate","The CSA B149.1 Code"],
+ e:"从厂家资料查，有的厂家会给图形化时序表（如 Figure 2-21）。",
+ p:"132", qt:"The sequence of operation needs to be determined from the operating instructions.", src:"both"},
+
+{s:4, q:"When replacing an IFC, what must you make sure matches the original?",
+ zh:"更换 IFC 时，什么必须和原来一致？",
+ a:["The DIP switch configuration (or manufacturer's specifications)","The colour of the board","The fuse brand","The transformer VA rating"],
+ e:"拆之前先看原板的 DIP 开关设置，新板设成一样或按厂家要求设。",
+ p:"133", qt:"If you replace an IFC, make sure to match the DIP switch configuration to the original IFC and/or manufacturer's specifications.", src:"both"},
+
+{s:4, q:"Which of these is NOT normally adjusted with an IFC's DIP switches?",
+ zh:"下面哪项一般不是用 IFC 的 DIP 开关调的？",
+ a:["Manifold gas pressure","Heat off delay","Trial for ignition time","Cool off delay"],
+ e:"DIP 开关可以调：heat off delay、trial for ignition、heat on delay、stage delay、cool off delay。歧管压力是在燃气阀的调压螺丝上调。",
+ p:"133", qt:"The IFC will have DIP switches that can be used to change some of the operating parameters such as heat off delay, trial for ignition, heat on delay, stage delay (for single-stage thermostat), and cool off delay.", src:"both"},
+
+{s:4, q:"DIP table (heat off delay): SW2 ON + SW3 ON = 100 s, SW2 OFF + SW3 ON = 140 s, SW2 ON + SW3 OFF = 60 s, SW2 OFF + SW3 OFF = 180 s. The board shows SW2 OFF and SW3 OFF. What is the heat off delay?",
+ zh:"按 DIP 表，SW2 和 SW3 都是 OFF，heat off delay 是多少？",
+ a:["180 s","60 s","100 s","0 s"],
+ e:"SW2、SW3 都 OFF = 180 秒：燃烧器停后风机还要吹 3 分钟。老师说这有点长，一般 60 到 90 秒。注意先确认题目给的表，各厂家组合不同。",
+ p:"137", qt:"Use the DIP table shown here to interpret the HEAT “OFF” DELAY setting for the DIP switch configuration shown.", src:"both"},
+
+{s:4, q:"On the same board, SW1 (cool off delay) is ON = 0 s. What happens when cooling stops?",
+ zh:"同一块板，SW1 为 ON（制冷关闭延时 0 秒），制冷停止时会怎样？",
+ a:["The blower shuts off immediately","The blower runs 180 s longer","The blower runs continuously","The inducer runs 60 s longer"],
+ e:"同一张表的左半边：SW1 ON = 0 秒（出厂设置），SW1 OFF = 80 秒。0 秒就是制冷一停风机马上停。",
+ p:"137", qt:"COOL “OFF” DELAY: SW1 ON = 0 SEC (factory setting); SW1 OFF = 80 SEC", src:"both"},
+
+{s:4, q:"On a typical IFC fault code chart, what does 4 flashes usually mean?",
+ zh:"常见 IFC 故障码表中，闪 4 下一般表示什么？",
+ a:["Open temperature limit circuit","Draft pressure error","Flame sensed when no flame should be present","Gas valve circuit error"],
+ e:"教材 Figure 1-65：2 闪系统锁定、3 闪排烟压力故障、4 闪限温回路断开、5 闪不该有火时检测到火焰、6 闪电源反接/接地差/电压低。老师提醒：各厂家不同，考试应该会给表。",
+ p:"71", qt:"4 flashes: Open temperature limit circuit", src:"both", flag:"闪码因厂家而异，以题目给的表为准。"},
+
+{s:4, q:"On the same IFC fault code chart, what does 3 flashes mean?",
+ zh:"同一张故障码表，闪 3 下表示什么？",
+ a:["Draft pressure error (venting, pressure switch or inducer problem)","Open temperature limit circuit","System lockout","Low flame sense signal"],
+ e:"3 闪：排烟压力故障，可能是排烟问题、压力开关问题或引风机问题。",
+ p:"71", qt:"3 flashes: Draft pressure error — possible problems: a) Venting problem b) Pressure switch problem c) Inducer problem", src:"both"},
+
+{s:4, q:"On the IFC fault code chart, what does 6 flashes mean?",
+ zh:"IFC 故障码 6 闪表示什么？",
+ a:["115 VAC power reversed, poor grounding, or system voltage too low","Gas valve circuit error","Open temperature limit circuit","Normal call for heat"],
+ e:"6 闪：115 V 电源反接、接地不良或电压太低。老师课上也回忆起是 reverse polarity。",
+ p:"71", qt:"6 flashes: 115 Volt AC power reversed, poor grounding, or system voltage too low", src:"both"},
+
+{s:4, q:"A control module is in lockout. What is needed to restart it?",
+ zh:"控制模块锁定（lockout）后怎么重启？",
+ a:["A manual reset: reset button, or turn the thermostat down, wait, then back up","It restarts on its own after the next call for heat","Replace the module","Jumper the flame sensor"],
+ e:"Lockout 是点火试火时间用完后的状态，要手动复位：按模块复位钮，或把温控器调到最低让模块断电，等 1 到 3 分钟再调回来。",
+ p:"62", qt:"The module then requires a manual reset to restart the ignition sequence, accomplished either by depressing a reset button on the control module or by turning the thermostat to its lowest setting.", src:"both"},
+
+/* ---------- 5 ---------- */
+{s:5, q:"Thermostats, operating aquastats and operating pressuretrols belong to which section of the control system?",
+ zh:"温控器、运行水温控制器、运行压力控制器属于控制系统的哪一部分？",
+ a:["Operating controllers","Limit and safety controllers","Combustion safety controller","Ignition control module"],
+ e:"控制系统四部分：operating controllers、limit and safety controllers、combustion safety controller、ignition control module。这三个都是 operating controllers。",
+ p:"22", qt:"Operating controllers: Respond to changes in the controlled variable (temperature, pressure, etc.) and make or break a circuit. Examples: thermostats, operating aquastats, and operating pressure controls.", src:"both"},
+
+{s:5, q:"Low-water cut-offs, high-limit aquastats and flow switches belong to which section of the control system?",
+ zh:"低水位切断、高限水温控制、流量开关属于哪一部分？",
+ a:["Limit and safety controllers","Operating controllers","Combustion safety controller","Ignition control module"],
+ e:"它们在继续运行会不安全时，从运行控制器手里“收回指挥权”。",
+ p:"22", qt:"Limit and safety controllers: Take the command away from the operating controls when continued operation would cause an unsafe situation.", src:"both"},
+
+{s:5, q:"A thermostat may be rated for direct switching of three kinds of loads. Which is NOT one of them?",
+ zh:"温控器可以直接切换三种负载，下面哪个不是？",
+ a:["480 V three-phase","Line voltage (120 V)","Low voltage (24 V)","Millivolt"],
+ e:"三种：线电压（120 V）、低压（24 V）、毫伏。",
+ p:"23", qt:"load switching ability — thermostat may be rated for direct switching of line voltage, low voltage, or millivoltage loads", src:"both"},
+
+{s:5, q:"You are converting a house with electric baseboard heat to a gas furnace. Why must you not reuse the old wall thermostat?",
+ zh:"把电踢脚线供暖的房子改装燃气炉，为什么不能沿用原来的温控器？",
+ a:["It is likely a 120 V line-voltage thermostat; on a 24 V board it can destroy the board or start a fire","It is a millivolt thermostat","It has no heat anticipator","Code bans reusing any thermostat"],
+ e:"电暖踢脚线的温控器通常是 120 V 线电压的，别以为它是低压。接到 24 V 的炉子控制板上会烧板，甚至引起火灾。",
+ p:"", qt:"", src:"class"},
+
+{s:5, q:"Temperature swing is also known as:",
+ zh:"Temperature swing（温度波动）又叫什么？",
+ a:["Operating differential","Anticipation","Setback","Cycle rate"],
+ e:"温度波动 = 房间达到的最高温度减最低温度，也叫 operating differential（运行差值），可调。",
+ p:"28", qt:"Temperature swing, also known as operating differential, is the difference between the highest and lowest temperatures obtained in a room.", src:"both"},
+
+{s:5, q:"What does a thermocouple do for the pilot?",
+ zh:"热电偶对长明火起什么作用？",
+ a:["It proves the pilot flame; if the pilot goes out, it prevents the main gas valve from opening","It ignites the pilot","It regulates pilot gas pressure","It powers the circulating blower"],
+ e:"热电偶受热产生毫伏直流电，吸住安全阀；长明火熄灭，电压消失，主阀打不开。",
+ p:"15", qt:"The thermocouple is used to prove the pilot flame. If it goes out, the thermocouple prevents the main gas valve from opening.", src:"both"},
+
+{s:5, q:"How does a thermopile produce more voltage than a single thermocouple?",
+ zh:"热电堆为什么比单个热电偶电压高？",
+ a:["It is many thermocouples connected in series","It is thermocouples connected in parallel","It uses a step-up transformer","It is heated by line voltage"],
+ e:"单个热电偶只有 20 到 30 mV；很多个串联成热电堆，能产生几百毫伏。",
+ p:"16", qt:"The output of a single thermocouple is very small — 20 to 30 millivolts (mV). Placing a number of single thermocouples in series electrically can create a device known as a thermopile, which generates hundreds of millivolts.", src:"both"},
+
+{s:5, q:"When must the bulb of a sealed bellows control be filled with mercury?",
+ zh:"密封波纹管控制器的感温包什么时候必须充水银？",
+ a:["For high temperatures, such as in pilot safety controls","For low room temperatures","For all water heaters","Never; mercury is banned in all controls"],
+ e:"高温场合（如长明火安全控制，可达约 3000°F）必须用水银；一般温控用类似轻油的液体，上限约 650°F。水银在约 650°F 汽化，产生“快动”效果。",
+ p:"14", qt:"For high temperatures, such as 3000 °F (1648 °C) reached in pilot safety controls, the bulb must be filled with mercury.", src:"both"},
+
+{s:5, q:"An operating aquastat is set at 180°F. How does it work?",
+ zh:"运行水温控制器设在 180°F，它怎么工作？",
+ a:["It is normally closed and opens at 180°F, cutting power to the main gas valve","It is normally open and closes at 180°F","It is normally closed and turns on the gas at 180°F","It is normally open and opens at 180°F"],
+ e:"常闭，水温到 180°F 时断开，切断主燃气阀电源；水温降低一个差值后再闭合。",
+ p:"34", qt:"The operating aquastat is a normally closed switch that controls the temperature of the water inside the boiler. If the aquastat is set for 180°F (82 °C), the contacts will remain closed until the water reaches this temperature. At this point, the contacts open and cut off power to the main gas valve.", src:"both"},
+
+{s:5, q:"What is the job of a high limit aquastat, and where is it commonly set?",
+ zh:"高限水温控制器的作用是什么，一般设多少？",
+ a:["Backup safety if the operating aquastat fails; commonly 200°F","Main temperature control; commonly 140°F","Controls the circulator; commonly 120°F","Controls makeup water; commonly 212°F"],
+ e:"和运行水温控制器类似，但设得更高（常见 200°F），作为后备保护。有的带手动复位，迫使操作者去查原因。",
+ p:"45", qt:"The high limit aquastat is similar to the operating aquastat but is adjusted to a higher water temperature setting [commonly 200°F (93 °C)]. It serves as a backup safety switch in case the operating aquastat fails.", src:"both"},
+
+{s:5, q:"According to the instructor, at what temperature is water considered scalding?",
+ zh:"按老师的说法，多少度的水算烫伤水温？",
+ a:["140°F","100°F","180°F","212°F"],
+ e:"老师说 140°F 算 scalding，120°F 就已经能严重烫伤人。锅炉运行温度远高于这个。",
+ p:"", qt:"", src:"class"},
+
+{s:5, q:"What does a low-water cut-off switch do?",
+ zh:"低水位切断开关的作用是什么？",
+ a:["Opens its contacts and cuts power to the main gas valve if boiler water falls below the minimum level","Adds water when pressure is high","Shuts off the circulator when water is hot","Opens the relief valve"],
+ e:"锅炉水位低于最低水位时断开，切断主燃气阀电源。什么时候必须装，由 Boiler and Pressure Vessel 规范规定。老师说：输入功率大或者管路低于锅炉时都要装。",
+ p:"43", qt:"If the water level in the boiler falls below the minimum level, the low-water cut-off switch opens its contacts and cuts off power to the main gas valve. The Boiler and Pressure Vessel code lists when and where low water cut-offs are required.", src:"both", flag:"课堂录音里的功率门槛听不清（“4,000 Btu”），考前查规范核实。"},
+
+{s:5, tf:true, q:"It is acceptable to jumper out a limit switch to keep a customer's heat running.",
+ zh:"为了让客户有暖气，可以把限温开关跨接掉。",
+ a:["True","False"], c:1,
+ e:"错。跨接 limit 会去掉对不安全状况的保护，永远不要这样做。",
+ p:"", qt:"", src:"class"},
+
+{s:5, q:"An operating pressuretrol cuts out at 5 psig with a 1.5 psi differential. At what pressure do the contacts close again?",
+ zh:"运行压力控制器 5 psig 断开，差值 1.5 psi，多少压力时重新闭合？",
+ a:["3.5 psig","6.5 psig","1.5 psig","5 psig"],
+ e:"5 − 1.5 = 3.5 psig。主设定和差值都可调。",
+ p:"38", qt:"Once it has reached this pressure, the contacts open and cuts off power to the main gas valve. The contacts close again when the steam pressure reduces by the differential setting, in this case, down to approximately 3.5 psig (24 kPa).", src:"both"},
+
+{s:5, q:"How does a high-limit pressure control differ from an operating pressure control?",
+ zh:"高限压力控制器和运行压力控制器有什么区别？",
+ a:["It is set higher, has no differential setting, and has a manual reset","It is set lower and resets automatically","It controls water level instead of pressure","There is no difference"],
+ e:"原理一样，但设定更高，没有差值调节，取而代之的是手动复位按钮。",
+ p:"52", qt:"Notice the high limit looks similar to the operating controller, but it does not have a differential setting; instead, it has a manual reset push button.", src:"both"},
+
+{s:5, q:"What does a sail switch prove?",
+ zh:"风帆开关（sail switch）证实什么？",
+ a:["Air flow","Water flow","Gas pressure","Flame presence"],
+ e:"Sail switch 是检测空气流动的流量开关，常用于证实燃烧器系统的风量。",
+ p:"48", qt:"Flow switches can also be designed to detect air movement. These are called sail switches. A common application of a sail switch is proving air flow for burner systems.", src:"both"},
+
+{s:5, q:"Why do small water-volume boilers need a flow switch?",
+ zh:"小水容量锅炉为什么需要流量开关？",
+ a:["To prove water is circulating before the burner fires, since low flow can turn the water to steam","To measure gas flow","To prove combustion air","To control water temperature"],
+ e:"这类锅炉水少，水流不足就可能变成蒸汽，所以主燃烧器点火前必须证实水泵在循环。",
+ p:"47", qt:"They ensure that the pumps are circulating water in the piping system and the boiler before the main burner can fire. Boilers that require flow switches have small water capacities, and their water may turn to steam if the flow of water is inadequate.", src:"both"},
+
+{s:5, q:"A snap disc high-limit switch next to a furnace heat exchanger opens and resets at about:",
+ zh:"炉子换热器旁的 snap disc 高限开关大约在多少度断开和复位？",
+ a:["Opens near 200°F, resets near 175°F (25°F differential, not adjustable)","Opens near 250°F, resets near 200°F","Opens near 140°F, resets near 120°F","Opens near 180°F, resets near 170°F (adjustable)"],
+ e:"约 200°F 断开、约 175°F 自动复位，差值 25°F，由厂家定，不能调。",
+ p:"49", qt:"If the temperature of the heat exchanger reaches around 200 °F (93 °C) — the normal setpoint for the high limit — the heat-sensitive bimetal will warp and break the control circuit. Once the temperature lowers to around 175 °F (79 °C), the contacts will automatically reset.", src:"both"},
+
+{s:5, q:"According to the instructor, what is the highest high-limit setting the Code allows on a forced-air furnace?",
+ zh:"按老师的说法，规范允许强制送风炉高限最高设到多少？",
+ a:["250°F","200°F","350°F","180°F"],
+ e:"老师说规范最高 250°F；重力式炉子（没有风机，靠热空气上升，俗称 octopus）允许到 350°F。教材里没写这个数，考前用 Code Compass 核实条款。",
+ p:"", qt:"", src:"class", flag:"教材无此数据，来自课堂，需核实。"},
+
+{s:5, q:"State the Wheatstone bridge balancing rule.",
+ zh:"惠斯通电桥的平衡条件是什么？",
+ a:["When R1/R2 equals R3/R4, the circuit is balanced and no current flows between A and B","When R1 equals R4, maximum current flows between A and B","When all resistors are zero, current flows","When R1 + R2 = R3 + R4, the relay energizes"],
+ e:"R1/R2 = R3/R4 时电桥平衡，A、B 之间无电流。",
+ p:"16", qt:"The principle states that when the ratio of R1 to R2 is the same as the ratio of R3 to R4, the circuit is in balance (i.e., there is no current flow between A and B).", src:"both"},
+
+{s:5, q:"In an electronic water heater thermostat based on a Wheatstone bridge, what happens when you turn the dial to a higher setting?",
+ zh:"用惠斯通电桥的电子热水器温控，调高温度旋钮会怎样？",
+ a:["The bridge goes out of balance, current flows between A and B and energizes a relay until the sensor rebalances it","The bridge stays balanced and nothing happens","The sensor resistance becomes zero","The ECO trips"],
+ e:"调旋钮改变电阻 → 电桥失衡 → A、B 间有电流 → 继电器吸合 → 点火模块工作。水温上升，传感器电阻变化到重新平衡，电流停止，燃烧停止。",
+ p:"17", qt:"When the thermostat dial is set to a given temperature, an imbalance occurs, allowing current to flow between A and B. This current is used to energize a relay, which in turn energizes the ignition control module.", src:"both"},
+
+{s:5, q:"How is a heat anticipator wired, and what does it do?",
+ zh:"热预期器（heat anticipator）怎么接线，作用是什么？",
+ a:["In series with the heating circuit; it adds a little heat so the thermostat shuts the burner off early","In parallel with the thermostat; it delays burner start","In series with the blower; it speeds up the fan","In parallel with the gas valve; it raises gas pressure"],
+ e:"它是温控器里的小电阻加热器，跟加热回路串联，靠回路电流发热（所以要按阀/继电器电流设定）。让温控器提前关火，用余热补上，减少过冲。",
+ p:"29", qt:"The anticipator is a small resistive heater in the thermostat itself, which heats when the system is on. This causes the thermostat to shut off the heating system sooner than it would if affected by room temperature only.", src:"both"},
+
+{s:5, q:"What does raising the CPH (cycles per hour) setting on an electronic thermostat do?",
+ zh:"电子温控器调高 CPH（每小时循环次数）会怎样？",
+ a:["Narrows the differential: shorter run times and less temperature swing","Widens the differential: longer run times","Raises the setpoint","Has no effect on the burner"],
+ e:"CPH 调的其实是触点通断的温差。1 CPH 约 3°F，12 CPH 约 0.4°F，运行时间更短、温度波动更小。但太高会短循环，要按设备类型选。老师课上跳过了这题，答案按教材。",
+ p:"31", qt:"An adjustment to 12 CPH at the other extreme end of the scale would be trying to maintain a temperature differential of only about 0.4 °F, which would give much shorter run time and less temperature swing.", src:"book"},
+
+{s:5, q:"What CPH setting do most electronic thermostats come pre-set at?",
+ zh:"大多数电子温控器出厂 CPH 设为多少？",
+ a:["5 or 6 CPH","1 or 2 CPH","9 CPH","12 CPH"],
+ e:"出厂多为 5 或 6 CPH。常见推荐：效率低于 90% 的炉子和热水踢脚线 5 CPH，高效炉 3 CPH，电炉 9 CPH。",
+ p:"31", qt:"Most electronic thermostats come out of the box set for 5 or 6 CPH.", src:"book"},
+
+/* ---------- 6 ---------- */
+{s:6, q:"Gas-pressure switches are required by code on burner systems operating with gas pressures greater than:",
+ zh:"燃气压力超过多少时，规范要求燃烧器系统装燃气压力开关？",
+ a:["1/2 psig (3.5 kPa)","2 psig","7 in w.c.","5 psig"],
+ e:"超过 1/2 psig 的燃烧器系统要装。压力过高或过低时自动断开燃气阀。",
+ p:"52", qt:"Gas-pressure switches are required by code on burner systems that operate with gas pressures greater than 1/2 psig (3.5 kPa).", src:"book"},
+
+{s:6, q:"The appliance regulator is set at 3.5 in w.c. Under CSA B149.3, at what pressure must the low gas-pressure switch open?",
+ zh:"器具调压器设 3.5 in w.c.，按 B149.3 低压开关在多少压力断开？",
+ a:["1.75 in w.c. (50% of setpoint)","2.6 in w.c. (75% of setpoint)","3.5 in w.c.","0.5 in w.c."],
+ e:"低燃气压力开关：压力降到调压器设定值的 50% 时断开。3.5 × 50% = 1.75 in w.c.",
+ p:"53", qt:"Low gas-pressure switch: The switch opens if the pressure drops to 50% of the regulator setpoint.", src:"both"},
+
+{s:6, q:"Under CSA B149.3, when must a high gas-pressure switch open?",
+ zh:"按 B149.3，高燃气压力开关什么时候断开？",
+ a:["When the appliance regulator setpoint is exceeded by 25% or more","When pressure exceeds the setpoint by 50%","When pressure exceeds 14 in w.c.","When pressure doubles"],
+ e:"高压开关：超过调压器设定值 25% 或以上时断开。记口诀：低 50%，高 25%。老师说这类题书里不一定有，但 TSSA 考试会考。",
+ p:"53", qt:"High gas-pressure switch: The switch opens when the appliance regulator setpoint is exceeded by 25% or more.", src:"both"},
+
+{s:6, q:"Flame rod detection systems work on which principle?",
+ zh:"火焰棒检测系统基于什么原理？",
+ a:["Flame ionization","Thermoelectric effect","Thermal expansion of liquids","Infrared radiation"],
+ e:"火焰的热量让空气分子激烈碰撞，产生离子和自由电子，火焰就能导电。",
+ p:"55", qt:"They work on the principle of flame ionization, whereby the heat from the flame causes air molecules in and around the flame envelope to collide so forcibly as to propel some electrons out of their atoms, thus producing ions and free electron.", src:"book"},
+
+{s:6, q:"Which flame rod system can mistake a leak to ground for a flame?",
+ zh:"哪种火焰棒系统可能把对地漏电误认成火焰？",
+ a:["Flame conductivity (AC)","Flame rectification","UV scanner","Thermocouple"],
+ e:"Conductivity 系统的火焰电流是交流，分不清漏电和真火焰。Rectification 系统读的是单向脉动直流，对地短路产生的是对称交流信号，会被拒绝。",
+ p:"55", qt:"Because the flame current in a conductivity system is AC, this system cannot differentiate between a leakage current and an actual flame current.", src:"both"},
+
+{s:6, q:"Why are metal plates or rods sometimes added to the burner head?",
+ zh:"为什么有时要在燃烧器头上加金属片或金属棒？",
+ a:["To keep at least a 4:1 ground area to flame rod area for flame rectification","To hold the flame rod in place","To reduce NOx","To cool the burner"],
+ e:"火焰整流要求接地面积至少是火焰棒的 4 倍（4:1）。燃烧器头烂了面积不够，可以加金属片补，不一定换燃烧器。",
+ p:"55", qt:"To ensure adequate flame rectification, maintain a minimum ratio of 4:1 between ground and flame rod. Metal rods or plates are added to the burner to increase the grounding area.", src:"both"},
+
+{s:6, q:"A flame rectification signal is measured with a:",
+ zh:"火焰整流信号用什么仪表测？",
+ a:["DC microammeter","AC voltmeter","Ohmmeter","Manometer"],
+ e:"虽然供的是交流，但接地面积远大于火焰棒，产生脉动直流，用直流微安表测。",
+ p:"57", qt:"The resultant current acts like a pulsating DC. The flame signal in a rectified system should be steady and can be measured with a DC microammeter.", src:"book"},
+
+{s:6, q:"What do UV and IR flame sensors detect?",
+ zh:"UV 和 IR 火焰传感器检测什么？",
+ a:["Ultraviolet and infrared radiation (light) given off by the flame","Ions in the flame","Heat at a thermocouple junction","Pressure in the combustion chamber"],
+ e:"UV 管检测紫外辐射；IR 传感器用硫化铅电池，遇红外线电阻下降。火焰辐射约 90% 是红外、6% 可见光、3% 紫外。",
+ p:"58", qt:"An ultraviolet sensing tube can detect the radiant energy in a flame... The main element of the infrared sensor is a lead sulphide cell that is used as an electrical switch.", src:"both"},
+
+{s:6, q:"What device is used to sense combustion air or flue gas flow on any appliance with a fan or blower?",
+ zh:"有风机的设备，用什么检测燃烧空气或烟气流量？",
+ a:["Air proving switch","Flow switch","Pressuretrol","Gas pressure switch"],
+ e:"风压开关是灵敏的膜片压力开关，把风机运行和火焰保护联锁起来。",
+ p:"59", qt:"Air-proving switches interlock the burner fan operation with the flame safeguard control. They are used to sense combustion air or flue gas flow on any appliance that incorporates a fan or blower.", src:"both"},
+
+{s:6, q:"An air pressure switch is rated 0.5 in w.c. According to the instructor's trade tip, about how much should the inducer pull or push?",
+ zh:"风压开关额定 0.5 in w.c.，按老师的经验，引风机应该做到多少？",
+ a:["About double the rating, around 1.0 in w.c.","Exactly 0.5 in w.c.","About 0.6 in w.c.","At least 3.5 in w.c."],
+ e:"老师的经验：引风机压力约为开关额定值的两倍。0.5 的开关要做到 1.0 左右；只有 0.92 就要查排烟问题，有时在出口加缩径增加阻力。教材只写单管开关至少需要 0.50 in w.c. 的压降才闭合。",
+ p:"59", qt:"The pressure switch shown in Figure 1-58 has a single sensing hose connected to the negative side of the induced vent blower, requiring at least a 0.50 inch w.c pressure fall (WCPF) to complete the control circuit.", src:"both", flag:"“两倍”是老师的现场经验，不是教材原文。"},
+
+{s:6, q:"A flame signal is present before the burner lights. What does the flame safeguard do?",
+ zh:"燃烧器点火前就检测到火焰信号，火焰保护器怎么处理？",
+ a:["It fails the safe start check and will not start the burner","It ignores the signal and starts normally","It opens the main valve early","It increases the trial for ignition time"],
+ e:"FSG 至少要做 safe start check：点火前有模拟火焰的情况就不允许启动。",
+ p:"72", qt:"As a minimum check, the flame safeguard control prevents burner start-up if a flame simulating condition is present prior to burner activation. This is called the safe start check function.", src:"both"},
+
+{s:6, q:"Which basic flame safeguard function cuts off the fuel when the flame is lost?",
+ zh:"火焰保护器哪项基本功能在失火时切断燃料？",
+ a:["Flame supervision","Safe start check","Burner sequencing","Pre-purge"],
+ e:"FSG 三项基本功能：自检（safe start）、燃烧器程序控制、火焰监视。没有火焰就切断自动燃料供应，这是火焰监视。",
+ p:"72", qt:"An FSG supervises the ignition and continued presence of a safe flame by de-energizing the automatic fuel supply if the flame is not present.", src:"both"},
+
+{s:6, q:"What extra features can a programming flame safeguard add over a primary (non-programming) control?",
+ zh:"程序型火焰保护器比基本型多了哪些功能？",
+ a:["Pre-purge with proven air flow, low fire start, timed trials for ignition","Only flame supervision","Thermostat scheduling","Gas pressure regulation"],
+ e:"程序型可加：带风量证实的预吹扫、低火启动、定时长明火/主火试点火、联锁监视、高低火切换、显示和存储数据。",
+ p:"76", qt:"These added features may include: a pre-purge with a proven air flow and capacity; a low fire start positioning; timed pilot trial for ignition; timed main flame trial for ignition (interrupted pilot); monitoring of start and running interlocks...", src:"both"},
+
+/* ---------- 7 ---------- */
+{s:7, q:"When should a water shut-off valve on a boiler or water heater be closed?",
+ zh:"锅炉或热水器的水关断阀什么时候关？",
+ a:["Only to isolate the appliance for repair or servicing","During normal operation to save water","Whenever the burner is off","When the boiler reaches temperature"],
+ e:"这些阀平时常开，只在维修时关来隔离设备。运行中关掉，系统缺水时补不进水。",
+ p:"79", qt:"They are normally open valves that can be shut off to isolate an appliance for repair or servicing.", src:"both"},
+
+{s:7, q:"What lets a globe valve throttle flow for long periods?",
+ zh:"截止阀（globe valve）为什么能长期节流？",
+ a:["Its design keeps seat erosion to a minimum","It has a gate that moves up and down","It is always fully open","It has a Teflon ball"],
+ e:"截止阀的结构让阀座冲蚀最小，适合经常节流调节，比如锅炉旁通。闸阀（gate valve）部分开启会振动磨损，只能全开或全关。",
+ p:"80", qt:"Globe valves, unlike gate valves, are designed for steady use in applications with frequent throttling or flow regulation. The design of the globe valve keeps the seat erosion to a minimum.", src:"both"},
+
+{s:7, q:"Where does the sensing stem of a water heater T&P relief valve sit?",
+ zh:"热水器 T&P 泄压阀的感温杆在哪个位置？",
+ a:["In the water within the top six inches of the tank","At the bottom of the tank","In the flue","At the cold water inlet"],
+ e:"感温杆伸进水箱顶部 6 英寸以内的水中。换热水器时也要换新 T&P 阀。",
+ p:"81", qt:"The sensing stem of this valve extends into the water within the top six inches of the tank.", src:"both"},
+
+{s:7, q:"How does a feedwater valve work with a low-water cut-off?",
+ zh:"补水阀和低水位切断怎么配合？",
+ a:["On low water, the cut-off shuts down the burner and powers the feedwater valve to add makeup water","It adds water only when the burner runs","It drains water when pressure is high","It shuts the circulator off"],
+ e:"检测到低水位：停燃烧器，同时让补水阀进水。",
+ p:"82", qt:"Upon sensing a low water condition, the boiler low-water cut-off shuts down the burner and powers the feedwater control that lets in makeup water.", src:"both"},
+
+{s:7, q:"On what type of appliance is a rod and tube (Unitrol) valve typically installed?",
+ zh:"杆管式（Unitrol）组合阀一般装在什么设备上？",
+ a:["Storage water heater","Furnace","Gas range","Boiler"],
+ e:"Unitrol 是储水式热水器上的多功能阀，靠铜管和殷钢棒热胀差感温。",
+ p:"93", qt:"The rod and tube combination gas valve is a multi-purpose valve typically installed in storage type water heaters.", src:"both"},
+
+{s:7, q:"What trips the ECO on a Unitrol valve, and what does it cut power to?",
+ zh:"Unitrol 阀上的 ECO 什么情况下断开，切断哪里的电？",
+ a:["Water temperature above about 200°F melts the fuse; it cuts current to the safety valve coil","Low gas pressure; it cuts power to the igniter","High flue temperature; it cuts power to the blower","Low water level; it cuts power to the thermostat"],
+ e:"ECO 是和安全阀线圈串联的熔断件，超过约 200°F 熔断，切断热电偶到安全阀线圈的电流，全部燃气关闭。多数是一次性的，跳了要换阀。",
+ p:"93", qt:"The ECO is a fusible link wired in series with the safety valve solenoid. If the temperature-sensitive fuse exceeds 200°F, the fuse will melt, and the electrical current to the safety valve power unit coil will be interrupted, shutting all of the gas off.", src:"both"},
+
+{s:7, q:"What acts as extra protection on a redundant gas valve?",
+ zh:"冗余燃气阀额外的保护是什么？",
+ a:["A second automatic shut-off valve in the valve body","A servo regulator","A pilot adjustment screw","An on/off switch"],
+ e:"冗余阀是 100% 安全关断型，阀体里还有第二个自动关断阀，避免没有点火源时燃气进入燃烧室。",
+ p:"99", qt:"It is of the 100% safety shut-off type with, as extra protection, a second shut-off valve incorporated in the valve body.", src:"book"},
+
+{s:7, q:"Why must a seismic gas valve be installed level, and how is it reset?",
+ zh:"地震切断阀为什么要水平安装，怎么复位？",
+ a:["An internal ball rolls on horizontal vibration; it must be manually reset","It uses a float; it resets automatically","It has a spring that needs gravity; reset by power cycling","It uses a mercury switch; it resets when vibration stops"],
+ e:"阀里有一个钢球，水平振动时滚动关阀，所以必须装平；动作后要手动复位。",
+ p:"106", qt:"Both of which need to be installed level as they have an internal ball that rolls when subject to horizontal vibration. They have an indicating window and must be manually reset once activated.", src:"both"},
+
+{s:7, q:"How is a cable release fire suppression gas valve closed?",
+ zh:"拉索式灭火联动燃气阀怎么关闭？",
+ a:["A manual pull station or a fusible link releases the cable","Only by a manual pull station","By a smoke detector signal through 24 V","By low gas pressure"],
+ e:"阀被拉索保持开启，手动拉站或灶具上方的温度熔断件都能释放拉索关阀，同时释放灭火剂。用于商用厨房，动作后要手动复位。",
+ p:"107", qt:"The system shown has a release-to-close valve, which is being held open by a cable that can be released by a manual pull station, or a temperature activated fusible link located above the cooking equipment.", src:"both"}
+];
+
+/* Chinese for options (same order as a[]) and textbook quotes, indexed like QUESTIONS. TF rows use null. */
+const ZH_A = [
+["阀组（歧管组件）","进户管","支管","滴水管/集污管组件"],
+["管线调压器（line pressure regulator）","再加一个器具调压器","进户调压器（service regulator）","只装一个超压泄放阀"],
+["0.5 psig","2 psig","5 psig","7 英寸水柱"],
+["Lock-up（正关断）型","只要限流放空型","可调旁通型","先导加载泄压型"],
+["没有用气时保持降压后的出口压力，不会爬升","出口压力一升高就向大气放气","进口压力下降时全开","大流量时让燃气绕过膜片"],
+null,
+["在阀组上游、阀组外部","在组合燃气阀内部","在器具调压器下游","只装在燃气表处"],
+["上游（进口）燃气压力","线圈直接把阀座拉开","复位弹簧","热电偶毫伏电压"],
+["在进口测压口接压力计","换变压器","把高限开关跨接","换点火模块"],
+["阀本身有问题，比如堵塞或阀在老化","器具运行正常","器具改成了丙烷","进口压力太高"],
+["条款号和白话总结；仍然要读规范原文","规范正式原文，所以不用看书","检查合格/不合格结果","厂家安装说明书"],
+["接线图（wiring diagram）","原理图（schematic）","梯形图（ladder）","方框图（block）"],
+["原理图（schematic）","接线图（wiring）","示意图（pictorial）","方框图（block）"],
+["梯形图（ladder diagram）","连接图","元件布置图","P&C 图"],
+null,
+["开关断开后负载没电，可以安全维修","降低负载上的压降","电机转向需要","省电线"],
+["并联电路有不止一条电流路径","串联电路有不止一条电流路径","并联电路里电流必须依次流过每个元件","几个电机串联时每个都能得到满电压"],
+["两线交叉但电气上不相连","两线相连","这是现场接线","其中一根是地线"],
+["设备是三相电源，三根线一起断","三个保险丝串联","三个独立的 24 V 控制回路","它是延时隔离开关"],
+["静止状态（介质还没作用）","通电状态","闭合状态","安装人员随意"],
+["介质增加时","介质减少时","只有手动复位时","永远不变"],
+["介质减少时","介质增加时","只有继电器通电时","对地短路时"],
+["常闭（NC）","常开（NO）","没有公共端的 SPDT","复位前一直断开"],
+["NO 端子和公共端（C）","NC 端子和公共端（C）","NO 和 NC 端子","三个端子都用"],
+["原理图（梯形图），按动作顺序排列","接线图","示意图","出厂测试记录"],
+["虚线（点线）","粗实线","高亮线","红线"],
+["开关","继电器","接触器","保护装置"],
+["控制回路可以用更安全的低压线路","继电器触点永远不会磨损","不需要变压器","负载电流变小"],
+["满载电流（Amps full load）","故障限流","允许现场负载","锁转电流"],
+["13.8 A","8.9 A","16 A","82.8 A"],
+["8 A","16 A","48 A","8.9 A"],
+["切换大电流和高电压，比如三相电机","检测火焰电流","给风机延时","把 120 V 降到 24 V"],
+null,
+["极性（polarization）","相位匹配（phasing）","时序（sequencing）","调制（modulation）"],
+["还看不出来，要分别测每根线对地","极性正确","极性接反","零线断了"],
+["对地读 120 VAC 的那根是火线","对地读 0 VAC 的那根是火线","白线永远是火线","测两根线之间的电阻"],
+["零线和地线在配电盘里连在一起","零线不带电流","地线上有保险丝","变压器把它们隔开了"],
+["0 VAC","120 VAC","24 VAC","96 VAC"],
+["串联，在负载之前","与负载并联","在负载之后，零线上","在零线和地线之间"],
+["相位匹配（phasing）","极性（polarization）","时序（sequencing）","调制（modulating）"],
+null,
+["96 VAC","144 VAC","24 VAC","120 VAC"],
+["把接地移到二次侧另一个端子（或对调一次侧接线），再测是否为 96 V","换变压器","不用管，144 V 正常","对调温控器线"],
+["用火焰整流的控制板，极性不对就工作不正常甚至不工作","极性反了引风机会反转","会改变温控器预期器设定","会让燃气阀电压翻倍"],
+["门开关和限温开关","温控器和风压开关","回卷开关和排烟开关","风机开关"],
+["炉子继电器线圈，它的触点再启动引风机","直接给燃气阀","循环风机","点火器"],
+["风压开关闭合，给控制模块供电","点火器马上通电","循环风机启动","主阀打开"],
+["常闭安全开关，与控制模块串联","常开开关，要热时闭合","与温控器并联","可现场调节的运行控制器"],
+["确认没有已经存在的火焰","确认长明火","确认引风机在转","确认主火焰"],
+["点火器和长明火阀","主阀和风机","引风机和点火器","长明火阀和主阀"],
+["主阀通电，点火器断电","点火器整个循环都开着","风机马上启动","模块进入锁定"],
+["温度升到设定点时风机控制开关闭合","温控器闭合","风压开关闭合","长明火被证实"],
+["温度降到风机控制开关设定差值以下时","燃烧器一停马上停","正好 3 分钟后","限温开关断开时"],
+["间歇长明火（intermittent pilot）","直接火花点火（DSI）","热表面点火（HSI）","热电偶常明火"],
+["没有长明火阀端子，火花直接点主燃烧器","点火器需要线电压","没有火焰传感器","永远不会锁定"],
+["需要线电压把表面加热到能点燃燃气","用线电压检测火焰","规范要求所有点火器用 120 V","它取代了变压器"],
+["常闭开关，火焰回卷时断开","常开开关，火焰回卷时闭合","常开开关，引风机运行时闭合","常闭开关，引风机停时闭合"],
+["IFC 管整台炉子（点火、引风机、风机、分段）；ICM 只管点火和监视火焰","ICM 控制风机，IFC 不控制","两者是同一个东西","IFC 没有火焰检测"],
+null,
+["厂家的操作说明","接线图","器具铭牌","CSA B149.1 规范"],
+["DIP 开关设置（或厂家规格）","电路板颜色","保险丝品牌","变压器 VA 额定值"],
+["歧管燃气压力","加热关闭延时","点火试火时间","制冷关闭延时"],
+["180 秒","60 秒","100 秒","0 秒"],
+["风机马上停","风机多转 180 秒","风机一直转","引风机多转 60 秒"],
+["限温回路断开","排烟压力故障","不该有火时检测到火焰","燃气阀回路故障"],
+["排烟压力故障（排烟、压力开关或引风机问题）","限温回路断开","系统锁定","火焰信号弱"],
+["115 VAC 电源接反、接地不良或电压太低","燃气阀回路故障","限温回路断开","正常要热"],
+["手动复位：按复位钮，或把温控器调低、等一会再调回","下次要热时自己重启","换模块","把火焰传感器跨接"],
+["运行控制器","限位与安全控制器","燃烧安全控制器","点火控制模块"],
+["限位与安全控制器","运行控制器","燃烧安全控制器","点火控制模块"],
+["480 V 三相","线电压（120 V）","低压（24 V）","毫伏"],
+["很可能是 120 V 线电压温控器，接到 24 V 板上会烧板甚至起火","它是毫伏温控器","它没有热预期器","规范禁止重复使用任何温控器"],
+["运行差值（operating differential）","预期（anticipation）","夜间降温（setback）","循环率（cycle rate）"],
+["证实长明火；长明火熄灭时阻止主燃气阀打开","点燃长明火","调节长明火燃气压力","给循环风机供电"],
+["它是很多热电偶串联","它是热电偶并联","它用升压变压器","它由线电压加热"],
+["用于高温场合，比如长明火安全控制","用于室温低的时候","所有热水器都用","从不用，所有控制器都禁用水银"],
+["常闭，到 180°F 断开，切断主燃气阀电源","常开，到 180°F 闭合","常闭，到 180°F 打开燃气","常开，到 180°F 断开"],
+["运行水温控制失效时的后备保护；一般设 200°F","主温度控制；一般设 140°F","控制循环泵；一般设 120°F","控制补水；一般设 212°F"],
+["140°F","100°F","180°F","212°F"],
+["锅炉水位低于最低水位时断开触点，切断主燃气阀电源","压力高时加水","水热时关循环泵","打开泄压阀"],
+null,
+["3.5 psig","6.5 psig","1.5 psig","5 psig"],
+["设定更高，没有差值调节，带手动复位","设定更低，自动复位","控制水位而不是压力","没有区别"],
+["空气流动","水流","燃气压力","有无火焰"],
+["点火前证实水在循环，因为水流不足会让水变成蒸汽","测燃气流量","证实燃烧空气","控制水温"],
+["约 200°F 断开，约 175°F 复位（差值 25°F，不可调）","约 250°F 断开，约 200°F 复位","约 140°F 断开，约 120°F 复位","约 180°F 断开，约 170°F 复位（可调）"],
+["250°F","200°F","350°F","180°F"],
+["R1/R2 等于 R3/R4 时电桥平衡，A、B 之间没有电流","R1 等于 R4 时 A、B 之间电流最大","所有电阻为零时有电流","R1 + R2 = R3 + R4 时继电器吸合"],
+["电桥失衡，A、B 之间有电流，让继电器吸合，直到传感器把它重新平衡","电桥保持平衡，什么也不发生","传感器电阻变成零","ECO 跳开"],
+["与加热回路串联；加一点热让温控器提前关火","与温控器并联；推迟燃烧器启动","与风机串联；让风机加速","与燃气阀并联；提高燃气压力"],
+["差值变小：运行时间更短，温度波动更小","差值变大：运行时间更长","提高设定温度","对燃烧器没影响"],
+["5 或 6 CPH","1 或 2 CPH","9 CPH","12 CPH"],
+["1/2 psig（3.5 kPa）","2 psig","7 英寸水柱","5 psig"],
+["1.75 英寸水柱（设定值的 50%）","2.6 英寸水柱（设定值的 75%）","3.5 英寸水柱","0.5 英寸水柱"],
+["超过器具调压器设定值 25% 或以上时","超过设定值 50% 时","超过 14 英寸水柱时","压力翻倍时"],
+["火焰电离","热电效应","液体热膨胀","红外辐射"],
+["火焰导电式（交流）","火焰整流式","紫外扫描器","热电偶"],
+["保证接地面积和火焰棒面积至少 4:1，满足火焰整流","固定火焰棒","降低氮氧化物","给燃烧器降温"],
+["直流微安表","交流电压表","欧姆表","压力计"],
+["火焰发出的紫外线和红外线（光）","火焰中的离子","热电偶结点的热量","燃烧室的压力"],
+["风压开关（air proving switch）","流量开关","压力控制器（pressuretrol）","燃气压力开关"],
+["约为额定值的两倍，大约 1.0 英寸水柱","正好 0.5 英寸水柱","大约 0.6 英寸水柱","至少 3.5 英寸水柱"],
+["safe start 检查不通过，不启动燃烧器","忽略信号正常启动","提前打开主阀","延长点火试火时间"],
+["火焰监视（flame supervision）","启动前安全检查（safe start）","燃烧器程序控制","预吹扫"],
+["带风量证实的预吹扫、低火启动、定时点火试火","只有火焰监视","温控器排程","燃气压力调节"],
+["只在维修时用来隔离设备","正常运行时关掉省水","燃烧器停时","锅炉到温时"],
+["它的结构让阀座冲蚀最小","它有一块上下移动的闸板","它总是全开","它有一个特氟龙球"],
+["在水箱顶部 6 英寸以内的水里","在水箱底部","在烟道里","在冷水进口"],
+["低水位时，切断器停燃烧器并让补水阀进水","只在燃烧器运行时加水","压力高时放水","关掉循环泵"],
+["储水式热水器","炉子","燃气灶","锅炉"],
+["水温超过约 200°F 熔断；切断安全阀线圈电流","燃气压力低；切断点火器电源","烟气温度高；切断风机电源","水位低；切断温控器电源"],
+["阀体里的第二个自动关断阀","伺服调压器","长明火调节螺丝","开/关开关"],
+["内部钢球受水平振动会滚动；必须手动复位","用浮子；自动复位","有靠重力的弹簧；断电再通电复位","用水银开关；振动停止后复位"],
+["手动拉站或熔断件释放拉索","只能用手动拉站","烟感通过 24 V 信号","燃气压力低"]
+];
+
+const ZH_QT = [
+"从器具主关断阀到器具燃烧器的一系列控制器和部件，叫做阀组或歧管组件。",
+"line pressure regulator 一般用来相应地降低建筑管线压力。例如 2 psig 的进户压力需要降到最高 0.5 psig，因为这是大多数器具调压器的最大进口压力。",
+"……2 psig 的进户压力需要降到最高 0.5 psig，因为这是大多数器具调压器的最大进口压力。",
+"","","",
+"规范明确要求每台器具都要有一个容易够到的燃气关断阀，装在阀组上游、阀组外部。",
+"膜片燃气阀是一种先导式电磁阀，因为它利用现有的燃气压力作为开关阀门的主要力量。",
+"",
+"器具调压器用来把建筑管线压力降到器具正常工作需要的压力（例如天然气约 3 英寸水柱，丙烷约 10 英寸水柱）。",
+"",
+"接线图就是电路的地图。它们在最初接线和排查故障时追线非常有用。",
+"原理图基本上显示两件事：电源；以及电流怎么流过电路的各部分，比如触点、线圈和过载保护。",
+"这种原理图也叫梯形图。",
+"梯形图左侧：代表进线电压。梯形图右侧：代表流出的电流。",
+"连接负载的开关通常装在火线上，绝不装在零线上。",
+"串联电路：元件连接方式让电流必须依次流过每一个。并联电路：电流有不止一条路径。",
+"两线交叉时，有点表示两线相连。没有点，两线只是交叉，电气上不相连。",
+"",
+"接线图里所有开关符号都画在“静止”位置。静止的意思是介质（热、压力等）还没有让开关改变位置。",
+"NO 开关符号画在线的下方：介质增加时开关闭合。",
+"NO 开关符号画在线的上方：介质（热、压力等）减少时开关闭合。",
+"静止位置是闭合的开关叫常闭（NC）。限位开关一般是 NC。",
+"如果接成 NO，线接在 NO 端子和公共端子上。",
+"右边的接线图显示开关和负载之间的电气连接。左边的原理图（梯形图）按电气动作顺序排列，便于跟踪。",
+"现场接线在接线图上一律用虚线表示。",
+"辅助装置包括开关、继电器、接触器和保护装置。开关是控制系统里最常见的辅助装置，用来启动或停止系统。",
+"继电器用 24 V 供电、却闭合 120 V 回路，这很常见。这样控制回路就能用更安全的低压线路。",
+"例如，NO 触点接 120 VAC 回路时额定为：1 马力；16 A 满载电流（AFL）；96 A 锁转电流（ALR）；触点电阻 16 Ω。",
+"NC，120 V，3/4 马力，AFL-ALR 为 13.8-82.8，RES 为 14。",
+"NO，240 V，1 马力，AFL-ALR 为 8-48，RES 为 8。",
+"重型接触器是用电磁线圈/衔铁去切换重型电气触点的装置，用来控制工业设备需要的大电流和高电压。",
+"现在生产的大多数新设备都有集成控制板，里面包含设备运行所需的全部延时功能。",
+"在直流电路中，极性指电流方向。在交流电路中，极性指区分火线、零线和地线。",
+"如果有电压，就把表分别从每根线接到地，判断哪根是火线（读 120 VAC）、哪根是零线（读 0 VAC）。",
+"对地读 120 VAC 的那根是火线，通常是黑色。",
+"地线：接地，只有电路中发生对地短路时才有电流。",
+"断开隔离开关（打到关）后，必须测火线对地，这时应读 0 VAC。",
+"注意：线电压回路中，开关应串联在负载之前。",
+"相位匹配（phasing）：让变压器一次侧和二次侧的极性一致。",
+"一次侧和二次侧不同相时，正弦波如图 2-16。一次侧和二次侧之间的电位差变成 144 V。",
+"测火线到二次侧未接地端之间的电压。一次侧和二次侧同相时，读数应为 96 V。",
+"如果读数是 144 V，说明一次侧和二次侧不同相，把接地移到二次侧另一个端子，这时 L1 到二次侧未接地端的读数就是 96 V。",
+"现在用的一些带火焰整流的电子板，极性不对就不能正常工作，甚至完全不工作。",
+"门开关和限温开关都闭合时，120/24 V 变压器通电。",
+"这给炉子继电器线圈供电，线圈再闭合炉子继电器触点。这些触点再给引风机供电。",
+"引风机运行会让风压开关闭合。因为火焰回卷开关和排烟开关是常闭的，控制模块就得电了。",
+"控制回路 24 V：温控器（NO）、火焰回卷开关（NC）、排烟安全开关（NC）、风压开关（NO）。",
+"控制模块做 safe start 检查，确认没有已经存在的火焰。",
+"如果 safe start 通过，点火器和长明火阀同时通电。长明火通过火焰传感器证实。",
+"如果长明火被证实，主阀通电，点火器断电。",
+"温度升到风机控制设定点时，风机控制开关闭合，循环风机得电。",
+"温控器断开后，循环风机继续运行，直到温度降到风机控制开关设定差值以下。",
+"通过标有“PV”的端子给长明火阀通电……通过标有“MV”的端子给主燃气阀通电。",
+"直接火花点火不用长明火，而是用火花直接点燃主燃烧器。所以控制模块没有长明火阀端子。",
+"热表面点火器需要线电压把表面加热到足以一接触就点燃燃气，所以它直接接线电压电源。",
+"snap disc 型高限开关常用作各种场合的火焰回卷开关。它在两个电气接头之间还有一个小手动复位按钮。",
+"集成炉控（IFC）管理炉子的全部运行，除了点火控制，还可以包括两段燃烧、变速风机、电子空气净化器和加湿器，视炉子型号而定。",
+"正如从前面的接线图看不出点火控制模块的动作顺序，现在你也看不出接在 IFC 上任何负载的顺序。",
+"动作顺序要从操作说明中确定。",
+"如果更换 IFC，确保 DIP 开关设置与原 IFC 和/或厂家规格一致。",
+"IFC 有 DIP 开关，可以改一些运行参数，比如加热关闭延时、点火试火时间、加热开启延时、分段延时（用单段温控器时）和制冷关闭延时。",
+"用这里的 DIP 表判断图示 DIP 开关设置下的加热关闭延时。",
+"制冷关闭延时：SW1 ON = 0 秒（出厂设置）；SW1 OFF = 80 秒。",
+"闪 4 下：限温回路断开。",
+"闪 3 下：排烟压力故障，可能的问题：a）排烟问题 b）压力开关问题 c）引风机问题。",
+"闪 6 下：115 V 交流电源接反、接地不良或系统电压太低。",
+"这时模块需要手动复位才能重新启动点火程序，方法是按控制模块上的复位按钮，或把温控器调到最低。",
+"运行控制器：响应被控变量（温度、压力等）的变化，接通或断开电路。例如：温控器、运行水温控制器和运行压力控制器。",
+"限位与安全控制器：当继续运行会造成不安全状况时，从运行控制器手里接管控制。",
+"负载切换能力：温控器可以额定为直接切换线电压、低压或毫伏负载。",
+"",
+"温度波动也叫运行差值，是房间里达到的最高和最低温度之差。",
+"热电偶用来证实长明火。如果长明火熄灭，热电偶阻止主燃气阀打开。",
+"单个热电偶的输出很小，20 到 30 毫伏。把多个热电偶电气串联，就成了热电堆，能产生几百毫伏。",
+"在高温场合，比如长明火安全控制里达到的 3000°F（1648°C），感温包必须充水银。",
+"运行水温控制器是常闭开关，控制锅炉里的水温。如果设在 180°F（82°C），触点一直闭合，直到水温达到这个温度。这时触点断开，切断主燃气阀电源。",
+"高限水温控制器和运行水温控制器类似，但调到更高的水温（一般 200°F，93°C）。它是运行水温控制器失效时的后备安全开关。",
+"",
+"如果锅炉水位低于最低水位，低水位切断开关断开触点，切断主燃气阀电源。锅炉与压力容器规范列出了什么时候、什么地方需要低水位切断。",
+"",
+"一旦达到这个压力，触点断开，切断主燃气阀电源。蒸汽压力下降一个差值后触点重新闭合，本例约为 3.5 psig（24 kPa）。",
+"注意高限控制器看起来和运行控制器很像，但它没有差值设定，而是有一个手动复位按钮。",
+"流量开关也可以设计成检测空气流动，叫做风帆开关。风帆开关的常见用途是证实燃烧器系统的风量。",
+"它们确保水泵在点火前让水在管路和锅炉里循环。需要流量开关的锅炉水容量小，水流不足时水可能变成蒸汽。",
+"如果换热器温度达到约 200°F（93°C），也就是高限的正常设定点，感温双金属片会变形，断开控制回路。温度降到约 175°F（79°C）后，触点自动复位。",
+"",
+"该原理指出：当 R1 与 R2 之比等于 R3 与 R4 之比时，电路平衡（即 A、B 之间没有电流）。",
+"当温控旋钮设到某个温度时，电桥失衡，A、B 之间有电流。这个电流使继电器吸合，继电器再让点火控制模块得电。",
+"预期器是温控器内部的小电阻加热器，系统运行时发热。这让温控器比只受室温影响时更早关掉加热系统。",
+"另一个极端，调到 12 CPH，就是要维持只有约 0.4°F 的温差，运行时间短得多，温度波动也小得多。",
+"大多数电子温控器出厂设为 5 或 6 CPH。",
+"燃气压力超过 1/2 psig（3.5 kPa）的燃烧器系统，规范要求装燃气压力开关。",
+"低燃气压力开关：压力降到调压器设定值的 50% 时断开。",
+"高燃气压力开关：超过器具调压器设定值 25% 或以上时断开。",
+"它们基于火焰电离原理：火焰的热量让火焰周围的空气分子剧烈碰撞，把一些电子撞出原子，产生离子和自由电子。",
+"因为导电式系统的火焰电流是交流，这种系统分不清漏电电流和真正的火焰电流。",
+"为了保证火焰整流可靠，接地和火焰棒之间至少保持 4:1 的比例。在燃烧器上加金属棒或金属片来增加接地面积。",
+"合成的电流像脉动直流。整流系统的火焰信号应该稳定，可以用直流微安表测量。",
+"紫外感应管能检测火焰的辐射能量……红外传感器的主要元件是一个硫化铅电池，用作电气开关。",
+"风压开关把燃烧器风机运行和火焰保护控制联锁起来。它们用来检测任何带风机设备的燃烧空气或烟气流量。",
+"图 1-58 的压力开关只有一根感压管，接在引风机负压侧，需要至少 0.50 英寸水柱的压降（WCPF）才能接通控制回路。",
+"作为最低限度的检查，如果燃烧器启动前存在模拟火焰的情况，火焰保护控制会阻止燃烧器启动。这叫 safe start 检查功能。",
+"FSG 监视点火和安全火焰的持续存在，火焰不存在时切断自动燃料供应。",
+"这些附加功能可能包括：带风量和容量证实的预吹扫；低火启动定位；定时长明火点火试火；定时主火点火试火（间断长明火）；监视启动和运行联锁……",
+"它们是常开阀，可以关闭来隔离设备进行维修或保养。",
+"截止阀和闸阀不同，设计用于需要经常节流或调节流量的场合。截止阀的结构让阀座冲蚀最小。",
+"这个阀的感温杆伸进水箱顶部 6 英寸以内的水里。",
+"检测到低水位时，锅炉低水位切断停掉燃烧器，并让补水控制阀进补充水。",
+"杆管式组合燃气阀是一种多功能阀，一般装在储水式热水器上。",
+"ECO 是与安全阀电磁线圈串联的熔断件。如果感温熔丝超过 200°F，熔丝熔断，安全阀动力线圈的电流被切断，燃气全部关闭。",
+"它是 100% 安全关断型，作为额外保护，阀体内还有第二个关断阀。",
+"两种都要水平安装，因为里面有一个钢球，受水平振动会滚动。它们有指示窗，动作后必须手动复位。",
+"图示系统有一个“释放即关闭”的阀，被一根拉索拉着保持开启；拉索可以由手动拉站释放，也可以由灶具上方的温度熔断件释放。"
+];
+
+/* Textbook chapter-end assignment questions (Chapter 1: 40, Chapter 2: 15). */
+SECTIONS.push({id:8, name:"第1章作业题", en:"Chapter 1 assignment"}, {id:9, name:"第2章作业题", en:"Chapter 2 assignment"});
+const HW = [
+/* ===== Chapter 1 ===== */
+{s:8, n:1, q:"The temperature disc, bimetallic strip and rod and tube controls all operate on which principle?",
+ zh:"温度碟片、双金属片、杆管式控制器都基于什么原理？",
+ a:["Thermal expansion of solids","Electro-magnetism","Thermoelectric effect","Thermal expansion of liquids"],
+ az:["固体热膨胀","电磁","热电效应","液体热膨胀"],
+ e:"三者都是金属受热膨胀、遇冷收缩：碟片翻转、双金属片弯曲、铜管带动殷钢棒移动。",
+ p:"12", qt:"Metals expand when heated and contract when cooled. The principle of the thermal expansion of solids is used for several control devices that regulate temperature change.",
+ qz:"金属受热膨胀、遇冷收缩。固体热膨胀原理被用于好几种调节温度变化的控制装置。", src:"book"},
+{s:8, n:2, q:"Sealed bellows controls operate on which principle?",
+ zh:"密封波纹管控制器基于什么原理？",
+ a:["Thermal expansion of liquids","Electro-magnetism","Thermoelectric effect","Thermal expansion of solids"],
+ az:["液体热膨胀","电磁","热电效应","固体热膨胀"],
+ e:"感温包里的液体受热膨胀，通过毛细管推动波纹管动作。",
+ p:"13", qt:"When liquid is sealed in a narrow tube (called a capillary), the force created by the liquid expanding within the capillary is used to operate an electrical switch or control mechanism.",
+ qz:"液体密封在细管（毛细管）里时，液体在毛细管内膨胀产生的力被用来操作电气开关或控制机构。", src:"book"},
+{s:8, n:3, tf:true, q:"Mercury is used in capillary tubes suitable for high temperature operation.",
+ zh:"水银用于适合高温工作的毛细管。", a:["True","False"], c:0,
+ e:"对。高温场合（如长明火安全控制）感温包必须充水银；一般温控用轻油类液体，上限约 650°F。",
+ p:"14", qt:"For high temperatures, such as 3000 °F (1648 °C) reached in pilot safety controls, the bulb must be filled with mercury.",
+ qz:"在高温场合，比如长明火安全控制里达到的 3000°F（1648°C），感温包必须充水银。", src:"both"},
+{s:8, n:4, q:"Solenoids operate on which principle?",
+ zh:"电磁线圈基于什么原理？",
+ a:["Electro-magnetism","Thermoelectric effect","Thermal expansion of solids","Thermal expansion of liquids"],
+ az:["电磁","热电效应","固体热膨胀","液体热膨胀"],
+ e:"电流通过线圈产生磁场，把衔铁吸进线圈中心，把电能变成机械力。",
+ p:"15", qt:"A solenoid is an electromagnetic device that creates a magnetic field around an actuating component converting electrical energy to a mechanical force.",
+ qz:"电磁线圈是一种电磁装置，在执行部件周围产生磁场，把电能转换成机械力。", src:"book"},
+{s:8, n:5, q:"Thermocouples and thermopiles operate on which principle?",
+ zh:"热电偶和热电堆基于什么原理？",
+ a:["Thermoelectric effect","Electro-magnetism","Thermal expansion of solids","Thermal expansion of liquids"],
+ az:["热电效应","电磁","固体热膨胀","液体热膨胀"],
+ e:"热电效应：受热直接产生电。",
+ p:"15", qt:"The thermoelectric effect of producing electricity by heat is used for the thermocouple and thermopile.",
+ qz:"热电偶和热电堆利用的是加热产生电的热电效应。", src:"book"},
+{s:8, n:6, q:"What control components produce electricity when heated?",
+ zh:"哪种控制元件受热会产生电？",
+ a:["Thermocouple","Transistor","Thermistor","Bimetallic strip"],
+ az:["热电偶","晶体管","热敏电阻","双金属片"],
+ e:"热电偶的热端受热，在冷端两头产生直流电压。热敏电阻只是电阻随温度变，自己不发电。",
+ p:"15", qt:"When the hot junction is heated, a direct current (DC) voltage is generated across to the other two ends of the strips (the cold junction).",
+ qz:"热端受热时，在两条金属的另一端（冷端）之间产生直流电压。", src:"book"},
+{s:8, n:7, tf:true, q:"Solid state electronic devices are made up of electro-mechanical components that move.",
+ zh:"固态电子器件由会移动的机电部件组成。", a:["True","False"], c:1,
+ e:"错。固态器件由不会移动的固体元件组成，这正是“固态”的意思。",
+ p:"17", qt:"Solid-state electronic devices are made up of solid components that do not move.",
+ qz:"固态电子器件由不会移动的固体元件组成。", src:"book"},
+{s:8, n:8, q:"A semiconductor device used to switch or amplify signals.",
+ zh:"用来开关或放大信号的半导体器件是？",
+ a:["Transistor","Diode","Thermistor","Thermocouple"],
+ az:["晶体管","二极管","热敏电阻","热电偶"],
+ e:"晶体管：基极加一点电压，集电极到发射极就能导通，可以开关，也可以放大。",
+ p:"18", qt:"A transistor is a semiconductor device used for switching or amplifying signals and electrical power.",
+ qz:"晶体管是用来开关或放大信号和电功率的半导体器件。", src:"book"},
+{s:8, n:9, q:"A semiconductor device used to allow the flow of current in only one direction.",
+ zh:"只允许电流单向流动的半导体器件是？",
+ a:["Diode","Transistor","Thermistor","Thermocouple"],
+ az:["二极管","晶体管","热敏电阻","热电偶"],
+ e:"二极管只让电流单向通过（正向偏置，阳极到阴极）。",
+ p:"19", qt:"The diode allows the passage of current in only one direction (forward biased, anode to cathode).",
+ qz:"二极管只允许电流单向通过（正向偏置，从阳极到阴极）。", src:"book"},
+{s:8, n:10, q:"What is a semiconductor device that changes its electrical resistance with a change in temperature?",
+ zh:"电阻随温度变化的半导体器件是？",
+ a:["Thermistor","Diode","Transistor","Thermocouple"],
+ az:["热敏电阻","二极管","晶体管","热电偶"],
+ e:"热敏电阻是一种电阻温度计，数字温控器就是用它测温。",
+ p:"21", qt:"A thermistor is a resistance thermometer as it changes its electrical resistance with a change in temperature.",
+ qz:"热敏电阻是一种电阻温度计，因为它的电阻随温度变化。", src:"book"},
+{s:8, n:11, tf:true, q:"A thyristor is different from a transistor in that it only needs a pulse signal to make it conducting and thereafter, it remains conducting.",
+ zh:"晶闸管与晶体管不同，它只需要一个脉冲信号就能导通，之后一直保持导通。", a:["True","False"], c:0,
+ e:"对。晶体管要持续的电流才能保持导通，晶闸管一个脉冲就够。",
+ p:"19", qt:"A thyristor is different form a transistor as it only needs a pulse signal to make it conduct and, thereafter, remains conducting, whereas the transistor needs a continuous current for keeping it in a conducting state.",
+ qz:"晶闸管和晶体管不同，它只需要一个脉冲信号就能导通，之后保持导通；而晶体管需要持续的电流才能保持导通状态。", src:"book"},
+{s:8, n:12, q:"SCR, TRIAC, and DIAC are all what types of electronic devices?",
+ zh:"SCR、TRIAC、DIAC 都属于哪类电子器件？",
+ a:["Thyristor","Diode","Transistor","Thermistor"],
+ az:["晶闸管","二极管","晶体管","热敏电阻"],
+ e:"晶闸管的三种基本类型就是 SCR、DIAC、TRIAC。",
+ p:"20", qt:"The three basic types of thyristors are: SCRs; DIACs; and TRIACs.",
+ qz:"晶闸管的三种基本类型是：SCR、DIAC 和 TRIAC。", src:"book"},
+{s:8, n:13, q:"Thermostat, operating aquastat and operating pressuretrol all belong to what section of the control system?",
+ zh:"温控器、运行水温控制器、运行压力控制器属于控制系统哪一部分？",
+ a:["Operating controllers","Ignition control module","Limit and safety controllers","Combustion safety controller"],
+ az:["运行控制器","点火控制模块","限位与安全控制器","燃烧安全控制器"],
+ e:"它们响应被控变量（温度、压力），接通或断开电路，属于运行控制器。",
+ p:"22", qt:"Operating controllers: Respond to changes in the controlled variable (temperature, pressure, etc.) and make or break a circuit. Examples: thermostats, operating aquastats, and operating pressure controls.",
+ qz:"运行控制器：响应被控变量（温度、压力等）的变化，接通或断开电路。例如：温控器、运行水温控制器和运行压力控制器。", src:"both"},
+{s:8, n:14, q:"Low-water cutoff, gas-pressure switch, flow switch, all belong to what section of the control system?",
+ zh:"低水位切断、燃气压力开关、流量开关属于控制系统哪一部分？",
+ a:["Limit and safety controllers","Operating controllers","Ignition control module","Combustion safety controller"],
+ az:["限位与安全控制器","运行控制器","点火控制模块","燃烧安全控制器"],
+ e:"它们在继续运行会不安全时接管控制，属于限位与安全控制器。",
+ p:"22", qt:"Limit and safety controllers: Take the command away from the operating controls when continued operation would cause an unsafe situation.",
+ qz:"限位与安全控制器：当继续运行会造成不安全状况时，从运行控制器手里接管控制。", src:"both"},
+{s:8, n:15, tf:true, q:"Position and location are important factors for thermostat installation.",
+ zh:"位置和安装地点是温控器安装的重要因素。", a:["True","False"], c:0,
+ e:"对。要装在代表整屋平均温度的房间、离地约 5 英尺、内墙上，避开热源、冷风和楼梯拐角；磁性开关型要装水平。",
+ p:"32", qt:"The room thermostat is a precision device and therefore proper installation is essential for correct operation.",
+ qz:"室内温控器是精密装置，所以正确安装对正常工作至关重要。", src:"book"},
+{s:8, n:16, tf:true, q:"Thermostats should be placed in a room on an outside wall.",
+ zh:"温控器应该装在房间的外墙上。", a:["True","False"], c:1,
+ e:"错。要装在内墙上。外墙受室外冷热影响，读数不准。",
+ p:"32", qt:"Install the thermostat: In a room that is subjected to the average temperature of the dwelling... On an inside wall.",
+ qz:"温控器安装：装在能代表整个住宅平均温度的房间……装在内墙上。", src:"book"},
+{s:8, n:17, q:"What is an operating aquastat?",
+ zh:"运行水温控制器（operating aquastat）是什么？",
+ a:["A normally closed switch that shuts off the gas supply when the temperature setpoint is reached","A normally open switch that shuts off the gas supply when the temperature setpoint is reached","A normally closed switch that turns on the gas supply when the temperature setpoint is reached","A normally open switch that turns on the gas supply when the temperature setpoint is reached"],
+ az:["常闭开关，达到设定温度时切断燃气","常开开关，达到设定温度时切断燃气","常闭开关，达到设定温度时打开燃气","常开开关，达到设定温度时打开燃气"],
+ e:"常闭，水温到设定点时断开，切断主燃气阀电源。",
+ p:"34", qt:"The operating aquastat is a normally closed switch that controls the temperature of the water inside the boiler... At this point, the contacts open and cut off power to the main gas valve.",
+ qz:"运行水温控制器是常闭开关，控制锅炉里的水温……到这个温度时，触点断开，切断主燃气阀电源。", src:"both"},
+{s:8, n:18, q:"What is the purpose of an operating pressuretrol?",
+ zh:"运行压力控制器（operating pressuretrol）的作用是什么？",
+ a:["To stop the boiler if the steam pressure gets too high","To start the boiler when the steam pressure drops","To shut-off gas supply in the event of an overpressure condition in the burner valve train assembly","To shut-off gas supply in the event of an under-pressure condition in the burner valve train assembly"],
+ az:["蒸汽压力过高时停锅炉","蒸汽压力下降时启动锅炉","燃烧器阀组超压时切断燃气","燃烧器阀组欠压时切断燃气"],
+ e:"教材 p.37 写的是：蒸汽压力升到设定值，触点断开，切断主燃气阀。按这句字面选“压力过高时停锅炉”。阀组超压/欠压是燃气压力开关的事。",
+ p:"37", qt:"As steam pressure in the boiler rises and reaches the setpoint of the pressure control, the switch contacts open and de-energizes the power to the main gas valve.",
+ qz:"锅炉蒸汽压力升到压力控制器设定值时，开关触点断开，切断主燃气阀电源。", src:"book",
+ flag:"FOL 三次都没抽到这题，没有官方答案。a 和 b 都说得通，按教材 p.37 字面选了“压力过高时停锅炉”，最好问老师。"},
+{s:8, n:19, tf:true, q:"A thermocouple is considered a combustion safety control.",
+ zh:"热电偶被视为燃烧安全控制。", a:["True","False"], c:0,
+ e:"对。燃烧安全控制最早就是监视长明火的热电偶，后来发展成电子点火模块和 FSG。",
+ p:"54", qt:"Combustion safety controls have evolved from the simple thermocouple that monitored the pilot flame to an electronic ignition control module...",
+ qz:"燃烧安全控制从最简单的监视长明火的热电偶，发展到电子点火控制模块……", src:"book"},
+{s:8, n:20, q:"Select the combustion safety controls that work on the principle of flame ionization.",
+ zh:"哪种燃烧安全控制基于火焰电离原理？",
+ a:["Flame rectifier (flame rod)","Thermopile","Infrared flame sensor","Ultraviolet flame sensor"],
+ az:["火焰整流器（火焰棒）","热电堆","红外火焰传感器","紫外火焰传感器"],
+ e:"火焰棒系统（导电式和整流式）靠火焰电离导电。UV/IR 是光学传感器，热电堆是热电效应。",
+ p:"55", qt:"There are two basic types of flame rod detection systems: flame conductivity; and flame rectification. They work on the principle of flame ionization.",
+ qz:"火焰棒检测系统有两种基本类型：火焰导电式和火焰整流式。它们基于火焰电离原理。", src:"both"},
+{s:8, n:21, q:"What device is used to sense combustion air or flue gas flow on any appliance that incorporates a fan or blower?",
+ zh:"有风机的设备用什么检测燃烧空气或烟气流量？",
+ a:["Air proving switch","Flow switch","Pressuretrol","Gas pressure switch"],
+ az:["风压开关","流量开关","压力控制器","燃气压力开关"],
+ e:"风压开关是灵敏的膜片压力开关，把风机和火焰保护联锁。",
+ p:"59", qt:"They are used to sense combustion air or flue gas flow on any appliance that incorporates a fan or blower.",
+ qz:"它们用来检测任何带风机设备的燃烧空气或烟气流量。", src:"both"},
+{s:8, n:22, tf:true, q:"Non-integrated ignition control modules designed for intermittent pilot, direct spark, or hot surface ignition will also manage all of the other appliance activities such as humidistat, electronic filters, heating pumps or fans.",
+ zh:"非集成点火控制模块（间歇长明火、直接火花、热表面点火）也会管理加湿器、电子过滤器、水泵或风机等其他功能。", a:["True","False"], c:1,
+ e:"错。非集成模块只管点火和火焰监视。管理整台设备的是集成控制板（IFC）。",
+ p:"68", qt:"An integrated furnace control (IFC) manages the entire operation of a furnace. Options besides ignition control can include two-stage burner operation, variable fan speed, electronic air cleaner, and humidifier.",
+ qz:"集成炉控（IFC）管理炉子的全部运行。除了点火控制，还可以包括两段燃烧、变速风机、电子空气净化器和加湿器。", src:"both"},
+{s:8, n:23, q:"On what type of gas appliance would a rod and tube (Unitrol) valve typically be installed?",
+ zh:"杆管式（Unitrol）阀一般装在什么燃气设备上？",
+ a:["Gas water heater","Gas range","Gas boiler","Gas furnace"],
+ az:["燃气热水器","燃气灶","燃气锅炉","燃气炉"],
+ e:"储水式热水器。",
+ p:"93", qt:"The rod and tube combination gas valve is a multi-purpose valve typically installed in storage type water heaters.",
+ qz:"杆管式组合燃气阀是一种多功能阀，一般装在储水式热水器上。", src:"both"},
+{s:8, n:24, q:"How is the field wiring identified on a wiring schematic for an IFC?",
+ zh:"IFC 的接线图上，现场接线怎么表示？",
+ a:["Dotted lines","Solid lines","Highlighted","Solid bold lines"],
+ az:["虚线","实线","高亮","粗实线"],
+ e:"现场接线一律用虚线。",
+ p:"69", qt:"The field wiring is always identified on wiring schematics with dotted lines.",
+ qz:"现场接线在接线图上一律用虚线表示。", src:"both"},
+{s:8, n:25, q:"What is a DIP switch?",
+ zh:"DIP 开关是什么？",
+ a:["A manual electric switch that is packaged with others in a group","Direct ignition proving sensor","An air flow differential pressure switch","A double pole double throw automatic switch"],
+ az:["和其他开关封装成一组的手动电气开关","直接点火证实传感器","气流差压开关","双刀双掷自动开关"],
+ e:"DIP = dual in-line package，一组封装在一起的小手动开关，IFC 上用来设延时等参数。",
+ p:"9", qt:"Dual in-line package switch (DIP switch): A manual electric switch that is packaged with others in a group.",
+ qz:"双列直插封装开关（DIP 开关）：和其他开关封装成一组的手动电气开关。", src:"book"},
+{s:8, n:26, tf:true, q:"Pilot operated solenoid valves use pressure differential to assist the plunger in opening and closing the main valve.",
+ zh:"先导式电磁阀利用压差帮助柱塞打开和关闭主阀。", a:["True","False"], c:0,
+ e:"对。线圈打开先导口，活塞上方的气泄掉，下方压力把阀顶开。",
+ p:"87", qt:"The pilot-operated valve uses pressure differential to assist the plunger in opening and closing the main valve.",
+ qz:"先导式阀利用压差帮助柱塞打开和关闭主阀。", src:"book"},
+{s:8, n:27, q:"The servo regulator built into a combination gas valve serves as which type of gas pressure regulator?",
+ zh:"组合燃气阀里的伺服调压器起的是哪种调压器的作用？",
+ a:["Appliance regulator","System regulator","Service regulator","Over pressure protection regulator"],
+ az:["器具调压器","系统调压器","进户调压器","超压保护调压器"],
+ e:"组合阀里内置的就是器具调压器，伺服阀可以部分开关阀座来调压。",
+ p:"91", qt:"Often, the appliance regulator is built into a combination control valve as is the case in the gas valve in Figure 1-89.",
+ qz:"器具调压器常常内置在组合控制阀里，比如图 1-89 的燃气阀。", src:"book"},
+{s:8, n:28, q:"What is the name of the backup safety designed to shut off the burner if the temperature of the water in the heater exceeds 200 °F?",
+ zh:"热水器水温超过 200°F 时切断燃烧器的后备安全装置叫什么？",
+ a:["ECO","T&P","Pilotstat","Aquastat"],
+ az:["ECO（能量切断）","T&P 阀","长明火安全阀","水温控制器"],
+ e:"ECO（energy cut-off）：和安全阀线圈串联的熔断件，超过 200°F 熔断，切断全部燃气。T&P 是泄压放水，不关燃气。",
+ p:"93", qt:"The ECO is a fusible link wired in series with the safety valve solenoid. If the temperature-sensitive fuse exceeds 200°F, the fuse will melt...",
+ qz:"ECO 是与安全阀电磁线圈串联的熔断件。如果感温熔丝超过 200°F，熔丝就会熔断……", src:"both"},
+{s:8, n:29, q:"What feature acts as extra protection on a redundant gas valve?",
+ zh:"冗余燃气阀的额外保护是什么？",
+ a:["A second automatic shutoff valve","On-off switch","Pilot adjustment","Servo regulator"],
+ az:["第二个自动关断阀","开关","长明火调节","伺服调压器"],
+ e:"阀体里多一个自动关断阀。",
+ p:"99", qt:"It is of the 100% safety shut-off type with, as extra protection, a second shut-off valve incorporated in the valve body.",
+ qz:"它是 100% 安全关断型，作为额外保护，阀体内还有第二个关断阀。", src:"book"},
+{s:8, n:30, q:"How do electronic thermostats control temperature swing overshoot?",
+ zh:"电子温控器怎么控制温度波动的过冲？",
+ a:["Cycles per hour method","Night setback","Millivolt anticipator","Adjustable heat anticipator"],
+ az:["每小时循环次数（CPH）法","夜间降温","毫伏预期器","可调热预期器"],
+ e:"老式机械温控器用热预期器；数字电子温控器用 CPH 法调循环率。",
+ p:"31", qt:"Digital electronic thermostats use a cycles-per-hour (CPH) method of anticipation that differs from earlier electromechanical thermostats.",
+ qz:"数字电子温控器用每小时循环次数（CPH）的预期方法，和早期机电温控器不同。", src:"book"},
+{s:8, n:31, q:"What CPH setting do most electronic thermostats come pre-set at?",
+ zh:"大多数电子温控器出厂 CPH 设为多少？",
+ a:["4-5","1-2","7-8","10-11"],
+ az:["4-5","1-2","7-8","10-11"],
+ e:"教材原文是“5 或 6 CPH”，四个选项里最接近的是 4-5。",
+ p:"31", qt:"Most electronic thermostats come out of the box set for 5 or 6 CPH.",
+ qz:"大多数电子温控器出厂设为 5 或 6 CPH。", src:"book",
+ flag:"教材写的是 5 或 6，选项里没有完全对应的，按最接近选 4-5。"},
+{s:8, n:32, q:"Different types of multi-stage thermostats use a variety of methods to initiate furnace staging. Select the method that employs algorithms to anticipate demand.",
+ zh:"多段温控器有多种分段方法，哪种用算法来预判需求？",
+ a:["Rate-of-change staging","CPH staging","Setpoint staging","Time-based staging"],
+ az:["变化率分段","CPH 分段","设定点分段","时间分段"],
+ e:"变化率分段用高级算法（如模糊逻辑），看系统回温的快慢，和以往同样条件下的历史对比。",
+ p:"31", qt:"Rate-of-change staging often employs advanced algorithms, such as fuzzy logic, to try and simulate human thinking beyond just temperature and time.",
+ qz:"变化率分段常用高级算法，比如模糊逻辑，试图模拟人的思考，而不只看温度和时间。", src:"book"},
+{s:8, n:33, q:"How can multiple wireless temperature sensors that use short range protocols such as Z-Wave and Zigbee achieve a longer range?",
+ zh:"用 Z-Wave、Zigbee 等短距离协议的多个无线温度传感器，怎样实现更远的通信距离？",
+ a:["Mesh network","Hard wire","AC adapters","Signal boosters"],
+ az:["网状网络","硬接线","交流适配器","信号放大器"],
+ e:"所有设备互相连成网状网络，消息可以一个传一个。",
+ p:"33", qt:"The devices can transmit information much farther than the 10–20 meters range of the device signal, as the devices all link up to form a mesh network that can pass the message along to any other device within range.",
+ qz:"这些设备能把信息传得比单个设备 10 到 20 米的信号范围远得多，因为所有设备连成网状网络，可以把消息传给范围内的任何其他设备。", src:"book"},
+{s:8, n:34, q:"A 10K thermistor has a reference resistance of 10 kΩ at what temperature?",
+ zh:"10K 热敏电阻在什么温度下的参考电阻是 10 kΩ？",
+ a:["25°C","-55°C","0°C","150°C"],
+ az:["25°C","-55°C","0°C","150°C"],
+ e:"热敏电阻都以 25°C 时的电阻值来标称。",
+ p:"21", qt:"They come in many different operating ranges and are referenced by their resistance at 25 °C. For example, a 10K has an operating range of 55-150 °C and has a resistance of 10 kilohm (kΩ) @ 25 °C.",
+ qz:"热敏电阻有很多工作范围，都以 25°C 时的电阻来标称。例如 10K 的工作范围是 55 到 150°C，25°C 时电阻为 10 kΩ。", src:"book"},
+{s:8, n:35, tf:true, q:"A PTC thermistor will decrease its resistance with a temperature increase.",
+ zh:"PTC 热敏电阻温度升高时电阻减小。", a:["True","False"], c:1,
+ e:"错。PTC（正温度系数）温度升高电阻增大；NTC（负温度系数）才是减小。",
+ p:"21", qt:"A PTC thermistor increases resistance with a temperature increase, and an NTC decreases its resistance with an increase in temperature.",
+ qz:"PTC 热敏电阻温度升高时电阻增大，NTC 温度升高时电阻减小。", src:"book"},
+{s:8, n:36, tf:true, q:"One advantage of a smart valve is that it uses a regular 110 VAC HSI.",
+ zh:"智能阀的一个优点是它用普通的 110 VAC 热表面点火器。", a:["True","False"], c:1,
+ e:"错。智能阀的点火棒组件里用的是特制的 24 V HSI。",
+ p:"102", qt:"Note that the igniter flame rod assembly for the smart valve contains a special 24 V HSI.",
+ qz:"注意智能阀的点火器火焰棒组件里装的是特制的 24 V 热表面点火器。", src:"book"},
+{s:8, n:37, q:"How have redundant gas valves been adapted to give them modulating operation?",
+ zh:"冗余燃气阀是怎样改成可调制（modulating）运行的？",
+ a:["Electric stepper motor","WiFi-enabled","Servo regulated","Electro hydraulic actuator"],
+ az:["电动步进电机","加 WiFi","伺服调压","电液执行器"],
+ e:"加一个步进电机（直流电机执行器），按控制器信号调伺服调压器的设定，可在 35% 到 100% 之间调。",
+ p:"104", qt:"With the use of a stepper motor, diaphragm gas valves can be used to modulate the firing rate.",
+ qz:"用步进电机，膜片燃气阀就可以调节燃烧速率。", src:"book"},
+{s:8, n:38, tf:true, q:"On an electric oven safety valve, the HSI must warm up sufficiently before enough electricity can pass to open the gas valve.",
+ zh:"电烤箱安全阀上，HSI 必须先充分加热，才有足够的电流通过去打开燃气阀。", a:["True","False"], c:0,
+ e:"对。点火棒和燃气阀串联，点火棒冷时电阻大，挡住电流；烧到黄热时电阻降下来，阀才打开。",
+ p:"106", qt:"When the bar reaches yellow heat, sufficient to ignite the gas, it allows passage of enough electricity to open the gas valve.",
+ qz:"点火棒烧到黄热、足以点燃燃气时，才允许足够的电流通过去打开燃气阀。", src:"book"},
+{s:8, n:39, tf:true, q:"A seismic valve will reset automatically once the vibration stops.",
+ zh:"地震阀在振动停止后会自动复位。", a:["True","False"], c:1,
+ e:"错。动作后必须手动复位。",
+ p:"106", qt:"They have an indicating window and must be manually reset once activated.",
+ qz:"它们有指示窗，动作后必须手动复位。", src:"both"},
+{s:8, n:40, tf:true, q:"Cable release fire suppression gas valves can only be activated manually.",
+ zh:"拉索式灭火燃气阀只能手动触发。", a:["True","False"], c:1,
+ e:"错。手动拉站或者灶具上方的温度熔断件都能释放拉索。",
+ p:"107", qt:"...held open by a cable that can be released by a manual pull station, or a temperature activated fusible link located above the cooking equipment.",
+ qz:"……由一根拉索保持开启，拉索可以由手动拉站释放，也可以由灶具上方的温度熔断件释放。", src:"both"},
+
+/* ===== Chapter 2 ===== */
+{s:9, n:1, tf:true, q:"The left-hand side of the ladder diagram represents the incoming voltage.",
+ zh:"梯形图左侧代表进线电压。", a:["True","False"], c:0,
+ e:"对。左侧进线电压，右侧流出电流。",
+ p:"116", qt:"Left-hand side of the ladder: Represents the incoming voltage.", qz:"梯形图左侧：代表进线电压。", src:"both"},
+{s:9, n:2, q:"Which electrical drawing would be considered a map of an electrical circuit?",
+ zh:"哪种电气图被看作电路的地图？",
+ a:["Wiring diagram","Block diagram","Ladder diagram","Pictorial diagram"],
+ az:["接线图","方框图","梯形图","示意图"],
+ e:"接线图就是电路地图。",
+ p:"115", qt:"Wiring diagrams are maps of electrical circuits.", qz:"接线图就是电路的地图。", src:"both"},
+{s:9, n:3, q:"Which electrical drawing is best used to determine how current flows through the various parts of the circuit?",
+ zh:"哪种电气图最适合看电流怎么流过电路各部分？",
+ a:["Schematic diagram","Block diagram","Wiring diagram","Pictorial diagram"],
+ az:["原理图","方框图","接线图","示意图"],
+ e:"原理图显示电源和电流路径。",
+ p:"116", qt:"The schematic diagram shows basically two things: the power source; and how current flows through the various parts of the circuit.",
+ qz:"原理图基本上显示两件事：电源，以及电流怎么流过电路各部分。", src:"both"},
+{s:9, n:4, q:"A schematic diagram is also known as a:",
+ zh:"原理图又叫：",
+ a:["Ladder diagram","P&C drawing","Component layout","Connection diagram"],
+ az:["梯形图","P&C 图","元件布置图","连接图"],
+ e:"梯形图。",
+ p:"116", qt:"This schematic is also called a ladder diagram.", qz:"这种原理图也叫梯形图。", src:"both"},
+{s:9, n:5, q:"What are the most common auxiliary devices found in control systems?",
+ zh:"控制系统里最常见的辅助装置是？",
+ a:["Switches","Relays","Contactors","Protective devices"],
+ az:["开关","继电器","接触器","保护装置"],
+ e:"开关最常见。",
+ p:"118", qt:"Switches are the most common auxiliary device found in control systems.", qz:"开关是控制系统里最常见的辅助装置。", src:"both"},
+{s:9, n:6, q:"For this relay connected to a 120 Volt circuit, what is the full load amp rating for the normally closed contacts? (NO 120: 16-96; NO 240: 8-48; NC 120: 13.8-82.8; NC 240: 8.9-41.4)",
+ zh:"这个继电器接 120 V 回路，常闭触点的满载电流额定值是多少？",
+ a:["13.8 amps","8 amps","8.9 amps","82.8 amps"],
+ az:["13.8 安","8 安","8.9 安","82.8 安"],
+ e:"NC 行 120 V：13.8-82.8，AFL 是前面的 13.8。82.8 是锁转电流。",
+ p:"135", qt:"NC 120 | 3/4 | 13.8-82.8 | 14", qz:"常闭，120 V，3/4 马力，AFL-ALR 13.8-82.8，RES 14。", src:"both"},
+{s:9, n:7, tf:true, q:"Integrated electronic control boards have replaced most time delay relays.",
+ zh:"集成电子控制板已经取代了大多数延时继电器。", a:["True","False"], c:0,
+ e:"对。",
+ p:"123", qt:"Most of the new equipment manufactured today have integrated control boards that include all the time-delay functions needed to operate the equipment.",
+ qz:"现在生产的大多数新设备都有集成控制板，包含设备运行所需的全部延时功能。", src:"book"},
+{s:9, n:8, tf:true, q:"The sine waves shown (primary and secondary on opposite sides of the zero line) represent primary and secondary transformer circuits that are in phase.",
+ zh:"图中的正弦波（一次侧和二次侧在零线两侧相反）表示变压器一次侧和二次侧同相。", a:["True","False"], c:1,
+ e:"错。老师课上判为 false：两条波方向相反，是不同相。同相是同时到峰、同时到谷。",
+ p:"127", qt:"Where the primary and secondary are not in phase, the sine wave will appear as shown in Figure 2-16. The difference in the potential between the primary and secondary is now 144 V.",
+ qz:"一次侧和二次侧不同相时，正弦波如图 2-16。一次侧和二次侧之间的电位差变成 144 V。", src:"both"},
+{s:9, n:9, q:"For AC circuits, the difference between the hot, neutral wire to ground wire is described as what?",
+ zh:"交流电路中，火线、零线与地线之间的区分叫什么？",
+ a:["Polarization","Phasing","Modulation","Sequencing"],
+ az:["极性","相位匹配","调制","时序"],
+ e:"Polarization（极性）。",
+ p:"124", qt:"In an AC circuit, polarity refers to the differentiation between hot, neutral, and ground.",
+ qz:"在交流电路中，极性指区分火线、零线和地线。", src:"both"},
+{s:9, n:10, q:"What is matching the polarity of the primary and secondary sides of a transformer called?",
+ zh:"让变压器一次侧和二次侧极性一致叫什么？",
+ a:["Phasing","Modulating","Sequencing","Polarization"],
+ az:["相位匹配","调制","时序","极性"],
+ e:"Phasing。",
+ p:"115", qt:"Phasing: Matching the polarity of the primary and secondary sides of a transformer.",
+ qz:"相位匹配：让变压器一次侧和二次侧的极性一致。", src:"both"},
+{s:9, n:11, q:"What voltage reading should you get between the 120 VAC hot and ungrounded side of the secondary, when checking for transformer phasing?",
+ zh:"检查变压器相位时，120 VAC 火线到二次侧未接地端应该读多少？",
+ a:["96 VAC","24 VAC","120 VAC","144 VAC"],
+ az:["96 VAC","24 VAC","120 VAC","144 VAC"],
+ e:"同相 96 V；144 V 是不同相。",
+ p:"128", qt:"If the primary and secondary are in phase, the reading should be 96 V.",
+ qz:"一次侧和二次侧同相时，读数应为 96 V。", src:"both"},
+{s:9, n:12, q:"What is the purpose of the control module's safe start check?",
+ zh:"控制模块 safe start 检查的目的是？",
+ a:["To confirm there is not already an existing flame","To confirm the pilot flame","To confirm the main flame","To confirm the induced fan is running"],
+ az:["确认没有已经存在的火焰","确认长明火","确认主火焰","确认引风机在转"],
+ e:"点火前确认没有已存在的火焰。",
+ p:"130", qt:"The control module performs safe start check to confirm there is not already an existing flame.",
+ qz:"控制模块做 safe start 检查，确认没有已经存在的火焰。", src:"both"},
+{s:9, n:13, q:"What is the operation of a flame rollout switch?",
+ zh:"火焰回卷开关怎么动作？",
+ a:["NC switch that opens on flame roll out","NO switch that breaks on flame roll out","NO switch that closes when the induced fan runs","NC switch that closes when the induced fan stops"],
+ az:["常闭开关，火焰回卷时断开","常开开关，火焰回卷时断开","常开开关，引风机运行时闭合","常闭开关，引风机停时闭合"],
+ e:"常闭，回卷时断开。",
+ p:"130", qt:"Control circuit — 24 V: ... Flame rollout switch (NC) ...", qz:"24 V 控制回路：……火焰回卷开关（常闭）……", src:"both"},
+{s:9, n:14, tf:true, q:"You can determine the sequence of operation for all components connected to an IFC from the wiring diagrams.",
+ zh:"从接线图可以确定 IFC 上所有部件的动作顺序。", a:["True","False"], c:1,
+ e:"错，要看厂家操作说明。",
+ p:"131", qt:"...you now cannot determine the sequence for any load shown connected to the IFC in Figure 2-20.",
+ qz:"……你现在也无法确定图 2-20 中接在 IFC 上任何负载的动作顺序。", src:"both"},
+{s:9, n:15, q:"Use the DIP table (SW2 ON/SW3 OFF = 60 s; ON/ON = 100 s; OFF/ON = 140 s; OFF/OFF = 180 s) to interpret the HEAT OFF DELAY when SW2 and SW3 are both OFF.",
+ zh:"按 DIP 表，SW2 和 SW3 都是 OFF 时，加热关闭延时是多少？",
+ a:["180 SEC","0 SEC","60 SEC","100 SEC"],
+ az:["180 秒","0 秒","60 秒","100 秒"],
+ e:"OFF/OFF = 180 秒。老师课上讲的书上这张图就是 SW1 ON、SW2 和 SW3 OFF。考试时先看清图里每个开关拨在哪边。",
+ p:"137", qt:"HEAT “OFF” DELAY: SW2 ON / SW3 OFF = 60 SEC; ON / ON = 100 SEC (factory); OFF / ON = 140 SEC; OFF / OFF = 180 SEC",
+ qz:"加热关闭延时：SW2 开/SW3 关 = 60 秒；开/开 = 100 秒（出厂）；关/开 = 140 秒；关/关 = 180 秒。", src:"both"}
+];
+HW.forEach(h=>{
+  const {az, qz, n, ...q} = h;
+  q.hw = n;
+  QUESTIONS.push(q);
+  ZH_A.push(q.tf ? null : az);
+  ZH_QT.push(qz || "");
+});
+
+/* FOL Unit 12 Midterm Review question bank (3 attempts, de-duplicated). o = FOL options in original order, k = index of correct. */
+SECTIONS.push({id:10, name:"FOL 期中复习题库", en:"FOL midterm review bank"});
+const TF = {o:["True","False"], oz:["对","错"]};
+const FOL = [
+{q:'When a control module is "locked out" how can the control be reset?', zh:"控制模块锁定后，怎么复位？",
+ o:["Turning the thermostat to its highest setting","Turning the thermostat to its lowest setting",'Turning the thermostat fan switch to "On"',"Removing thermostat from its sub-base"],
+ oz:["把温控器调到最高","把温控器调到最低","把温控器风机开关拨到“On”","把温控器从底座上拆下"], k:1,
+ e:"锁定后要手动复位：按模块上的复位按钮，或者把温控器调到最低，让模块断电，等 1 到 3 分钟再调回来。",
+ p:"62", qt:"The module then requires a manual reset to restart the ignition sequence, accomplished either by depressing a reset button on the control module or by turning the thermostat to its lowest setting.", qz:"这时模块需要手动复位才能重新启动点火程序，方法是按控制模块上的复位按钮，或把温控器调到最低。"},
+{q:"The flame signal on a high efficiency furnace is measured in?", zh:"高效炉的火焰信号用什么单位测？",
+ o:["Millivolts","Ohms","Milliamps","Microamps"], oz:["毫伏","欧姆","毫安","微安"], k:3,
+ e:"火焰整流信号是很小的脉动直流，用直流微安表测，单位是微安（µA）。",
+ p:"57", qt:"The flame signal in a rectified system should be steady and can be measured with a DC microammeter.", qz:"整流系统的火焰信号应该稳定，可以用直流微安表测量。"},
+{q:"Thermostat heat anticipators are dependent on __________.", zh:"温控器热预期器取决于什么？",
+ o:["Voltage","Resistance","Current","Capacitance"], oz:["电压","电阻","电流","电容"], k:2,
+ e:"热预期器靠回路电流发热，电流大小由继电器、燃气阀的电流决定，所以按电流设定。",
+ p:"30", qt:"Heat anticipators are dependent on current flow. The current flow, in turn, is determined by the amperage draw of the relay, gas valve, etc., in the primary heating system.", qz:"热预期器取决于电流。电流又由主加热系统中继电器、燃气阀等的电流决定。"},
+{q:"What is a solenoid?", zh:"电磁线圈（solenoid）是什么？",
+ o:["Electromagnetic device that converts electrical energy to a mechanical force","Electro-chemical device that converts a chemical reaction into mechanical force","Electro-reactive device that converts a nuclear reaction into mechanical energy","Motive energy device that converts inertia to mechanical energy"],
+ oz:["把电能转成机械力的电磁装置","把化学反应转成机械力的电化学装置","把核反应转成机械能的装置","把惯性转成机械能的装置"], k:0,
+ e:"电磁线圈：电流产生磁场，把衔铁吸进来，电能变机械力。",
+ p:"15", qt:"A solenoid is an electromagnetic device that creates a magnetic field around an actuating component converting electrical energy to a mechanical force.", qz:"电磁线圈是一种电磁装置，在执行部件周围产生磁场，把电能转换成机械力。"},
+{q:"What does a basic combination gas valve include?", zh:"基本的组合燃气阀包括哪些部件？",
+ o:["An adjustable propane regulator, an adjustable pilot regulator, gas meter","An adjustable propane regulator, a manual shut off valve, gas meter","A gas meter, manual shut off valve, pressure regulator","A manual shut off valve, automatic gas valve, pressure regulator"],
+ oz:["可调丙烷调压器、可调长明火调压器、燃气表","可调丙烷调压器、手动关断阀、燃气表","燃气表、手动关断阀、调压器","手动关断阀、自动燃气阀、调压器"], k:3,
+ e:"组合阀三件套：手动关断阀、自动燃气阀、调压器。燃气表不在阀里。",
+ p:"97", qt:"The compact body of a combination gas valve includes: a manual shut-off valve; an automatic gas valve; and a pressure regulator.", qz:"组合燃气阀的紧凑阀体包括：手动关断阀、自动燃气阀和调压器。"},
+{q:"A semiconductor device used to switch or amplify signals.", zh:"用来开关或放大信号的半导体器件。",
+ o:["Diode","Transistor","Thermistor","Thermocouple"], oz:["二极管","晶体管","热敏电阻","热电偶"], k:1,
+ e:"晶体管：开关或放大。", p:"18", qt:"A transistor is a semiconductor device used for switching or amplifying signals and electrical power.", qz:"晶体管是用来开关或放大信号和电功率的半导体器件。"},
+{q:'The "G" terminal on a furnace control board performs what purpose?', zh:"炉子控制板上 G 端子的作用？",
+ o:["To energize the gas valve on a call for heat","To provide power from the transformer to the thermostat","To energize the indoor blower","To energize the outdoor A/C condensing unit"],
+ oz:["要热时给燃气阀通电","把变压器电源送到温控器","启动室内风机","启动室外空调冷凝机"], k:2,
+ e:"温控器端子：R = 24 V 电源进温控器，W = 加热（燃气阀），G = 室内风机，Y = 室外空调冷凝机，C = 24 V 公共端（“零线”）。G 记成 Green/Fan。",
+ p:"32", qt:"These units have terminals to accommodate two heating wires, W1 and W2, as well as two AC wires, Y1 and Y2, plus power, fan, common wire...", qz:"这些温控器有接两根加热线 W1、W2，两根空调线 Y1、Y2，以及电源、风机、公共线的端子……", flag:"R/W/G/Y/C 各端子的作用教材 p.32 只是列了一下，详细的是行业通用知识，答案以 FOL 为准。"},
+{q:"What is the name of the backup safety designed to shut off the burner if the temperature of the water in the heater exceeds 200°F?", zh:"热水器水温超过 200°F 时切断燃烧器的后备安全装置叫什么？",
+ o:["T&P","ECO","Pilostat","Aquastat"], oz:["T&P 阀","ECO（能量切断）","长明火安全阀","水温控制器"], k:1,
+ e:"ECO 熔断件，超过 200°F 熔断，切断安全阀线圈电流。FOL 原题写成了“2000 F”，是笔误。",
+ p:"93", qt:"If the temperature-sensitive fuse exceeds 200°F, the fuse will melt, and the electrical current to the safety valve power unit coil will be interrupted, shutting all of the gas off.", qz:"如果感温熔丝超过 200°F，熔丝熔断，安全阀动力线圈的电流被切断，燃气全部关闭。"},
+{q:"An operating aquastat is controlled by:", zh:"运行水温控制器由什么控制？",
+ o:["Air temperature","Mercury","Water temperature","Fluid oil"], oz:["空气温度","水银","水温","油液"], k:2,
+ e:"它感测锅炉水温，水温到设定值就断开。", p:"34", qt:"The operating aquastat is a normally closed switch that controls the temperature of the water inside the boiler.", qz:"运行水温控制器是常闭开关，控制锅炉里的水温。"},
+{q:"Spring loaded manual gas shut off valves can only be used?", zh:"弹簧式手动燃气关断阀只能用在哪里？",
+ o:["Indoors","Outdoors","Cannot be used","Underground"], oz:["室内","室外","不能使用","地下"], k:0,
+ e:"弹簧式旋塞阀只能室内用，黄铜做的，现在已不再安装；润滑旋塞阀室内外都可以。",
+ p:"84", qt:"Spring loaded valve: Only for indoor use. Made of brass. This kind of valve is no longer installed.", qz:"弹簧式阀：只能室内使用，黄铜制，这种阀现在已不再安装。"},
+{q:"As the temperature of a NTC thermistor increases the resistance __________?", zh:"NTC 热敏电阻温度升高时，电阻怎样变化？",
+ o:["Decreases","Increases","Remains constant","Drops to zero"], oz:["减小","增大","不变","降到零"], k:0,
+ e:"NTC = 负温度系数，温度升高电阻减小；PTC 相反。",
+ p:"21", qt:"A PTC thermistor increases resistance with a temperature increase, and an NTC decreases its resistance with an increase in temperature.", qz:"PTC 热敏电阻温度升高时电阻增大，NTC 温度升高时电阻减小。"},
+{q:"The “W” terminal on a furnace control board performs what purpose?", zh:"炉子控制板上 W 端子的作用？",
+ o:["To energize the gas valve on a call for heat","To provide power from the transformer to the thermostat",'To provide the 24 volt transformer "neutral" connection',"To energize the outdoor A/C condensing unit"],
+ oz:["要热时给燃气阀通电","把变压器电源送到温控器","24 V 变压器的“零线”公共端","启动室外空调冷凝机"], k:0,
+ e:"W = 加热（White），要热时启动加热程序、给燃气阀通电。", p:"32", qt:"These units have terminals to accommodate two heating wires, W1 and W2...", qz:"这些温控器有接两根加热线 W1、W2 的端子……"},
+{q:"Choose the control listed below that is an “operating controller”", zh:"下面哪个是“运行控制器”？",
+ o:["High limit switch","Low water cut off switch","Flame sensor","Aquastat"], oz:["高限开关","低水位切断开关","火焰传感器","水温控制器（aquastat）"], k:3,
+ e:"运行控制器：温控器、运行水温控制器、运行压力控制器。高限、低水位是限位安全；火焰传感器是燃烧安全。",
+ p:"22", qt:"Operating controllers... Examples: thermostats, operating aquastats, and operating pressure controls.", qz:"运行控制器……例如：温控器、运行水温控制器和运行压力控制器。"},
+{q:"A common location for a high limit switch on a forced warm air furnace is next to the ___________.", zh:"强制送风炉的高限开关常装在哪个部件旁边？",
+ o:["Venter assembly","Hot Surface Igniter","Heat Exchanger","Blower motor"], oz:["排烟风机组件","热表面点火器","换热器","风机电机"], k:2,
+ e:"装在换热器旁边，约 200°F 断开、175°F 复位。",
+ p:"49", qt:"A common location for a high-limit switch on a forced warm-air furnace is next to the heat exchanger.", qz:"强制送风炉上高限开关的常见位置是换热器旁边。"},
+{q:"What is the primary force used to open or close a diaphragm gas valve?", zh:"膜片燃气阀开关的主要力量是什么？",
+ o:["Spring pressure","Solenoid coil","Water","Gas Pressure"], oz:["弹簧压力","电磁线圈","水","燃气压力"], k:3,
+ e:"膜片阀靠现有的燃气压力作主要动力，线圈只控制一个小孔。",
+ p:"95", qt:"The diaphragm gas valve is a pilot operated solenoid valve in that it uses available gas pressure as the primary force to open or close the valve.", qz:"膜片燃气阀是先导式电磁阀，因为它利用现有的燃气压力作为开关阀门的主要力量。"},
+{tf:1, q:"Solid state electronic devices are made up of electro-mechanical components that move.", zh:"固态电子器件由会移动的机电部件组成。", k:1,
+ e:"错，固态器件由不会动的固体元件组成。", p:"17", qt:"Solid-state electronic devices are made up of solid components that do not move.", qz:"固态电子器件由不会移动的固体元件组成。"},
+{q:"Heat anticipators used in millivoltage thermostats are specifically manufactured and are for use with ____ millivolt systems only", zh:"毫伏温控器里的热预期器专门制造，只能用于多少毫伏的系统？",
+ o:["250","500","750","1000"], oz:["250","500","750","1000"], k:2,
+ e:"毫伏系统的温控器专用于 750 mV 系统。", p:"30", qt:"Thermostats for millivolt circuits are specifically manufactured and are for use with 750 mV systems only.", qz:"毫伏回路用的温控器是专门制造的，只能用于 750 mV 系统。"},
+{q:"The two main types of gas shut off valves include?", zh:"手动燃气关断阀的两大类型？",
+ o:["Plug type, needle type","Plug type, pilot type","Plug type, ball type","Plug type, redundant type"], oz:["旋塞式、针阀式","旋塞式、长明火式","旋塞式、球阀式","旋塞式、冗余式"], k:2,
+ e:"两大类：旋塞式（plug）和球阀式（ball），都是转 1/4 圈开关。针阀用于长明火等小场合。",
+ p:"84", qt:"The two main types of manual gas shut-off valves include: Plug-type; and Ball type.", qz:"手动燃气关断阀的两大类型：旋塞式和球阀式。"},
+{q:"The “C” terminal on a furnace control board performs what purpose?", zh:"炉子控制板上 C 端子的作用？",
+ o:["To energize the gas valve on a call for heat","To provide power from the transformer to the thermostat","To energize the outdoor A/C condensing unit",'To provide the 24 volt transformer "neutral" connection'],
+ oz:["要热时给燃气阀通电","把变压器电源送到温控器","启动室外空调冷凝机","24 V 变压器的“零线”公共端"], k:3,
+ e:"C = Common，24 V 变压器的公共端，相当于“零线”。", p:"32", qt:"...plus power, fan, common wire, and possibly additional functions...", qz:"……加上电源、风机、公共线，可能还有其他功能……"},
+{tf:1, q:"Position and location are important factors for thermostat installation.", zh:"位置和地点是温控器安装的重要因素。", k:0,
+ e:"对。内墙、离地约 5 英尺、能代表整屋平均温度、避开热源冷源。", p:"32", qt:"The room thermostat is a precision device and therefore proper installation is essential for correct operation.", qz:"室内温控器是精密装置，所以正确安装对正常工作至关重要。"},
+{q:"Solenoids operate on which principle?", zh:"电磁线圈基于什么原理？",
+ o:["Electro-magnetism","Thermoelectric effect","Thermal expansion of solids","Thermal expansion of liquids"], oz:["电磁","热电效应","固体热膨胀","液体热膨胀"], k:0,
+ e:"电磁原理。", p:"14", qt:"This principle has been used in creating the electromagnet and forms the basis for the solenoid used in many control devices.", qz:"这个原理被用来制造电磁铁，也是许多控制装置中电磁线圈的基础。"},
+{q:"Name three types of combustion safety controls that rely on flame sensing:", zh:"说出三种靠火焰检测的燃烧安全控制。",
+ o:["Flame rod, capacitive ignition system, ultraviolet flame sensor","Flame rod, infrared flame sensor, capacitive ignition system","Flame rod, inductive ignition system, thermocouple","Flame rod, infrared flame sensor, ultraviolet flame sensor"],
+ oz:["火焰棒、电容点火系统、紫外传感器","火焰棒、红外传感器、电容点火系统","火焰棒、电感点火系统、热电偶","火焰棒、红外传感器、紫外传感器"], k:3,
+ e:"火焰棒（电离）、红外（硫化铅电池）、紫外（石英管）。点火系统不是火焰检测。",
+ p:"55", qt:"Flame rod detectors are the most common flame-sensing devices... Optical flame sensors... Ultraviolet flame sensor... Infrared flame sensor", qz:"火焰棒是最常见的火焰检测装置……光学火焰传感器……紫外火焰传感器……红外火焰传感器"},
+{q:"What is a DIP switch?", zh:"DIP 开关是什么？",
+ o:["Direct ignition proving sensor","A double pole double throw automatic switch","A manual electric switch that is packaged with others in a group","An air flow differential pressure switch"],
+ oz:["直接点火证实传感器","双刀双掷自动开关","和其他开关封装成一组的手动电气开关","气流差压开关"], k:2,
+ e:"DIP = dual in-line package，一排小手动开关。", p:"9", qt:"Dual in-line package switch (DIP switch): A manual electric switch that is packaged with others in a group.", qz:"双列直插封装开关（DIP 开关）：和其他开关封装成一组的手动电气开关。"},
+{q:"Thermistors are used to measure _____________?", zh:"热敏电阻用来测什么？",
+ o:["Pressure","Revolutions","Amperage","Temperature"], oz:["压力","转速","电流","温度"], k:3,
+ e:"测温度。", p:"21", qt:"Thermistors are widely used for temperature measurement and sensing.", qz:"热敏电阻广泛用于温度测量和感测。"},
+{tf:1, q:"Cable release fire suppression gas valves can only be activated manually.", zh:"拉索式灭火燃气阀只能手动触发。", k:1,
+ e:"错，手动拉站或温度熔断件都能触发。", p:"107", qt:"...held open by a cable that can be released by a manual pull station, or a temperature activated fusible link located above the cooking equipment.", qz:"……由拉索保持开启，拉索可由手动拉站或灶具上方的温度熔断件释放。"},
+{q:"With the unit “at rest” or no call for heat, operating controllers are?", zh:"设备静止、不要热时，运行控制器是什么状态？",
+ o:["Normally closed","Normally open","Manual reset devices","Normally neutral"], oz:["常闭","常开","手动复位装置","常中性"], k:1,
+ e:"按 FOL：运行控制器（比如温控器）静止时常开，要热时闭合；限位安全控制器静止时常闭。注意运行水温控制器本身是常闭开关，这题问的是“不要热时”的状态。",
+ p:"22", qt:"Operating controllers: Respond to changes in the controlled variable (temperature, pressure, etc.) and make or break a circuit.", qz:"运行控制器：响应被控变量（温度、压力等）的变化，接通或断开电路。"},
+{tf:1, q:"A PTC thermistor will decrease its resistance with a temperature increase.", zh:"PTC 热敏电阻温度升高时电阻减小。", k:1,
+ e:"错，PTC 升温电阻增大。", p:"21", qt:"A PTC thermistor increases resistance with a temperature increase.", qz:"PTC 热敏电阻温度升高时电阻增大。"},
+{q:"How can multiple wireless temperature sensors that use short range protocols such as Z-Wave and Zigbee achieve a longer range?", zh:"Z-Wave、Zigbee 短距离无线传感器怎样实现更远的距离？",
+ o:["Hard wire","AC adapters","Mesh network","Signal boosters"], oz:["硬接线","交流适配器","网状网络","信号放大器"], k:2,
+ e:"网状网络，设备之间互相转发。", p:"33", qt:"...as the devices all link up to form a mesh network that can pass the message along to any other device within range.", qz:"……因为所有设备连成网状网络，可以把消息传给范围内的其他设备。"},
+{q:"The “Y” terminal on a furnace control board performs what purpose?", zh:"炉子控制板上 Y 端子的作用？",
+ o:["To energize the gas valve on a call for heat","To provide power from the transformer to the thermostat","To energize the outdoor A/C condensing unit",'To provide the 24 volt transformer "neutral" connection'],
+ oz:["要热时给燃气阀通电","把变压器电源送到温控器","启动室外空调冷凝机","24 V 变压器的“零线”公共端"], k:2,
+ e:"Y = 制冷，启动室外冷凝机（压缩机）。", p:"32", qt:"...as well as two AC wires, Y1 and Y2...", qz:"……以及两根空调线 Y1 和 Y2……"},
+{q:"What type of optical flame sensor utilizes a tube constructed of quartz and filled with an inert gas?", zh:"哪种光学火焰传感器用充惰性气体的石英管？",
+ o:["Infrared flame sensor","Ultraviolet Flame Sensor","Flame rod flame sensor","Air proving switch"], oz:["红外火焰传感器","紫外火焰传感器","火焰棒","风压开关"], k:1,
+ e:"紫外：石英管充惰性气体；红外：硫化铅电池。", p:"58", qt:"This tube consists of quartz and filled with inert gas.", qz:"这种管由石英制成，充有惰性气体。"},
+{q:"Thermostat, operating aquastat and operating pressuretrol all belong to what section of the control system?", zh:"温控器、运行水温控制器、运行压力控制器属于控制系统哪一部分？",
+ o:["Operating controllers","Ignition control module","Limit and safety controllers","Combustion safety controller"], oz:["运行控制器","点火控制模块","限位与安全控制器","燃烧安全控制器"], k:0,
+ e:"运行控制器。", p:"22", qt:"Examples: thermostats, operating aquastats, and operating pressure controls.", qz:"例如：温控器、运行水温控制器和运行压力控制器。"},
+{q:"On an infrared flame sensor, what happens to the resistance of the sensor when a flame is present?", zh:"红外火焰传感器检测到火焰时，电阻怎么变？",
+ o:["Resistance increases","Resistance decreases","Resistance stays constant","Voltage increases"], oz:["电阻增大","电阻减小","电阻不变","电压升高"], k:1,
+ e:"硫化铅遇红外线失去电阻，电流能通过。", p:"58", qt:"The lead sulphide material is in itself a semiconductor, but when exposed to infrared radiation, it loses its resistance and allows free movement of electricity.", qz:"硫化铅本身是半导体，但受红外辐射照射时会失去电阻，让电流自由通过。"},
+{q:"A semiconductor device used to allow the flow of current in only one direction.", zh:"只允许电流单向流动的半导体器件。",
+ o:["Diode","Transistor","Thermistor","Thermocouple"], oz:["二极管","晶体管","热敏电阻","热电偶"], k:0,
+ e:"二极管。", p:"19", qt:"The diode allows the passage of current in only one direction (forward biased, anode to cathode).", qz:"二极管只允许电流单向通过（正向偏置，从阳极到阴极）。"},
+{q:"What control components produce electricity when heated?", zh:"哪种控制元件受热会产生电？",
+ o:["Transistor","Thermistor","Thermocouple","Bimetallic strip"], oz:["晶体管","热敏电阻","热电偶","双金属片"], k:2,
+ e:"热电偶。", p:"15", qt:"When the hot junction is heated, a direct current (DC) voltage is generated...", qz:"热端受热时会产生直流电压……"},
+{q:"A 10K thermistor has a reference resistance of 10KΩ at what temperature.", zh:"10K 热敏电阻在多少度时是 10 kΩ？",
+ o:["-55 degrees C","0 degrees C","25 degrees C","150 degrees C"], oz:["-55°C","0°C","25°C","150°C"], k:2,
+ e:"25°C。", p:"21", qt:"...referenced by their resistance at 25 °C. For example, a 10K ... has a resistance of 10 kilohm (kΩ) @ 25 °C.", qz:"……以 25°C 时的电阻标称。例如 10K 在 25°C 时电阻为 10 kΩ。"},
+{q:"List the three main types of control modules", zh:"列出三种主要的控制模块。",
+ o:["Intermittent pilot, Standing Pilot, Hot Surface Ignition","Intermittent pilot ignition, direct ignition, hot surface ignition","Standing pilot, thermopile system, thermocouple system","Hot surface ignition, standing pilot, thermopile ignition system"],
+ oz:["间歇长明火、常明火、热表面点火","间歇长明火点火、直接点火、热表面点火","常明火、热电堆系统、热电偶系统","热表面点火、常明火、热电堆点火系统"], k:1,
+ e:"非集成电子点火模块三种：间歇长明火、直接火花、热表面。常明火不用电子模块。",
+ p:"61", qt:"...there are three types of Non-integrated electronic ignition control modules namely: intermittent pilot; direct spark ignition; and hot surface ignition.", qz:"……非集成电子点火控制模块有三种：间歇长明火、直接火花点火和热表面点火。"},
+{q:"An intermittent pilot:", zh:"间歇长明火（intermittent pilot）是：",
+ o:["Pilot lit each time there is a call for heat, pilot remains lit during the entire call for heat","Pilot is continuously lit","Pilot lit each time there is a call for heat, pilot remains on until main flame comes on","Pilot flame supervised by a pilot safety control"],
+ oz:["每次要热时点长明火，整个要热期间长明火一直亮着","长明火一直亮着","每次要热时点长明火，主火点着后长明火就灭","长明火由长明火安全控制监视"], k:0,
+ e:"间歇长明火只在主燃烧器运行期间存在，要热结束时长明火和主火一起关。主火点着后就灭的是间断长明火（interrupted pilot）。",
+ p:"63", qt:"Unlike the continuous pilot, the intermittent pilot is present only during the operation of the main burner.", qz:"和常明火不同，间歇长明火只在主燃烧器运行期间存在。"},
+{q:"When a thermocouple is heated at the _______ _________ a voltage is created", zh:"热电偶在哪个位置受热会产生电压？",
+ o:["Cold junction","Bi-metal junction","Hot junction","Solid core"], oz:["冷端","双金属结","热端","实心芯"], k:2,
+ e:"热端受热，冷端两头出电压。", p:"15", qt:"When the hot junction is heated, a direct current (DC) voltage is generated across to the other two ends of the strips (the cold junction).", qz:"热端受热时，在两条金属另一端（冷端）之间产生直流电压。"},
+{q:"What type of optical flame sensor utilizes a lead sulphide cell?", zh:"哪种光学火焰传感器用硫化铅电池？",
+ o:["Infrared flame sensor","Ultraviolet flame sensor","Flame rod","Air proving switch"], oz:["红外火焰传感器","紫外火焰传感器","火焰棒","风压开关"], k:0,
+ e:"红外。", p:"58", qt:"The main element of the infrared sensor is a lead sulphide cell that is used as an electrical switch.", qz:"红外传感器的主要元件是用作电气开关的硫化铅电池。"},
+{q:"Select the combustion safety controls that work on the principle of flame ionization.", zh:"哪种燃烧安全控制基于火焰电离原理？",
+ o:["Thermopile","Infrared flame sensor","Ultraviolet flame sensor","Flame rectifier (flame rod)"], oz:["热电堆","红外火焰传感器","紫外火焰传感器","火焰整流器（火焰棒）"], k:3,
+ e:"火焰棒。", p:"55", qt:"They work on the principle of flame ionization...", qz:"它们基于火焰电离原理……"},
+{q:"Low-water cutoff, gas-pressure switch, flow switch, all belong to what section of the control system?", zh:"低水位切断、燃气压力开关、流量开关属于哪一部分？",
+ o:["Operating controllers","Ignition control module","Limit and safety controllers","Combustion safety controller"], oz:["运行控制器","点火控制模块","限位与安全控制器","燃烧安全控制器"], k:2,
+ e:"限位与安全控制器。", p:"22", qt:"Limit and safety controllers: Take the command away from the operating controls when continued operation would cause an unsafe situation.", qz:"限位与安全控制器：继续运行会不安全时，从运行控制器手里接管控制。"},
+{q:"With the unit “at rest” or no call for heat, limit (or safety) controllers are?", zh:"设备静止、不要热时，限位（安全）控制器是什么状态？",
+ o:["Normally closed","Normally open","Manual reset devices","Normally neutral"], oz:["常闭","常开","手动复位装置","常中性"], k:0,
+ e:"常闭，出现不安全状况才断开。", p:"119", qt:"Typically, limit switches are in the NC position.", qz:"限位开关一般是常闭的。"},
+{q:"Sealed bellows controls operate on which principle?", zh:"密封波纹管控制器基于什么原理？",
+ o:["Electro-magnetism","Thermoelectric effect","Thermal expansion of solids","Thermal expansion of liquids"], oz:["电磁","热电效应","固体热膨胀","液体热膨胀"], k:3,
+ e:"液体热膨胀。", p:"13", qt:"When liquid is sealed in a narrow tube (called a capillary), the force created by the liquid expanding within the capillary is used to operate an electrical switch or control mechanism.", qz:"液体密封在毛细管里，液体膨胀产生的力被用来操作开关或控制机构。"},
+{q:"On what type of gas appliance would a rod and tube (Unitrol) valve typically be installed?", zh:"杆管式（Unitrol）阀一般装在什么设备上？",
+ o:["Gas range","Gas water heater","Gas furnace","Gas boiler"], oz:["燃气灶","燃气热水器","燃气炉","燃气锅炉"], k:1,
+ e:"储水式热水器。", p:"93", qt:"The rod and tube combination gas valve is a multi-purpose valve typically installed in storage type water heaters.", qz:"杆管式组合燃气阀一般装在储水式热水器上。"},
+{q:"A thermostat should not be installed:", zh:"温控器不应该装在哪里？",
+ o:["In a hallway","In a kitchen","On an inside wall","In the living room"], oz:["走廊","厨房","内墙上","客厅"], k:1,
+ e:"厨房有炉灶等人为热源，会让读数不准。", p:"32", qt:"Where it is not subjected to the artificial effects of internal heat or cold, such as television sets, lamps, direct sun, cold air return, etc.", qz:"装在不受内部人为冷热影响的地方，比如电视、灯、直射阳光、回风口等。"},
+{tf:1, q:"A seismic valve will reset automatically once the vibration stops.", zh:"地震阀振动停止后会自动复位。", k:1,
+ e:"错，要手动复位。", p:"106", qt:"They have an indicating window and must be manually reset once activated.", qz:"它们有指示窗，动作后必须手动复位。"},
+{q:"Thermocouples and thermopiles operate on which principle?", zh:"热电偶和热电堆基于什么原理？",
+ o:["Electro-magnetism","Thermoelectric effect","Thermal expansion of solids","Thermal expansion of liquids"], oz:["电磁","热电效应","固体热膨胀","液体热膨胀"], k:1,
+ e:"热电效应。", p:"15", qt:"The thermoelectric effect of producing electricity by heat is used for the thermocouple and thermopile.", qz:"热电偶和热电堆利用加热产生电的热电效应。"},
+{q:"List the three types of solenoid valves", zh:"列出电磁阀的三种类型。",
+ o:["Reverse acting, direct acting, pilot operated","Direct acting, lever, pilot operated","Reverse operating, pilot operated, modulating operated","Regulator operated, reverse acting, direct acting"],
+ oz:["反作用、直动式、先导式","直动式、杠杆式、先导式","反向操作、先导式、调制式","调压器操作、反作用、直动式"], k:1,
+ e:"直动式、杠杆式、先导式。", p:"87", qt:"Direct acting... Lever-actuated... Pilot-operated...", qz:"直动式……杠杆式……先导式……"},
+{tf:1, q:"Thermostats should be placed in a room on an outside wall.", zh:"温控器应装在房间外墙上。", k:1,
+ e:"错，装内墙。", p:"32", qt:"On an inside wall.", qz:"装在内墙上。"},
+{q:"List the basic sequence of operation for a control module", zh:"列出控制模块的基本动作顺序。",
+ o:["Thermostat calls for heat, safe start check initiated, igniter energized, gas valve energized, main burner flame monitored","Performing a safe start check, igniting the flame, powering the gas valve(s), proving presence of flame, monitoring flame during the run cycle of the burner","Thermostat calls for heat, igniting the flame, powering the gas valve(s), proving presence of flame, monitoring flame during the run cycle of the burner","Thermostat calls for heat, igniting the pilot, powering the gas valve(s), proving presence of flame, monitoring the pilot during the run cycle of the burner"],
+ oz:["温控器要热、启动安全检查、点火器通电、燃气阀通电、监视主火","启动前安全检查、点火、给燃气阀通电、证实火焰、运行中监视火焰","温控器要热、点火、给燃气阀通电、证实火焰、运行中监视火焰","温控器要热、点长明火、给燃气阀通电、证实火焰、运行中监视长明火"], k:1,
+ e:"教材五步原文：safe start check → igniting → powering gas valves → proving flame → monitoring flame。",
+ p:"62", qt:"1) performing a safe start check; 2) igniting the flame; 3) powering the gas valves; 4) proving presence of flame; and 5) monitoring flame during the run cycle of the burner.", qz:"1）启动前安全检查；2）点火；3）给燃气阀通电；4）证实火焰存在；5）燃烧器运行期间监视火焰。"},
+{q:"The expansion of the mercury is smooth up to approximately __________ degrees F", zh:"水银的膨胀在大约多少华氏度以内是平稳的？",
+ o:["500 degrees F","650 degrees F","1250 degrees F","3000 degrees F"], oz:["500°F","650°F","1250°F","3000°F"], k:1,
+ e:"约 650°F 以内平稳，超过就汽化，产生“快动”。3000°F 是长明火安全控制达到的温度。",
+ p:"14", qt:"The expansion of the mercury is smooth up to approximately 650 °F (343 °C), at which point the mercury vaporizes (boils).", qz:"水银在约 650°F（343°C）以内膨胀平稳，到这个温度时水银汽化（沸腾）。"},
+{q:"What device is used to sense combustion air or flue gas flow on any appliance that incorporates a fan or blower?", zh:"有风机的设备用什么检测燃烧空气或烟气流量？",
+ o:["Flow switch","Pressuretrol","Gas pressure switch","Air proving switch"], oz:["流量开关","压力控制器","燃气压力开关","风压开关"], k:3,
+ e:"风压开关。", p:"59", qt:"They are used to sense combustion air or flue gas flow on any appliance that incorporates a fan or blower.", qz:"它们用来检测任何带风机设备的燃烧空气或烟气流量。"},
+{q:"Name five limit and safety controllers", zh:"说出五种限位与安全控制器。",
+ o:["Thermostat, operating aquastat, Low water cut off switch, High limit aquastat, flow switch","Thermostat, operating pressuretrol, Low water cut off switch, High limit aquastat, flow switch","Operating pressuretrol, operating aquastat, Low water cut off switch, High limit aquastat, flow switch","High limit switch, High limit aquastat, Low water cut off switch, High limit pressure control, flow switch"],
+ oz:["温控器、运行水温控制器、低水位切断、高限水温控制器、流量开关","温控器、运行压力控制器、低水位切断、高限水温控制器、流量开关","运行压力控制器、运行水温控制器、低水位切断、高限水温控制器、流量开关","高限开关、高限水温控制器、低水位切断、高限压力控制器、流量开关"], k:3,
+ e:"凡是带“operating”或温控器的都是运行控制器，排除后只剩最后一项。",
+ p:"22", qt:"Examples: low-water cut-off switches, high-limit aquastats, high-limit pressure controls, and flow switches", qz:"例如：低水位切断开关、高限水温控制器、高限压力控制器和流量开关。"},
+{q:"An operating pressuretrol is controlled by:", zh:"运行压力控制器由什么控制？",
+ o:["Water","Steam","Air","Mercury"], oz:["水","蒸汽","空气","水银"], k:1,
+ e:"它感测蒸汽锅炉上部的蒸汽压力。", p:"37", qt:"As steam pressure in the boiler rises and reaches the setpoint of the pressure control, the switch contacts open and de-energizes the power to the main gas valve.", qz:"锅炉蒸汽压力升到压力控制器设定值时，开关触点断开，切断主燃气阀电源。"},
+{q:"A low gas pressure switch opens when the pressure drops to ________% of the regulator set point.", zh:"低燃气压力开关在压力降到调压器设定值的百分之多少时断开？",
+ o:["25","50","75","80"], oz:["25","50","75","80"], k:1,
+ e:"50%。高压开关是超过 25%。", p:"53", qt:"The switch opens if the pressure drops to 50% of the regulator setpoint.", qz:"压力降到调压器设定值的 50% 时开关断开。"},
+{q:'A temperature control with a narrow differential will cause very?', zh:"温差（差值）设得窄的温度控制会导致什么？",
+ o:['Close temperature control with long "on" cycles','Wide range of temperature control with short "on" cycles','Close temperature control and short "on" cycles','Wide range of temperature control and long "on" cycles'],
+ oz:["控温很准，开机周期长","控温范围宽，开机周期短","控温很准，开机周期短","控温范围宽，开机周期长"], k:2,
+ e:"差值窄 = 温度波动小（控温准），但每次运行时间短、启停更频繁。就像 CPH 调高。",
+ p:"31", qt:"...a temperature differential of only about 0.4 °F, which would give much shorter run time and less temperature swing.", qz:"……只有约 0.4°F 的温差，运行时间短得多，温度波动也小得多。"},
+{q:"What is the purpose of a flow switch in a hot water system?", zh:"热水系统里流量开关的作用？",
+ o:["To ensure flow of water before burner is energized","To ensure flow of air across heat exchanger before burner is energized","To ensure flow of air through the venting system before gas valve is energized","To ensure lack of CO in the flue products before gas valve is energized"],
+ oz:["燃烧器通电前确认有水流","燃烧器通电前确认换热器有风","燃气阀通电前确认排烟有气流","燃气阀通电前确认烟气没有 CO"], k:0,
+ e:"确认水在循环。", p:"47", qt:"They ensure that the pumps are circulating water in the piping system and the boiler before the main burner can fire.", qz:"它们确保主燃烧器点火前，水泵正在让水在管路和锅炉里循环。"},
+{q:"Typically the electrical resistance of metals __________ when heated.", zh:"一般金属受热时电阻怎么变？",
+ o:["Increases","Decreases","Drops to zero","Stays the same"], oz:["增大","减小","降到零","不变"], k:0,
+ e:"一般金属受热电阻增大；少数材料相反（如 NTC）。", p:"21", qt:"Typically, the electrical resistance of metals increases when heated.", qz:"一般金属受热时电阻增大。"},
+{q:"The two materials used for the sensing element (rod and tube) for a unitrol is?", zh:"Unitrol 杆管式感温元件用哪两种材料？",
+ o:["Copper and aluminum","Copper and Steel","Magnesium and Aluminum","Copper and Invar"], oz:["铜和铝","铜和钢","镁和铝","铜和殷钢"], k:3,
+ e:"外面铜管（膨胀大），里面殷钢棒（几乎不膨胀）。", p:"13", qt:"The copper tube encases an invar rod, a metal alloy with a low expansion/contraction rate.", qz:"铜管里面包着一根殷钢棒，殷钢是一种膨胀收缩率很低的合金。"},
+{q:"A semiconductor device that changes its electrical resistance with a change in temperature.", zh:"电阻随温度变化的半导体器件。",
+ o:["Diode","Thermistor","Thermocouple","Transistor"], oz:["二极管","热敏电阻","热电偶","晶体管"], k:1,
+ e:"热敏电阻。", p:"21", qt:"A thermistor is a resistance thermometer as it changes its electrical resistance with a change in temperature.", qz:"热敏电阻是一种电阻温度计，电阻随温度变化。"},
+{q:"The temperature disc, bimetallic strip and rod and tube controls all operate on which principle?", zh:"温度碟片、双金属片、杆管控制器都基于什么原理？",
+ o:["Electro-magnetism","Thermoelectric effect","Thermal expansion of solids","Thermal expansion of liquids"], oz:["电磁","热电效应","固体热膨胀","液体热膨胀"], k:2,
+ e:"固体热膨胀。", p:"12", qt:"The principle of the thermal expansion of solids is used for several control devices that regulate temperature change.", qz:"固体热膨胀原理被用于好几种调节温度变化的控制装置。"},
+{q:"How is the field wiring identified on a wiring schematic for an IFC?", zh:"IFC 接线图上现场接线怎么表示？",
+ o:["Highlighted","Dotted lines","Solid Bold lines","Solid lines"], oz:["高亮","虚线","粗实线","实线"], k:1,
+ e:"虚线。", p:"69", qt:"The field wiring is always identified on wiring schematics with dotted lines.", qz:"现场接线在接线图上一律用虚线表示。"},
+{q:"Gas pressure switches are required by Code on burner systems that operate with gas pressures greater than __________.", zh:"燃气压力超过多少时，规范要求装燃气压力开关？",
+ o:["1/4 PSI","1/2 PSI",'11" water column',"1 PSI"], oz:["1/4 psi","1/2 psi","11 英寸水柱","1 psi"], k:1,
+ e:"1/2 psig。", p:"52", qt:"Gas-pressure switches are required by code on burner systems that operate with gas pressures greater than 1/2 psig (3.5 kPa).", qz:"燃气压力超过 1/2 psig（3.5 kPa）的燃烧器系统，规范要求装燃气压力开关。"},
+{tf:1, q:"Non-integrated ignition control modules designed for intermittent pilot, direct spark, or hot surface ignition will also manage all of the other appliance activities such as humidistat, electronic filters, heating pumps or fans.", zh:"非集成点火模块也会管理加湿、过滤器、水泵、风机等其他功能。", k:1,
+ e:"错，那是 IFC 的事。", p:"68", qt:"An integrated furnace control (IFC) manages the entire operation of a furnace.", qz:"集成炉控（IFC）管理炉子的全部运行。"},
+{q:"What is an operating aquastat?", zh:"运行水温控制器是什么？",
+ o:["It is a normally closed switch, that shuts off the gas supply when the temperature setpoint is reached","It is a normally open switch, that shuts off the gas supply when the temperature setpoint is reached","It is a normally closed switch, that turns on the gas supply when the temperature setpoint is reached","It is a normally open switch, that turns on the gas supply when the temperature setpoint is reached"],
+ oz:["常闭开关，达到设定温度时切断燃气","常开开关，达到设定温度时切断燃气","常闭开关，达到设定温度时打开燃气","常开开关，达到设定温度时打开燃气"], k:0,
+ e:"常闭，到温断开。", p:"34", qt:"If the aquastat is set for 180°F (82 °C), the contacts will remain closed until the water reaches this temperature. At this point, the contacts open and cut off power to the main gas valve.", qz:"如果设在 180°F，触点一直闭合直到水温达到这个温度，这时触点断开，切断主燃气阀电源。"},
+{q:"Sealed bellows used to operate thermostats may have a temperature limit of 650 degrees F and usually contain a fluid similar to a _____________.", zh:"温控用的密封波纹管温度上限 650°F，通常装的液体类似什么？",
+ o:["Alcohol","Mercury","Light oil","Refrigerant"], oz:["酒精","水银","轻油","制冷剂"], k:2,
+ e:"轻油。", p:"14", qt:"Sealed bellows used to operate thermostats may have a temperature limit of 650 °F (343 °C) and usually contain a fluid similar to a light oil.", qz:"用于温控的密封波纹管温度上限可达 650°F（343°C），通常装有类似轻油的液体。"},
+{q:"A direct spark ignition:", zh:"直接火花点火（DSI）是：",
+ o:["Lights the pilot light, the pilot then fires the main burner","Lights the main burner with no pilot","Lights the pilot light","Lights the pilot and the main burner at the same time"],
+ oz:["点长明火，再由长明火点主燃烧器","不用长明火，直接点主燃烧器","只点长明火","同时点长明火和主燃烧器"], k:1,
+ e:"没有长明火，火花直接点主燃烧器。", p:"65", qt:"Direct spark ignition does not use a pilot flame but rather directly lights the main burner with a spark.", qz:"直接火花点火不用长明火，而是用火花直接点燃主燃烧器。"},
+{q:"A combination pressure-temperature relief valve is used on what type of appliance?", zh:"组合温压泄放阀（T&P）用在什么设备上？",
+ o:["Steam boiler","Hot water boiler","Forced warm air furnace","Storage hot water heater"], oz:["蒸汽锅炉","热水锅炉","强制送风炉","储水式热水器"], k:3,
+ e:"储水式热水器。热水锅炉用的是单纯的泄压阀。", p:"81", qt:"Local and national codes require the installation of storage water heaters with a combination pressure-temperature relief valve.", qz:"地方和国家规范要求储水式热水器安装组合温压泄放阀。"},
+{q:"What is the purpose of an operating pressuretrol?", zh:"运行压力控制器的作用？",
+ o:["To stop the boiler if the steam pressure gets too high","To start the boiler when the steam pressure drops","To shut-off gas supply in the event of an overpressure condition in the burner valve train assembly","To shut-off gas supply in the event of an under pressure condition in the burner valve train assembly"],
+ oz:["蒸汽压力过高时停锅炉","蒸汽压力下降时启动锅炉","燃烧器阀组超压时切断燃气","燃烧器阀组欠压时切断燃气"], k:0,
+ e:"教材 p.37 的描述是：蒸汽压力升到设定值，触点断开，切断主燃气阀。按这句字面选“压力过高时停锅炉”。阀组超压/欠压是燃气压力开关的事。",
+ p:"37", qt:"As steam pressure in the boiler rises and reaches the setpoint of the pressure control, the switch contacts open and de-energizes the power to the main gas valve.", qz:"锅炉蒸汽压力升到压力控制器设定值时，开关触点断开，切断主燃气阀电源。",
+ flag:"FOL 三次都没抽到这题，答案没有官方确认。a 和 b 都说得通，按教材字面选了 a，最好问老师。"},
+{q:"How have redundant gas valves been adapted to give them modulating operation?", zh:"冗余燃气阀怎样改成可调制运行？",
+ o:["WiFi-enabled","Servo regulated","Electric Stepper motor","Electro hydraulic actuator"], oz:["加 WiFi","伺服调压","电动步进电机","电液执行器"], k:2,
+ e:"步进电机。", p:"104", qt:"With the use of a stepper motor, diaphragm gas valves can be used to modulate the firing rate.", qz:"用步进电机，膜片燃气阀就可以调节燃烧速率。"},
+{q:"The flame rod (flame rectifiers) utilize?", zh:"火焰棒（火焰整流）用的是什么单位的信号？",
+ o:["Millivolts","Ohms","Milliamps","Microamps"], oz:["毫伏","欧姆","毫安","微安"], k:3,
+ e:"微安。", p:"57", qt:"The flame signal in a rectified system should be steady and can be measured with a DC microammeter.", qz:"整流系统的火焰信号应该稳定，可以用直流微安表测量。"},
+{q:"If the condensate return pump fails to operate on a steam boiler, which safety control will protect the boiler?", zh:"蒸汽锅炉的冷凝回水泵坏了，哪个安全控制保护锅炉？",
+ o:["Pressuretrol","Limit control","Ultraviolet flame sensor","Low water cut off"], oz:["压力控制器","限位控制","紫外火焰传感器","低水位切断"], k:3,
+ e:"回水泵不工作，锅炉水位会下降，低水位切断动作。", p:"43", qt:"If the water level in the boiler falls below the minimum level, the low-water cut-off switch opens its contacts and cuts off power to the main gas valve.", qz:"如果锅炉水位低于最低水位，低水位切断开关断开触点，切断主燃气阀电源。"},
+{q:"How do electronic thermostats control temperature swing overshoot?", zh:"电子温控器怎么控制温度波动过冲？",
+ o:["Night setback","Cycles per hour method","Adjustable Heat anticipator","Millivolt anticipator"], oz:["夜间降温","每小时循环次数（CPH）法","可调热预期器","毫伏预期器"], k:1,
+ e:"CPH 法。", p:"31", qt:"Digital electronic thermostats use a cycles-per-hour (CPH) method of anticipation.", qz:"数字电子温控器用每小时循环次数（CPH）的预期方法。"},
+{q:"A probe type low water cut off, is a normally open switch that uses __________ to conduct current between the terminals.", zh:"探针式低水位切断是常开开关，用什么在端子之间导电？",
+ o:["Condensate","Boiler water","Mercury","Steam"], oz:["冷凝水","锅炉水","水银","蒸汽"], k:1,
+ e:"锅炉水。水位低于探针，回路断，切断燃气阀。", p:"44", qt:"The probe type is a normally open switch. It has an electronic circuitry that uses boiler water to conduct current between the terminals on the end of the probes.", qz:"探针式是常开开关，它的电子电路利用锅炉水在探针末端的端子之间导电。"},
+{q:"To ensure adequate flame rectification, a minimum ratio of _________ between grounding area and the flame rod must be maintained.", zh:"为保证火焰整流，接地面积和火焰棒之间至少要保持多少比例？",
+ o:["1:1","2:1","3:1","4:1"], oz:["1:1","2:1","3:1","4:1"], k:3,
+ e:"4:1。", p:"55", qt:"To ensure adequate flame rectification, maintain a minimum ratio of 4:1 between ground and flame rod.", qz:"为保证火焰整流可靠，接地和火焰棒之间至少保持 4:1。"},
+{q:"What device would be used if sequenced control was desired for several pieces of equipment?", zh:"多台设备需要按顺序控制时，用什么？",
+ o:["A building automation strategy","A humidistat controller","A thermostat controller","A humidifier/ thermostatic controller"], oz:["楼宇自动化策略","湿度控制器","温控器","加湿/温控控制器"], k:0,
+ e:"需要协调多台设备启停时，采用楼宇自动化策略。FOL 标的是 p.42（楼宇管理系统），p.123 也有原话。",
+ p:"123", qt:"When it is necessary to coordinate multiple equipment starting and stopping, a building automation strategy is implemented.", qz:"需要协调多台设备的启停时，就采用楼宇自动化策略。"},
+{q:"What feature acts as extra protection on a redundant gas valve?", zh:"冗余燃气阀的额外保护是什么？",
+ o:["On-off switch","Pilot adjustment","Servo regulator","A second automatic shutoff valve"], oz:["开关","长明火调节","伺服调压器","第二个自动关断阀"], k:3,
+ e:"第二个自动关断阀。", p:"99", qt:"It is of the 100% safety shut-off type with, as extra protection, a second shut-off valve incorporated in the valve body.", qz:"它是 100% 安全关断型，作为额外保护，阀体内还有第二个关断阀。"},
+{q:"SCR, TRIAC, and DIAC are all what types of electronic devices?", zh:"SCR、TRIAC、DIAC 属于哪类器件？",
+ o:["Diode","Thyristor","Transistor","Thermistor"], oz:["二极管","晶闸管","晶体管","热敏电阻"], k:1,
+ e:"晶闸管。", p:"20", qt:"The three basic types of thyristors are: SCRs; DIACs; and TRIACs.", qz:"晶闸管的三种基本类型是 SCR、DIAC 和 TRIAC。"},
+{q:"What type of control is a sensitive diaphragm operated pressure switch?", zh:"灵敏的膜片压力开关是哪种控制？",
+ o:["Infrared Flame Sensor","Ultraviolet flame sensor","Air proving switch","Flame rod"], oz:["红外火焰传感器","紫外火焰传感器","风压开关","火焰棒"], k:2,
+ e:"风压开关本质上就是灵敏的膜片压力开关。", p:"59", qt:"Essentially, air-proving switches are sensitive diaphragm-operated pressure switches.", qz:"风压开关本质上就是灵敏的膜片压力开关。"},
+{q:"Thermocouple voltages are measured in?", zh:"热电偶电压用什么单位测？",
+ o:["AC Volts","DC Millivolts","DC Microamps","Ohms"], oz:["交流伏","直流毫伏","直流微安","欧姆"], k:1,
+ e:"直流毫伏，单个约 20 到 30 mV。", p:"16", qt:"The output of a single thermocouple is very small — 20 to 30 millivolts (mV).", qz:"单个热电偶的输出很小，20 到 30 毫伏。"},
+{q:"Thermostats are rated for?", zh:"温控器的额定类型有哪些？",
+ o:["Line voltage","Low voltage","Millivoltage","All of the above"], oz:["线电压","低压","毫伏","以上都是"], k:3,
+ e:"三种都有。", p:"23", qt:"...thermostat may be rated for direct switching of line voltage, low voltage, or millivoltage loads", qz:"……温控器可以额定为直接切换线电压、低压或毫伏负载。"},
+{q:"What is the purpose of the heat anticipator?", zh:"热预期器的作用？",
+ o:["To shut off gas valve if a hazard exists","To shut off gas valve once thermostat is satisfied","To shut off gas valve slightly before thermostat is satisfied","To turn on the gas valve slightly after the thermostat is satisfied"],
+ oz:["有危险时关燃气阀","温控器满足时关燃气阀","温控器满足前稍早关燃气阀","温控器满足后稍晚开燃气阀"], k:2,
+ e:"提前一点关火，用余热补足，减少过冲。", p:"29", qt:"This causes the thermostat to shut off the heating system sooner than it would if affected by room temperature only.", qz:"这让温控器比只受室温影响时更早关掉加热系统。"},
+{tf:1, q:"Mercury is used in capillary tubes suitable for high temperature operation.", zh:"水银用于适合高温工作的毛细管。", k:0,
+ e:"对。", p:"14", qt:"For high temperatures... the bulb must be filled with mercury.", qz:"高温场合……感温包必须充水银。"},
+{q:"Name the three categories of gas pressure regulators.", zh:"燃气调压器的三大类？",
+ o:["Service, line, appliance","Pilot, service, appliance","Line, pilot, appliance","Service, system, pilot"], oz:["进户、管线、器具","长明火、进户、器具","管线、长明火、器具","进户、系统、长明火"], k:0,
+ e:"进户（service）、系统/管线（system/line pressure）、器具（appliance）。", p:"89", qt:"There are essentially three categories of gas pressure regulators: service; system (line pressure); and appliance.", qz:"燃气调压器基本上有三类：进户、系统（管线压力）和器具。"},
+{q:"What is the sensing portion of a “rod and tube” control device made of?", zh:"杆管式控制器的感温部分用什么材料？",
+ o:["Brass","Steel","Copper","Magnesium"], oz:["黄铜","钢","铜","镁"], k:2,
+ e:"铜管，膨胀率高。", p:"13", qt:"In this control device, the sensing portion of the valve is constructed of copper tube that has a high expansion/contraction rate.", qz:"这种控制装置的感温部分由膨胀收缩率高的铜管制成。"},
+{q:"What CPH setting do most electronic thermostats come pre-set at?", zh:"大多数电子温控器出厂 CPH 是多少？",
+ o:["1-2","4-5","7-8","10-11"], oz:["1-2","4-5","7-8","10-11"], k:1,
+ e:"FOL 标准答案 4-5，它自己也注明“教材写的是 5 或 6”。", p:"31", qt:"Most electronic thermostats come out of the box set for 5 or 6 CPH.", qz:"大多数电子温控器出厂设为 5 或 6 CPH。"},
+{q:"What additional controls may be included in a combination gas valve?", zh:"组合燃气阀可能附加哪些控制？",
+ o:["100% safety shut off, pilot gas adjustment, control module","Propane gas meter, main gas regulator adjustment, pilot gas adjustment","Automatic gas valve, a millivolt gas valve, pilot gas adjustment","Thermocouple adjustment, pilot gas adjustment, millivolt gas valve adjustment"],
+ oz:["100% 安全关断、长明火燃气调节、控制模块","丙烷表、主调压器调节、长明火调节","自动燃气阀、毫伏燃气阀、长明火调节","热电偶调节、长明火调节、毫伏阀调节"], k:0,
+ e:"附加控制：100% 安全关断、长明火调节、控制模块。注意和“基本三件套”那题区分。",
+ p:"97", qt:"Some of the additional controls found include: 100% safety shut-off; pilot gas adjustment; and control module.", qz:"可能附加的控制包括：100% 安全关断、长明火燃气调节和控制模块。"},
+{tf:1, q:"On an electric oven safety valve, the HSI must warm up sufficiently before enough electricity can pass to open the gas valve.", zh:"电烤箱安全阀上，HSI 必须先充分加热，才有足够电流打开燃气阀。", k:0,
+ e:"对。", p:"106", qt:"When the bar reaches yellow heat, sufficient to ignite the gas, it allows passage of enough electricity to open the gas valve.", qz:"点火棒烧到黄热时，才有足够电流通过去打开燃气阀。"},
+{q:"The flame safeguard control monitors and controls only the ________ __________ of the appliance.", zh:"火焰保护控制只监视和控制设备的什么？",
+ o:["Blower motor","Venter assembly","Safe operation","High limit"], oz:["风机电机","排烟组件","安全运行","高限"], k:2,
+ e:"FSG 只管安全运行，功能运行交给运行控制器。", p:"71", qt:"The FSG monitors and controls only the safe operation of the appliance and leaves the functional operation to the main operating control.", qz:"FSG 只监视和控制设备的安全运行，功能运行交给主运行控制器。"},
+{tf:1, q:"A thyristor is different from a transistor in that it only needs a pulse signal to make it conducting and thereafter, it remains conducting.", zh:"晶闸管只需一个脉冲就导通并保持导通。", k:0,
+ e:"对。", p:"19", qt:"A thyristor is different form a transistor as it only needs a pulse signal to make it conduct and, thereafter, remains conducting.", qz:"晶闸管只需要一个脉冲信号就能导通，之后保持导通。"},
+{tf:1, q:"A thermocouple is considered a combustion safety control.", zh:"热电偶被视为燃烧安全控制。", k:0,
+ e:"对。", p:"54", qt:"Combustion safety controls have evolved from the simple thermocouple that monitored the pilot flame...", qz:"燃烧安全控制从最简单的监视长明火的热电偶发展而来……"},
+{q:"The servo regulator built into a combination gas valve serves as which type of gas pressure regulator?", zh:"组合阀内置的伺服调压器是哪类调压器？",
+ o:["System regulator","Service regulator","Appliance regulator","Over pressure protection regulator"], oz:["系统调压器","进户调压器","器具调压器","超压保护调压器"], k:2,
+ e:"器具调压器。", p:"91", qt:"Often, the appliance regulator is built into a combination control valve.", qz:"器具调压器常常内置在组合控制阀里。"},
+{q:"Flow switches are mandatory on equipment with?", zh:"什么设备必须装流量开关？",
+ o:["Large water capacities and low firing rate","Large water capacities and large firing rate","Small water capacities and low firing rate","Small water capacities and large firing rate"],
+ oz:["水容量大、燃烧率低","水容量大、燃烧率高","水容量小、燃烧率低","水容量小、燃烧率高"], k:3,
+ e:"FOL 标准答案：水容量小、燃烧率高。水少火大，水流一不够就会变成蒸汽。", p:"47", qt:"Boilers that require flow switches have small water capacities, and their water may turn to steam if the flow of water is inadequate.", qz:"需要流量开关的锅炉水容量小，水流不足时水可能变成蒸汽。"},
+{q:"What liquid in a capillary is suitable for high temperature operation?", zh:"哪种毛细管液体适合高温？",
+ o:["Mercury","Alcohol","Refrigerant","Ammonia"], oz:["水银","酒精","制冷剂","氨"], k:0,
+ e:"水银。", p:"14", qt:"For high temperatures, such as 3000 °F reached in pilot safety controls, the bulb must be filled with mercury.", qz:"在高温场合，比如长明火安全控制达到的 3000°F，感温包必须充水银。"},
+{tf:1, q:"One advantage of a smart valve is that it uses a regular 120 VAC HSI.", zh:"智能阀的一个优点是用普通 120 VAC HSI。", k:1,
+ e:"错，用特制 24 V HSI。", p:"102", qt:"Note that the igniter flame rod assembly for the smart valve contains a special 24 V HSI.", qz:"智能阀的点火棒组件装的是特制的 24 V HSI。"},
+{q:"The “R” terminal on a furnace control board performs what purpose?", zh:"炉子控制板上 R 端子的作用？",
+ o:["To energize the gas valve on a call for heat","To provide power from the transformer to the thermostat","To energize the indoor blower on a cooling call","To energize the outdoor A/C condensing unit"],
+ oz:["要热时给燃气阀通电","把变压器电源送到温控器","制冷时启动室内风机","启动室外空调冷凝机"], k:1,
+ e:"R = 24 V 电源（Red），从变压器送到温控器。", p:"32", qt:"...plus power, fan, common wire...", qz:"……加上电源、风机、公共线……"},
+{tf:1, q:"Pilot operated solenoid valves use pressure differential to assist the plunger in opening and closing the main valve.", zh:"先导式电磁阀利用压差帮助柱塞开关主阀。", k:0,
+ e:"对。", p:"87", qt:"The pilot-operated valve uses pressure differential to assist the plunger in opening and closing the main valve.", qz:"先导式阀利用压差帮助柱塞打开和关闭主阀。"},
+{q:"What type of water shut off valve should be used in applications requiring frequent throttling?", zh:"需要经常节流的场合用哪种水关断阀？",
+ o:["Gate Valves","Globe Valves","Relief Valves","Ball type shut off valve"], oz:["闸阀","截止阀","泄压阀","球阀"], k:1,
+ e:"截止阀；闸阀只能全开全关。", p:"80", qt:"Globe valves, unlike gate valves, are designed for steady use in applications with frequent throttling or flow regulation.", qz:"截止阀和闸阀不同，设计用于需要经常节流或调节流量的场合。"},
+{q:"On a wheatstone bridge when the ratio between R1 and R2 is the same as the ratio of R3 and R4 the circuit is known to be ____________", zh:"惠斯通电桥 R1/R2 = R3/R4 时，电路是什么状态？",
+ o:["Unbalanced","Proportional","Offset","Balanced"], oz:["不平衡","成比例","偏移","平衡"], k:3,
+ e:"平衡。", p:"16", qt:"...when the ratio of R1 to R2 is the same as the ratio of R3 to R4, the circuit is in balance.", qz:"……当 R1 与 R2 之比等于 R3 与 R4 之比时，电路平衡。"},
+{q:"Different types of multi-stage thermostats use a variety of methods to initiate furnace staging, select the method that employs algorithms to anticipate demand.", zh:"多段温控器哪种分段方法用算法预判需求？",
+ o:["CPH staging","Setpoint staging","Time-based staging","Rate-of-change staging"], oz:["CPH 分段","设定点分段","时间分段","变化率分段"], k:3,
+ e:"变化率分段。", p:"31", qt:"Rate-of-change staging often employs advanced algorithms, such as fuzzy logic...", qz:"变化率分段常用高级算法，比如模糊逻辑……"},
+{q:"Flow switches actuate in response to _________ movement.", zh:"流量开关响应什么的流动？",
+ o:["Steam","Air","Water","Refrigerant"], oz:["蒸汽","空气","水","制冷剂"], k:2,
+ e:"水。检测空气流动的叫风帆开关（sail switch）。", p:"47", qt:"Flow switches actuate in response to water movement.", qz:"流量开关响应水的流动而动作。"},
+{q:"The triac operates like the SCR, but can conduct current in ______ direction(s)", zh:"TRIAC 和 SCR 类似，但能在几个方向上导电？",
+ o:["One","Both","All","Any"], oz:["一个","两个（双向）","所有","任意"], k:1,
+ e:"双向。SCR 只能正向导通。", p:"20", qt:"The TRIAC operates like the SCR, but can conduct current in both directions when triggered.", qz:"TRIAC 的工作方式和 SCR 类似，但触发后能双向导电。"}
+];
+FOL.forEach(f=>{
+  const q = {s:10, q:f.q, zh:f.zh, e:f.e, p:f.p, qt:f.qt, src:"fol", fol:1};
+  if(f.flag) q.flag = f.flag;
+  let az = null;
+  if(f.tf){ q.tf = true; q.a = ["True","False"]; q.c = f.k; }
+  else {
+    const order = [f.k].concat(f.o.map((_,i)=>i).filter(i=>i!==f.k));
+    q.a = order.map(i=>f.o[i]); az = order.map(i=>f.oz[i]);
+  }
+  QUESTIONS.push(q); ZH_A.push(az); ZH_QT.push(f.qz||"");
+});
+
+</script>
+<script>
+(function(){
+const KEY = "cntl3004-midterm-v1";
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+QUESTIONS.forEach((q,i)=>{ q.id = i; });
+
+function load(){ try{ return JSON.parse(localStorage.getItem(KEY)) || {}; }catch(e){ return {}; } }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+const S = Object.assign({
+  mode:"practice", filter:"all", pos:{}, ans:{}, marks:{}, perm:{}, order:null,
+  shuffleQ:false, fs:1, exam:null, tries:{}, solved:{}, zhStem:"tap", zhOpt:"pick", topicsOpen:true
+}, load());
+QUESTIONS.forEach((q,i)=>{ q.az = ZH_A[i]; q.qz = ZH_QT[i]; });
+let stemOpen = false;
+
+function perm(q){
+  if(q.tf) return [0,1];
+  if(!S.perm[q.id] || S.perm[q.id].length !== q.a.length){ S.perm[q.id] = shuffle(q.a.map((_,i)=>i)); }
+  return S.perm[q.id];
+}
+function correctIdx(q){ return q.tf ? q.c : 0; }
+function baseOrder(){
+  if(!S.order || S.order.length !== QUESTIONS.length){ S.order = QUESTIONS.map(q=>q.id); }
+  return S.shuffleQ ? S.order : QUESTIONS.map(q=>q.id);
+}
+
+/* list of question ids for the current view */
+function list(){
+  if(S.mode === "exam" && S.exam) return S.exam.ids;
+  const ids = baseOrder();
+  const f = S.filter;
+  if(f === "all") return ids;
+  if(f === "wrong") return (S.wrongSnap || []).filter(id=>ids.includes(id)).sort((a,b)=>ids.indexOf(a)-ids.indexOf(b));
+  if(f === "marked") return ids.filter(id=>S.marks[id]);
+  if(f === "todo") return (S.todoSnap || []).filter(id=>ids.includes(id)).sort((a,b)=>ids.indexOf(a)-ids.indexOf(b));
+  return ids.filter(id=>QUESTIONS[id].s === +f);
+}
+function viewKey(){ return S.mode === "exam" ? "exam" : S.filter + (S.shuffleQ ? ":r" : ""); }
+function curPos(){ const L=list(); let p=S.pos[viewKey()]||0; if(p>=L.length) p=Math.max(0,L.length-1); return p; }
+function setPos(p){ S.pos[viewKey()] = p; stemOpen=false; save(); render(); scrollTop(); try{ if(document.activeElement && document.activeElement.blur) document.activeElement.blur(); }catch(e){} }
+function scrollTop(){ try{ window.scrollTo({top:0, behavior:"instant"}); }catch(e){ window.scrollTo(0,0); } }
+
+function answersFor(){ return S.mode==="exam" && S.exam ? S.exam.ans : S.ans; }
+function revealed(id){
+  if(S.mode === "exam") return !!(S.exam && S.exam.done);
+  return !!S.solved[id];
+}
+
+/* ---------- chips ---------- */
+function wrongIds(){ return QUESTIONS.filter(q=>S.ans[q.id]!=null && S.ans[q.id]!==correctIdx(q)).map(q=>q.id); }
+function renderChips(){
+  const box = $("#topics"), el = $("#chips");
+  if(S.mode === "exam"){ box.hidden = true; return; }
+  box.hidden = false;
+  const label = {all:"全部",wrong:"错题本",todo:"未做",marked:"已标记"}[S.filter] || (()=>{ const t=SECTIONS.find(x=>String(x.id)===S.filter); return t? t.id+" "+t.name : "全部"; })();
+  $("#cur-topic").textContent = label;
+  $("#topics-toggle").textContent = S.topicsOpen ? "收成一行" : "展开全部";
+  $("#topics-toggle").onclick = ()=>{ S.topicsOpen=!S.topicsOpen; save(); renderChips(); };
+  el.classList.toggle("collapsed", !S.topicsOpen);
+  const chip = ([k,l,n])=>`<button class="chip" data-f="${k}" aria-pressed="${S.filter===k}">${esc(l)}<b>${n}</b></button>`;
+  const a = [["all","全部",QUESTIONS.length]];
+  const secs = SECTIONS.map(t=>[String(t.id), t.id+" "+t.name, QUESTIONS.filter(q=>q.s===t.id).length]);
+  const b = [["wrong","错题本", wrongIds().length],["todo","未做", QUESTIONS.filter(q=>S.ans[q.id]==null).length],["marked","已标记", Object.keys(S.marks).filter(k=>S.marks[k]).length]];
+  el.innerHTML = a.concat(b).map(chip).join("") + '<span class="grp"></span>' + secs.map(chip).join("");
+  el.querySelectorAll(".chip").forEach(x=>x.onclick=()=>setFilter(x.dataset.f));
+  if(!S.topicsOpen){ const on=el.querySelector('[aria-pressed="true"]'); if(on) el.scrollLeft = on.offsetLeft - el.offsetLeft - 16; }
+}
+function setFilter(f){
+  S.filter = f;
+  if(f==="wrong") S.wrongSnap = wrongIds();
+  if(f==="todo") S.todoSnap = QUESTIONS.filter(q=>S.ans[q.id]==null).map(q=>q.id);
+  save(); render(); scrollTop();
+}
+
+/* ---------- progress ---------- */
+function renderProgress(){
+  const L = list(), A = answersFor();
+  let ok=0,bad=0,done=0;
+  L.forEach(id=>{ const v=A[id]; if(v!=null){ done++; if(S.mode!=="exam"||S.exam.done){ v===correctIdx(QUESTIONS[id])?ok++:bad++; } } });
+  const p = curPos();
+  let t = L.length ? `第 ${p+1}/${L.length} 题 · 已答 ${done}` : "没有题目";
+  if((S.mode!=="exam"||S.exam.done) && done) t += ` · 正确率 ${Math.round(ok/done*100)}%`;
+  $("#prog-text").textContent = t;
+  const n = L.length || 1;
+  $("#bar").innerHTML = S.mode==="exam" && !S.exam.done
+    ? `<i class="b-ok" style="width:${done/n*100}%;background:var(--accent)"></i>`
+    : `<i class="b-ok" style="width:${ok/n*100}%"></i><i class="b-bad" style="width:${bad/n*100}%"></i>`;
+  $("#btn-grid").textContent = L.length ? `${p+1} / ${L.length}` : "0 / 0";
+}
+
+/* ---------- question ---------- */
+const STAR = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg>';
+function renderQuestion(){
+  const main = $("#main"), L = list();
+  if(!L.length){
+    const msg = {wrong:["错题本是空的","第一次就选错的题会自动收进来。"], marked:["还没有标记的题","做题时点右上角的「标记」，把没把握的题收起来。"], todo:["全部做完了","可以去错题本复习，或者在设置里清空记录重来。"]}[S.filter] || ["没有题目",""];
+    main.innerHTML = `<div class="card empty"><h2>${msg[0]}</h2><p>${msg[1]}</p><div class="btns" style="justify-content:center;margin-top:12px"><button class="btn" id="go-all">回到全部题目</button></div></div>`;
+    $("#go-all").onclick=()=>setFilter("all");
+    return;
+  }
+  const exam = S.mode==="exam";
+  const p = curPos(), q = QUESTIONS[L[p]], ci = correctIdx(q), show = revealed(q.id);
+  const sec = SECTIONS.find(x=>x.id===q.s);
+  const order = perm(q);
+  const letters = q.tf ? ["T","F"] : ["A","B","C","D"];
+  const tries = exam ? [] : (S.tries[q.id]||[]);
+  const chosenExam = exam ? S.exam.ans[q.id] : null;
+  const tfZh = ["对","错"];
+  const optZh = (oi)=> q.tf ? tfZh[oi] : q.az[oi];
+
+  const opts = order.map((oi,k)=>{
+    let cls="opt", mark="", zh="";
+    if(exam){
+      if(show){ if(oi===ci){cls+=" right";mark="✓ 正确答案";} else if(oi===chosenExam){cls+=" wrong";mark="✗ 你的选择";} else cls+=" dim"; }
+      else if(oi===chosenExam) cls+=" sel";
+    } else {
+      const tried = tries.includes(oi);
+      if(tried){ if(oi===ci){cls+=" right";mark="✓ 正确";} else {cls+=" tried-wrong";mark="✗ 不对";} }
+      else if(show && oi===ci){ cls+=" right"; mark="✓ 正确答案"; }
+      if(S.zhOpt==="on" || (S.zhOpt==="pick" && (tried || (show && oi===ci)))) zh=`<span class="zh">${esc(optZh(oi))}</span>`;
+    }
+    return `<button class="${cls}" data-oi="${oi}" ${exam&&show?"disabled":""}><span class="k">${letters[k]}</span><span class="t">${esc(q.a[oi])}${zh}</span>${mark?`<span class="m">${mark}</span>`:""}</button>`;
+  }).join("");
+
+  // stem chinese
+  let stemZh = "", tapCls = "";
+  if(!exam){
+    if(S.zhStem==="on") stemZh = `<p class="qzh">${esc(q.zh)}</p>`;
+    else if(S.zhStem==="tap"){ tapCls=" tap"; stemZh = stemOpen ? `<p class="qzh">${esc(q.zh)}</p>` : `<button class="ztip" id="ztip">点题干看中文</button>`; }
+  }
+
+  let exp = "";
+  if(show){
+    let verdict;
+    if(exam){ const v=chosenExam; verdict = v==null?["","未作答"]:(v===ci?["ok","答对了"]:["bad","答错了"]); }
+    else { const first=S.ans[q.id]; verdict = first==null?["","已查看答案"]:(first===ci?["ok","第一次就答对了"]:["bad",`第一次答错了，试了 ${tries.length} 次`]); }
+    const src = q.src==="fol" ? `<span class="badge cls">FOL 原题 · 答案以 FOL 为准</span>` : q.src==="class" ? `<span class="badge cls">课堂补充 · 教材无原文</span>` : (q.src==="both" ? `<span class="badge cls">课堂讲过</span>` : `<span class="badge">教材原文</span>`);
+    const pg = q.p ? `<span class="pg">教材 p.${esc(q.p)}</span>` : "";
+    const quote = q.qt ? `<blockquote><cite>Gas Trade Training Unit 13, p.${esc(q.p)}</cite>${esc(q.qt)}${q.qz?`<span class="tr">${esc(q.qz)}</span>`:""}</blockquote>` : "";
+    exp = `<section class="exp" aria-live="polite">
+      <div class="verdict ${verdict[0]}">${verdict[1]}${exam?"":'<button class="redo" id="redo">重做本题</button>'}</div>
+      <p>${esc(q.e)}</p>
+      <div class="src">${pg}${src}</div>
+      ${quote}
+      ${q.flag?`<div class="flag">⚠ ${esc(q.flag)}</div>`:""}
+    </section>`;
+  }
+  let foot = "";
+  if(exam && !show) foot = `<div class="hint">模拟考：选完不显示对错，也不显示中文。交卷前可以改答案。</div>`;
+  if(!exam && !show) foot = `<div class="reveal"><span>${tries.length?"不对，可以继续试其他选项。":"每个选项都可以点，点了显示对错，选对了才出解析。"}</span><button class="btn" id="show-ans">直接看答案</button></div>`;
+
+  main.innerHTML = `<article class="card">
+    <div class="plate"><span class="qn">Q${String(p+1).padStart(3,"0")}</span><span class="tag">${sec.id} · ${esc(sec.name)}</span>${q.tf?'<span class="tag tf">True / False</span>':""}${q.hw?`<span class="tag">书上第 ${q.hw} 题</span>`:""}${q.fol?'<span class="tag tf">FOL</span>':""}${q.p&&!exam?`<span class="tag">p.${esc(q.p)}</span>`:""}
+      <button class="star" id="star" aria-pressed="${!!S.marks[q.id]}">${STAR}${S.marks[q.id]?"已标记":"标记"}</button></div>
+    <div class="qbody"><p class="qtext${tapCls}" id="qtext">${esc(q.q)}</p>${stemZh}</div>
+    <div class="opts">${opts}</div>${foot}${exp}
+  </article>`;
+  main.querySelectorAll(".opt").forEach(b=>b.onclick=()=>choose(q, +b.dataset.oi));
+  $("#star").onclick=()=>toggleMark(q.id);
+  if(tapCls){ const t=()=>{ stemOpen=!stemOpen; renderQuestion(); }; $("#qtext").onclick=t; const z=$("#ztip"); if(z) z.onclick=t; }
+  const r = $("#redo"); if(r) r.onclick=()=>{ delete S.ans[q.id]; delete S.tries[q.id]; delete S.solved[q.id]; save(); render(); };
+  const sa = $("#show-ans"); if(sa) sa.onclick=()=>{ S.solved[q.id]=true; if(S.ans[q.id]==null) S.ans[q.id]=-1; save(); render(); scrollToExp(); };
+}
+function scrollToExp(){
+  const ex = document.querySelector(".exp");
+  if(ex && ex.getBoundingClientRect().top > window.innerHeight - 160){ ex.scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth", block:"start"}); }
+}
+function choose(q, oi){
+  if(S.mode==="exam"){ if(S.exam.done) return; S.exam.ans[q.id] = oi; save(); render(); return; }
+  const t = S.tries[q.id] = S.tries[q.id] || [];
+  if(!t.includes(oi)) t.push(oi);
+  if(S.ans[q.id]==null) S.ans[q.id] = oi;          // first try counts for score and wrong book
+  const wasSolved = !!S.solved[q.id];
+  if(oi===correctIdx(q)) S.solved[q.id] = true;
+  save(); render();
+  if(!wasSolved && S.solved[q.id]) scrollToExp();
+}
+function toggleMark(id){ if(S.marks[id]) delete S.marks[id]; else S.marks[id]=true; save(); render(); toast(S.marks[id]?"已标记，可在「已标记」里集中复习":"已取消标记"); }
+
+/* ---------- nav ---------- */
+function renderNav(){
+  const L=list(), p=curPos();
+  $("#btn-prev").disabled = p<=0 || !L.length;
+  const nx = $("#btn-next");
+  const last = p>=L.length-1;
+  if(S.mode==="exam" && S.exam && !S.exam.done && last){ nx.innerHTML = "交卷"; nx.disabled=false; nx.dataset.act="submit"; }
+  else if(S.mode==="exam" && S.exam && S.exam.done && last){ nx.innerHTML = "成绩"; nx.disabled=false; nx.dataset.act="result"; }
+  else { nx.innerHTML = '下一题<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg>'; nx.disabled = last || !L.length; nx.dataset.act="next"; }
+}
+function next(){ const L=list(), p=curPos(); const a=$("#btn-next").dataset.act; if(a==="submit") return confirmSubmit(); if(a==="result") return showResult(); if(p<L.length-1) setPos(p+1); }
+function prev(){ const p=curPos(); if(p>0) setPos(p-1); }
+$("#btn-next").onclick=next; $("#btn-prev").onclick=prev; $("#btn-grid").onclick=openGrid;
+
+/* ---------- sheets / modal ---------- */
+function closeLayer(){ $("#layer").innerHTML=""; document.body.style.overflow=""; }
+function sheet(title, body, extraHead){
+  $("#layer").innerHTML = `<div class="scrim" id="scrim"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="${esc(title)}"><div class="sheet-inner"><div class="sheet-head"><h2>${esc(title)}</h2><span class="spacer"></span>${extraHead||""}<button class="icon-btn" id="sheet-x" aria-label="关闭"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div><div class="sheet-body">${body}</div></div></div>`;
+  document.body.style.overflow="hidden";
+  $("#scrim").onclick=closeLayer; $("#sheet-x").onclick=closeLayer;
+}
+function modal(title, text, okText, onOk, danger){
+  const wrap = document.createElement("div");
+  wrap.innerHTML = `<div class="scrim" style="z-index:49"></div><div class="modal" role="alertdialog" aria-modal="true"><div class="box"><h3>${esc(title)}</h3><p>${text}</p><div class="btns" style="justify-content:flex-end"><button class="btn" data-x>取消</button><button class="btn ${danger?"danger":"primary"}" data-ok>${esc(okText)}</button></div></div></div>`;
+  document.body.appendChild(wrap);
+  const close=()=>wrap.remove();
+  wrap.querySelector("[data-x]").onclick=close; wrap.querySelector(".scrim").onclick=close;
+  wrap.querySelector("[data-ok]").onclick=()=>{ close(); onOk(); };
+  wrap.querySelector("[data-ok]").focus();
+}
+let toastT;
+function toast(msg){ let t=$("#toast"); if(!t){ t=document.createElement("div"); t.id="toast"; t.className="toast"; t.setAttribute("role","status"); document.body.appendChild(t);} t.textContent=msg; t.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>t.hidden=true,1800); }
+
+function cellClass(id){
+  const A=answersFor(), v=A[id];
+  if(v==null) return "";
+  if(S.mode==="exam" && !S.exam.done) return "c-ans";
+  return v===correctIdx(QUESTIONS[id]) ? "c-ok" : "c-bad";
+}
+function openGrid(){
+  const L=list(), p=curPos();
+  const groups = {};
+  L.forEach((id,i)=>{ const s=QUESTIONS[id].s; (groups[s]=groups[s]||[]).push([id,i]); });
+  const useGroups = S.mode!=="exam" && !S.shuffleQ;
+  const cell = ([id,i])=>`<button class="cell ${cellClass(id)} ${i===p?"cur":""}" data-i="${i}" aria-label="第${i+1}题">${i+1}${S.marks[id]?'<span class="mk"></span>':""}</button>`;
+  let body = `<div class="legend"><span><i style="background:var(--ok-soft);border-color:var(--ok)"></i>答对</span><span><i style="background:var(--bad-soft);border-color:var(--bad)"></i>答错</span><span><i style="background:var(--accent-soft);border-color:var(--accent)"></i>已答（未交卷）</span><span><i></i>未做</span><span><i style="background:var(--star);border-radius:50%;width:8px;height:8px"></i>标记</span></div>`;
+  if(useGroups){
+    body += Object.keys(groups).map(s=>`<div class="secblock"><h3>${s} · ${esc(SECTIONS[s-1].name)}</h3><div class="cells">${groups[s].map(cell).join("")}</div></div>`).join("");
+  } else body += `<div class="cells">${L.map((id,i)=>cell([id,i])).join("")}</div>`;
+  if(S.mode==="exam" && S.exam && !S.exam.done){
+    const n = L.filter(id=>S.exam.ans[id]!=null).length;
+    body += `<div class="btns"><button class="btn primary" id="g-submit">交卷（已答 ${n}/${L.length}）</button></div>`;
+  }
+  sheet("题目列表", body);
+  document.querySelectorAll(".cell").forEach(b=>b.onclick=()=>{ closeLayer(); setPos(+b.dataset.i); });
+  const gs=$("#g-submit"); if(gs) gs.onclick=()=>{ closeLayer(); confirmSubmit(); };
+  const cur=document.querySelector(".cell.cur"); if(cur) cur.scrollIntoView({block:"center"});
+}
+
+/* ---------- settings ---------- */
+function sw(id,on){ return `<button class="switch" role="switch" id="${id}" aria-checked="${on}"></button>`; }
+function seg3(name, cur, opts){ return `<div class="seg" data-set="${name}">${opts.map(([v,l])=>`<button data-v="${v}" aria-pressed="${cur===v}">${l}</button>`).join("")}</div>`; }
+function openSettings(){
+  const done = Object.keys(S.ans).length;
+  const body = `
+    <div class="row"><label>题干中文<span class="sub">“点击显示”：点一下题干才出中文，再点收起</span></label>${seg3("zhStem",S.zhStem,[["off","不显示"],["tap","点击显示"],["on","一直显示"]])}</div>
+    <div class="row"><label>选项中文<span class="sub">“选中显示”：点了哪个选项，就在它下面出中文</span></label>${seg3("zhOpt",S.zhOpt,[["off","不显示"],["pick","选中显示"],["on","一直显示"]])}</div>
+    <div class="row"><label>打乱题目顺序<span class="sub">练习模式下随机出题，选项本来就是打乱的</span></label>${sw("s-shuf",S.shuffleQ)}</div>
+    <div class="row"><label>字号<span class="sub">手机上看不清可以调大</span></label>${seg3("fs",String(S.fs),[["0.92","小"],["1","中"],["1.12","大"]])}</div>
+    <div class="row"><label>重新打乱选项<span class="sub">背答案位置不算会，换个顺序再做</span></label><button class="btn" id="s-reperm">打乱</button></div>
+    <div class="row"><label>练习记录<span class="sub">已做 ${done} 题，记录只保存在这个浏览器里</span></label><button class="btn danger" id="s-reset">清空记录</button></div>
+    <p style="margin:0;font-size:.78rem;color:var(--muted)">模拟考模式不显示任何中文，这两项只对练习模式生效。</p>`;
+  sheet("设置", body);
+  document.querySelectorAll("[data-set]").forEach(g=>g.querySelectorAll("button").forEach(b=>b.onclick=()=>{
+    const k=g.dataset.set, v=b.dataset.v;
+    if(k==="fs"){ S.fs=+v; applyFs(); } else S[k]=v;
+    stemOpen=false; save(); render(); openSettings();
+  }));
+  $("#s-shuf").onclick=()=>{ S.shuffleQ=!S.shuffleQ; if(S.shuffleQ) S.order=shuffle(QUESTIONS.map(q=>q.id)); save(); render(); openSettings(); };
+  $("#s-reset").onclick=()=>modal("清空练习记录？","所有作答、错题和标记都会被清除，不能恢复。","清空",()=>{ S.ans={}; S.tries={}; S.solved={}; S.marks={}; S.perm={}; S.pos={}; S.wrongSnap=[]; S.todoSnap=[]; save(); closeLayer(); render(); toast("记录已清空"); },true);
+  $("#s-reperm").onclick=()=>{ S.perm={}; save(); render(); toast("选项顺序已重新打乱"); };
+}
+function applyFs(){ document.documentElement.style.setProperty("--fs", S.fs||1); }
+$("#btn-settings").onclick=openSettings;
+
+/* ---------- modes ---------- */
+function setMode(m){
+  if(m===S.mode) return;
+  if(m==="exam" && !S.exam){ return openExamSetup(); }
+  S.mode=m; save(); render(); scrollTop();
+}
+$("#m-practice").onclick=()=>setMode("practice");
+$("#m-exam").onclick=()=>{ if(S.mode==="exam") openExamSetup(); else setMode("exam"); };
+function openExamSetup(){
+  const NFOL = QUESTIONS.filter(q=>q.fol).length;
+  const has = S.exam && !S.exam.done;
+  const body = `<p style="margin:0;color:var(--muted)">从 ${QUESTIONS.length} 题里随机抽题，选项顺序重新打乱。做题时不显示对错，交卷后统一看成绩和解析。期中考试约 112 题、2 小时。</p>
+    <div class="btns">${[30,50,QUESTIONS.length].map(n=>`<button class="btn ${n===QUESTIONS.length?"primary":""}" data-n="${n}">${n===QUESTIONS.length?"全部 "+n+" 题":n+" 题"}</button>`).join("")}</div>
+    <p style="margin:0;color:var(--muted);font-size:.85rem">只从 FOL 题库里抽（最接近正式考试）：</p>
+    <div class="btns">${[50,NFOL].map(n=>`<button class="btn" data-n="${n}" data-pool="fol">FOL ${n===NFOL?"全部 "+n:n} 题</button>`).join("")}</div>
+    ${has?`<div class="row"><label>继续上次的模拟考<span class="sub">已答 ${Object.keys(S.exam.ans).length}/${S.exam.ids.length}</span></label><button class="btn" id="ex-cont">继续</button></div>`:""}
+    ${S.exam && S.exam.done?`<div class="row"><label>查看上次成绩</label><button class="btn" id="ex-res">查看</button></div>`:""}`;
+  sheet("模拟考", body);
+  document.querySelectorAll("[data-n]").forEach(b=>b.onclick=()=>{
+    const start=()=>{ const n=+b.dataset.n; const pool=b.dataset.pool==="fol"?QUESTIONS.filter(q=>q.fol):QUESTIONS; S.exam={ids:shuffle(pool.map(q=>q.id)).slice(0,n), ans:{}, done:false, start:Date.now(), end:null}; S.exam.ids.forEach(id=>{ if(!QUESTIONS[id].tf) S.perm[id]=shuffle(QUESTIONS[id].a.map((_,i)=>i)); }); S.mode="exam"; S.pos.exam=0; save(); closeLayer(); render(); scrollTop(); };
+    if(has) modal("开始新的模拟考？","上次没交卷的模拟考会被放弃。","开始",start); else start();
+  });
+  const c=$("#ex-cont"); if(c) c.onclick=()=>{ S.mode="exam"; save(); closeLayer(); render(); };
+  const r=$("#ex-res"); if(r) r.onclick=()=>{ S.mode="exam"; save(); closeLayer(); render(); showResult(); };
+}
+function confirmSubmit(){
+  const L=S.exam.ids, n=L.filter(id=>S.exam.ans[id]!=null).length;
+  modal("确认交卷？", n<L.length?`还有 <b>${L.length-n}</b> 题没答，没答的按错题算。`:"全部题目都已作答。", "交卷", ()=>{
+    S.exam.done=true; S.exam.end=Date.now();
+    L.forEach(id=>{ const v=S.exam.ans[id]; if(v!=null && S.ans[id]==null){ S.ans[id]=v; S.tries[id]=[v]; if(v===correctIdx(QUESTIONS[id])) S.solved[id]=true; } }); // feed practice record & wrong book
+    save(); render(); showResult();
+  });
+}
+function fmtTime(ms){ const s=Math.floor(ms/1000); const h=Math.floor(s/3600), m=Math.floor(s%3600/60), x=s%60; return (h?h+":":"")+String(m).padStart(h?2:1,"0")+":"+String(x).padStart(2,"0"); }
+function showResult(){
+  const E=S.exam, L=E.ids; let ok=0;
+  const per={}; L.forEach(id=>{ const q=QUESTIONS[id]; per[q.s]=per[q.s]||[0,0]; per[q.s][1]++; if(E.ans[id]===correctIdx(q)){ ok++; per[q.s][0]++; } });
+  const pct=Math.round(ok/L.length*100);
+  const rows=Object.keys(per).sort().map(s=>`<tr><td>${s} · ${esc(SECTIONS[s-1].name)}</td><td>${per[s][0]}/${per[s][1]}</td></tr>`).join("");
+  const body=`<div class="stats"><div class="stat"><b>${pct}%</b><span>得分</span></div><div class="stat"><b>${ok}/${L.length}</b><span>答对</span></div><div class="stat"><b>${fmtTime((E.end||Date.now())-E.start)}</b><span>用时</span></div></div>
+    <table class="sectbl"><thead><tr><th>分类</th><th>答对</th></tr></thead><tbody>${rows}</tbody></table>
+    <p style="margin:0;color:var(--muted);font-size:.85rem">答错的题已经加入练习模式的错题本。在题目列表里点任意一题可以看解析。</p>
+    <div class="btns"><button class="btn primary" id="r-review">逐题看解析</button><button class="btn" id="r-wrong">去错题本练</button><button class="btn" id="r-new">再考一次</button></div>`;
+  sheet("模拟考成绩", body);
+  $("#r-review").onclick=()=>{ closeLayer(); S.pos.exam=0; save(); render(); scrollTop(); };
+  $("#r-wrong").onclick=()=>{ closeLayer(); S.mode="practice"; setFilter("wrong"); };
+  $("#r-new").onclick=()=>{ closeLayer(); openExamSetup(); };
+}
+
+/* ---------- timer ---------- */
+let tick;
+function renderTimer(){
+  const t=$("#timer"); clearInterval(tick);
+  if(S.mode==="exam" && S.exam){ t.hidden=false; const f=()=>{ t.textContent="⏱ "+fmtTime((S.exam.end||Date.now())-S.exam.start); }; f(); if(!S.exam.done) tick=setInterval(f,1000); }
+  else t.hidden=true;
+}
+
+function render(){
+  $("#m-practice").setAttribute("aria-pressed", S.mode==="practice");
+  $("#m-exam").setAttribute("aria-pressed", S.mode==="exam");
+  if(S.mode==="exam" && !S.exam) S.mode="practice";
+  renderChips(); renderQuestion(); renderProgress(); renderNav(); renderTimer();
+}
+
+/* keyboard */
+document.addEventListener("keydown", e=>{
+  if(e.metaKey||e.ctrlKey||e.altKey) return;
+  if($("#layer").innerHTML || document.querySelector(".modal")){ if(e.key==="Escape"){ closeLayer(); const m=document.querySelector(".modal"); if(m) m.parentElement.remove(); } return; }
+  const k=e.key.toLowerCase();
+  if(k==="arrowright"){ e.preventDefault(); if(!$("#btn-next").disabled && $("#btn-next").dataset.act==="next") next(); return; }
+  if(k==="arrowleft"){ e.preventDefault(); prev(); return; }
+  if(k==="enter"||k===" "){ if(document.activeElement && document.activeElement.tagName==="BUTTON") return; if(k===" ") return; if(!$("#btn-next").disabled && $("#btn-next").dataset.act==="next") next(); return; }
+  if(k==="m"){ const L=list(); if(L.length) toggleMark(L[curPos()]); return; }
+  if(k==="z"){ const t=$("#qtext"); if(t && t.classList.contains("tap")) t.click(); return; }
+  const map={a:0,b:1,c:2,d:3,"1":0,"2":1,"3":2,"4":3,t:0,f:1};
+  if(k in map){ const btns=[...document.querySelectorAll(".opt")]; const b=btns[map[k]]; if(b && !b.disabled){ if((k==="t"||k==="f") && btns.length!==2) return; b.click(); } }
+});
+
+applyFs();
+if(S.filter==="wrong" && !S.wrongSnap) S.wrongSnap=wrongIds();
+render();
+})();
+</script>
