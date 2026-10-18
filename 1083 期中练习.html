@@ -2101,7 +2101,7 @@ function list(){
 }
 function viewKey(){ return S.mode === "exam" ? "exam" : S.filter + (S.shuffleQ ? ":r" : ""); }
 function curPos(){ const L=list(); let p=S.pos[viewKey()]||0; if(p>=L.length) p=Math.max(0,L.length-1); return p; }
-function setPos(p){ S.pos[viewKey()] = p; stemOpen=false; save(); render(); scrollTop(); }
+function setPos(p){ S.pos[viewKey()] = p; stemOpen=false; save(); render(); scrollTop(); try{ if(document.activeElement && document.activeElement.blur) document.activeElement.blur(); }catch(e){} }
 function scrollTop(){ try{ window.scrollTo({top:0, behavior:"instant"}); }catch(e){ window.scrollTo(0,0); } }
 
 function answersFor(){ return S.mode==="exam" && S.exam ? S.exam.ans : S.ans; }
@@ -2392,7 +2392,7 @@ document.addEventListener("keydown", e=>{
   const k=e.key.toLowerCase();
   if(k==="arrowright"){ e.preventDefault(); if(!$("#btn-next").disabled && $("#btn-next").dataset.act==="next") next(); return; }
   if(k==="arrowleft"){ e.preventDefault(); prev(); return; }
-  if(k==="enter"){ if(document.activeElement && document.activeElement.classList.contains("opt")) return; if(!$("#btn-next").disabled && $("#btn-next").dataset.act==="next") next(); return; }
+  if(k==="enter"||k===" "){ if(document.activeElement && document.activeElement.tagName==="BUTTON") return; if(k===" ") return; if(!$("#btn-next").disabled && $("#btn-next").dataset.act==="next") next(); return; }
   if(k==="m"){ const L=list(); if(L.length) toggleMark(L[curPos()]); return; }
   if(k==="z"){ const t=$("#qtext"); if(t && t.classList.contains("tap")) t.click(); return; }
   const btns=[...document.querySelectorAll(".opt")];
